@@ -368,8 +368,24 @@ function ChordLine({
     }
   };
 
+  const getLineWidth = (duration: ChordDuration) => {
+    switch (duration) {
+      case "1":
+        return "2px";
+      case "1/2":
+      case "1/4":
+        return "1px";
+      default:
+        return "1px";
+    }
+  };
+
   return (
-    <div className="group relative ml-auto flex w-fit max-w-full items-center gap-2 pt-10" ref={containerRef}>
+    <div
+      className="group relative ml-auto flex w-fit max-w-full items-center gap-2"
+      ref={containerRef}
+      style={{ paddingTop: "2.8rem" }}
+    >
       <div className="absolute -right-10 top-10 z-20 flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           type="button"
@@ -417,6 +433,7 @@ function ChordLine({
       <div className="pointer-events-none absolute -left-8 -right-8 inset-y-0 z-0">
         {line.chords.map((chord) => {
           const lineHeight = getLineHeight(chord.duration);
+          const lineWidth = getLineWidth(chord.duration);
           const shouldAutoEdit = requestedEditingChordId === chord.id;
           const isEditing = editingChordId === chord.id || shouldAutoEdit;
           const chordInputValue = editingChordId === chord.id ? draftChordName : chord.name;
@@ -454,13 +471,13 @@ function ChordLine({
                     }}
                     onBlur={() => commitChordName(chord)}
                     onKeyDown={(event) => handleChordEditorKeyDown(event, chord)}
-                    className="relative z-30 w-16 rounded border border-orange-200 bg-white px-1.5 py-1 text-center text-[10px] font-bold text-slate-700 shadow-sm outline-none"
+                    className="relative z-30 rounded border border-sky-200 bg-sky-50 px-px py-1 text-center text-[12px] font-bold text-sky-500 shadow-sm outline-none"
                   />
                 ) : (
                   <div
                     onPointerDown={(event) => handleStart(chord, event)}
                     onDoubleClick={() => startEditingChord(chord)}
-                    className="relative z-30 cursor-grab select-none whitespace-nowrap rounded bg-[#FF7F50] px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm active:cursor-grabbing"
+                    className="relative z-30 flex cursor-grab select-none items-center justify-center overflow-hidden whitespace-nowrap rounded bg-sky-50 px-px py-0.5 text-center text-[12px] font-bold text-sky-500 shadow-sm active:cursor-grabbing"
                     style={{ touchAction: "none" }}
                   >
                     {chord.name}
@@ -468,14 +485,14 @@ function ChordLine({
                 )}
 
                 <div
-                  className="absolute left-1/2 z-0 w-px -translate-x-1/2 bg-orange-400/40"
-                  style={{ height: lineHeight, top: "100%" }}
+                  className="absolute left-1/2 z-0 -translate-x-1/2 bg-sky-200/70"
+                  style={{ height: lineHeight, top: "100%", width: lineWidth }}
                 />
 
                 {chord.duration === "1" && barNumber > 0 ? (
                   <div
-                    className="absolute z-10 text-[11px] font-medium leading-none text-orange-200"
-                    style={{ left: "50%", top: "11px", transform: "translateX(8px)" }}
+                    className="absolute z-10 text-[11px] font-medium leading-none text-sky-300"
+                    style={{ left: "50%", top: `calc(100% + ${lineHeight})`, transform: "translate(8px, -100%)" }}
                   >
                     {barNumber}
                   </div>
