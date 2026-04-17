@@ -27,11 +27,16 @@ type ChordLineProps = {
   requestedEditingChordId: string | null;
   onEditingRequestHandled: () => void;
   barNumberByChordId: Record<string, number>;
+  fontSize: number;
 };
 
 const STORAGE_KEY = "accords-editor-lines";
+const FONT_SIZE_KEY = "accords-editor-font-size";
 const CHORD_TOP_OFFSET = "-18px";
 const DURATIONS: readonly ChordDuration[] = ["1", "1/2", "1/4"];
+const DEFAULT_FONT_SIZE = 18;
+const MIN_FONT_SIZE = 12;
+const MAX_FONT_SIZE = 36;
 
 const createId = () => crypto.randomUUID();
 
@@ -100,8 +105,19 @@ const loadStoredLines = (): Line[] => {
   return defaultLines();
 };
 
+const loadStoredFontSize = () => {
+  const raw = window.localStorage.getItem(FONT_SIZE_KEY);
+  if (!raw) return DEFAULT_FONT_SIZE;
+
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return DEFAULT_FONT_SIZE;
+
+  return Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, parsed));
+};
+
 function App() {
   const [lines, setLines] = useState<Line[]>(loadStoredLines);
+  const [fontSize, setFontSize] = useState<number>(loadStoredFontSize);
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
   const [requestedEditor, setRequestedEditor] = useState<{
     lineId: string;
@@ -111,6 +127,10 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
   }, [lines]);
+
+  useEffect(() => {
+    window.localStorage.setItem(FONT_SIZE_KEY, String(fontSize));
+  }, [fontSize]);
 
   let barCounter = 0;
   const barNumberByChordId = lines.reduce<Record<string, number>>((numbers, line) => {
@@ -191,6 +211,11 @@ function App() {
     );
   };
 
+  const updateFontSize = (value: number) => {
+    if (!Number.isFinite(value)) return;
+    setFontSize(Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, value)));
+  };
+
   const copyToClipboard = async () => {
     const data = JSON.stringify(lines, null, 2);
 
@@ -220,7 +245,19 @@ function App() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+              <span>גודל טקסט</span>
+              <input
+                type="number"
+                min={MIN_FONT_SIZE}
+                max={MAX_FONT_SIZE}
+                step={1}
+                value={fontSize}
+                onChange={(event) => updateFontSize(Number(event.target.value))}
+                className="w-14 border-none bg-transparent p-0 text-right text-xs font-semibold text-slate-700 focus:outline-none"
+              />
+            </label>
             {copyState === "copied" ? (
               <span className="text-xs font-medium text-emerald-600">הועתק</span>
             ) : null}
@@ -252,6 +289,7 @@ function App() {
                 setRequestedEditor((current) => (current?.lineId === line.id ? null : current));
               }}
               barNumberByChordId={barNumberByChordId}
+              fontSize={fontSize}
             />
           ))}
         </div>
@@ -281,6 +319,7 @@ function ChordLine({
   requestedEditingChordId,
   onEditingRequestHandled,
   barNumberByChordId,
+  fontSize,
 }: ChordLineProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chordInputRef = useRef<HTMLInputElement | null>(null);
@@ -356,15 +395,17 @@ function ChordLine({
   };
 
   const getLineHeight = (duration: ChordDuration) => {
+    const scaled = (size: number) => `${Math.round(size * fontScale)}px`;
+
     switch (duration) {
       case "1":
-        return "36px";
+        return scaled(36);
       case "1/2":
-        return "28px";
+        return scaled(28);
       case "1/4":
-        return "20px";
+        return scaled(20);
       default:
-        return "36px";
+        return scaled(36);
     }
   };
 
@@ -380,13 +421,22 @@ function ChordLine({
     }
   };
 
+  const fontScale = fontSize / DEFAULT_FONT_SIZE;
+  const rowTopPadding = `${Math.round(2.8 * fontScale * 100) / 100}rem`;
+  const controlTop = `${Math.round(2.8 * fontScale * 100) / 100}rem`;
+  const chordRowTop = `${Math.round(2.5 * fontScale * 100) / 100}rem`;
+  const chordFontSize = `${Math.round(fontSize * 0.8 * 10) / 10}px`;
+
   return (
     <div
       className="group relative ml-auto flex w-fit max-w-full items-center gap-2"
       ref={containerRef}
-      style={{ paddingTop: "2.8rem" }}
+      style={{ paddingTop: rowTopPadding }}
     >
-      <div className="absolute -right-10 top-10 z-20 flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div
+        className="absolute -right-10 z-20 flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+        style={{ top: controlTop }}
+      >
         <button
           type="button"
           onClick={onAddChord}
@@ -417,6 +467,7 @@ function ChordLine({
             fontFamily: "system-ui, -apple-system, sans-serif",
             lineHeight: "1.2",
             maxWidth: "min(100%, 30ch)",
+            fontSize: `${fontSize}px`,
           }}
         />
 
@@ -443,7 +494,7 @@ function ChordLine({
             <div
               key={chord.id}
               className="pointer-events-auto absolute"
-              style={{ right: `${chord.position}%`, top: "2.5rem", transform: "translateX(50%)" }}
+              style={{ right: `${chord.position}%`, top: chordRowTop, transform: "translateX(50%)" }}
             >
               <div
                 className="group/chord absolute"
@@ -471,14 +522,16 @@ function ChordLine({
                     }}
                     onBlur={() => commitChordName(chord)}
                     onKeyDown={(event) => handleChordEditorKeyDown(event, chord)}
-                    className="relative z-30 rounded border border-sky-200 bg-sky-50 px-px py-1 text-center text-[12px] font-bold text-sky-500 shadow-sm outline-none"
+                    className="relative z-30 rounded border border-sky-200 bg-sky-50 px-0.5 py-1 text-center font-bold text-sky-500 shadow-sm outline-none"
+                    size={Math.max(chordInputValue.length, 2)}
+                    style={{ fontSize: chordFontSize, width: `${Math.max(chordInputValue.length + 0.9, 2.4)}ch` }}
                   />
                 ) : (
                   <div
                     onPointerDown={(event) => handleStart(chord, event)}
                     onDoubleClick={() => startEditingChord(chord)}
-                    className="relative z-30 flex cursor-grab select-none items-center justify-center overflow-hidden whitespace-nowrap rounded bg-sky-50 px-px py-0.5 text-center text-[12px] font-bold text-sky-500 shadow-sm active:cursor-grabbing"
-                    style={{ touchAction: "none" }}
+                    className="relative z-30 flex cursor-grab select-none items-center justify-center overflow-hidden whitespace-nowrap rounded bg-sky-50 px-px py-0.5 text-center font-bold text-sky-500 shadow-sm active:cursor-grabbing"
+                    style={{ fontSize: chordFontSize, touchAction: "none" }}
                   >
                     {chord.name}
                   </div>
@@ -491,8 +544,13 @@ function ChordLine({
 
                 {chord.duration === "1" && barNumber > 0 ? (
                   <div
-                    className="absolute z-10 text-[11px] font-medium leading-none text-sky-300"
-                    style={{ left: "50%", top: `calc(100% + ${lineHeight})`, transform: "translate(8px, -100%)" }}
+                    className="absolute z-10 text-[11px] font-medium leading-none"
+                    style={{
+                      color: "rgb(207 239 255)",
+                      left: "50%",
+                      top: `calc(100% + ${lineHeight})`,
+                      transform: "translate(8px, -100%)",
+                    }}
                   >
                     {barNumber}
                   </div>
