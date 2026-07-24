@@ -74,9 +74,19 @@ def chord_template(name: str) -> np.ndarray:
 
 
 def align_chords(
-    wav_path: Path, chord_names: list[str], beat_times: np.ndarray
+    wav_path: Path,
+    chord_names: list[str],
+    beat_times: np.ndarray,
+    downbeat_phase: int = 0,
+    beats_per_bar: int = 4,
 ) -> list[dict]:
-    """Monotonic Viterbi alignment of the chord sequence onto beats."""
+    """Monotonic Viterbi alignment of the chord sequence onto beats.
+
+    Chord changes overwhelmingly land on bar starts (and sometimes mid-bar),
+    so advancing to the next chord is penalized off the downbeat grid. This
+    stops boundaries from drifting when adjacent chords share pitches
+    (e.g. Cm vs Fm7) and lets sustained chords keep their full length.
+    """
     import librosa
 
     y, sr = librosa.load(str(wav_path), sr=22050, mono=True)
@@ -99,6 +109,16 @@ def align_chords(
     if B < K:
         raise RuntimeError(f"only {B} beats for {K} chords — sequence too dense")
 
+    # Penalty for starting a chord at beat b, by its position within the bar:
+    # free on the downbeat, cheap mid-bar, expensive elsewhere.
+    def change_penalty(b: int) -> float:
+        pos = (b - downbeat_phase) % beats_per_bar
+        if pos == 0:
+            return 0.0
+        if beats_per_bar % 2 == 0 and pos == beats_per_bar // 2:
+            return 0.12
+        return 0.45
+
     NEG = -1e9
     dp = np.full((K, B), NEG)
     came_from_prev = np.zeros((K, B), dtype=bool)
@@ -109,7 +129,7 @@ def align_chords(
     for k in range(1, K):
         for b in range(k, B):
             stay = dp[k, b - 1]
-            advance = dp[k - 1, b - 1]
+            advance = dp[k - 1, b - 1] - change_penalty(b)
             if advance >= stay:
                 dp[k, b] = advance + sim[k, b]
                 came_from_prev[k, b] = True
@@ -181,7 +201,13 @@ def main() -> int:
 
         print("aligning chords to audio (viterbi over beat chroma)...", flush=True)
         beat_times = np.array(base["beats"])
-        chords = align_chords(wav, chord_names, beat_times)
+        chords = align_chords(
+            wav,
+            chord_names,
+            beat_times,
+            downbeat_phase=int(base["downbeatPhase"]),
+            beats_per_bar=int(base["beatsPerBar"]),
+        )
 
     # True bar number at each chord start
     bars = base["bars"]
