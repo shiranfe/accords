@@ -16,6 +16,14 @@ python -m venv .venv
 
 ## Generate a sync file for a song
 
+**Easiest — from the browser:** open the song page and click "צור סנכרון
+להקלטה" (or "סנכרון מחדש") in the side panel. The dev server runs the
+pipeline for you (vite middleware `/api/sync`) and the page refreshes the
+sync data on completion. Requires the song to have a YouTube URL and the
+one-time venv setup below.
+
+**Manually — from a terminal:**
+
 Full (recommended — includes chord alignment):
 
 ```powershell

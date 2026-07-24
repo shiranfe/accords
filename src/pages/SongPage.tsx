@@ -8,6 +8,8 @@ import type { SyncData } from "../lib/sync";
 import { useYouTubePlayer, YT_STATE } from "../hooks/useYouTubePlayer";
 import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
 import { SourceEditorPanel } from "../components/SourceEditorPanel";
+import { songToNegina } from "../lib/serializeNegina";
+import { runSyncOnServer } from "../lib/syncRunner";
 import { navigate } from "../lib/navigate";
 
 const FONT_SIZE_KEY = "accords:viewer:font-size";
@@ -39,6 +41,9 @@ export function SongPage({ songId }: { songId: string }) {
   const [bpm, setBpm] = useState<number>(song?.bpm ?? DEFAULT_BPM);
   const [meter, setMeter] = useState<number>(song?.meter ?? 4);
   const [sync, setSync] = useState<SyncData | null>(null);
+  const [syncTick, setSyncTick] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
@@ -67,6 +72,8 @@ export function SongPage({ songId }: { songId: string }) {
   }, [barAlign]);
 
   useEffect(() => {
+    // syncTick re-fetches after a browser-triggered pipeline run completes
+    void syncTick;
     let cancelled = false;
     void loadSync(songId).then((data) => {
       if (!cancelled) setSync(data);
@@ -74,7 +81,7 @@ export function SongPage({ songId }: { songId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [songId]);
+  }, [songId, syncTick]);
 
   const timeline = useMemo(
     () => (song ? buildTimeline({ ...song, meter }, bpm) : null),
@@ -269,6 +276,30 @@ export function SongPage({ songId }: { songId: string }) {
     if (isSynced && player) player.seekTo(0, true);
   };
 
+  // Run the audio-alignment pipeline from the browser via the dev server
+  const runSyncNow = async () => {
+    if (!song || syncing) return;
+    if (!song.youtubeUrl) {
+      setSyncNotice("חסר קישור יוטיוב — הוסף אותו בעריכת מקור ושמור");
+      return;
+    }
+    setSyncing(true);
+    setSyncNotice(null);
+    const result = await runSyncOnServer({
+      songId: song.id,
+      youtubeUrl: song.youtubeUrl,
+      source: song.sourceText ?? songToNegina(song),
+      meter,
+    });
+    setSyncing(false);
+    if (result.ok) {
+      setSyncNotice("הסנכרון הושלם ✓");
+      setSyncTick((t) => t + 1);
+    } else {
+      setSyncNotice(`הסנכרון נכשל: ${result.error ?? "שגיאה לא ידועה"}`);
+    }
+  };
+
   if (!song) {
     return (
       <div dir="rtl" className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
@@ -428,9 +459,38 @@ export function SongPage({ songId }: { songId: string }) {
 
               {sync?.chords && !alignedChords && (
                 <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-semibold text-amber-800">
-                  האקורדים השתנו מאז הסנכרון — הרץ יישור מחדש (כפתור ההעתקה בעריכת מקור)
+                  האקורדים השתנו מאז הסנכרון — הרץ יישור מחדש
                 </div>
               )}
+
+              <div className="mb-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => void runSyncNow()}
+                  disabled={syncing}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors disabled:cursor-wait ${
+                    !sync || (sync.chords && !alignedChords)
+                      ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                      : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
+                  }`}
+                >
+                  {syncing ? (
+                    <>
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                      מסנכרן… זה לוקח בערך דקה
+                    </>
+                  ) : !sync ? (
+                    "צור סנכרון להקלטה"
+                  ) : sync.chords && !alignedChords ? (
+                    "הרץ יישור מחדש"
+                  ) : (
+                    "סנכרון מחדש"
+                  )}
+                </button>
+                {syncNotice && (
+                  <div className="mt-2 text-[11px] font-medium text-slate-500">{syncNotice}</div>
+                )}
+              </div>
 
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="rounded-xl bg-slate-50 px-2 py-2.5">
