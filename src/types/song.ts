@@ -26,6 +26,8 @@ export type Song = {
   sections: Section[];
   youtubeUrl?: string;
   bpm?: number;
+  /** Beats per bar (4 = 4/4, 3 = 3/4, 6 = 6/8). Default 4. */
+  meter?: number;
   /** Original negina/Markato source text, kept for round-trip fidelity */
   sourceText?: string;
 };

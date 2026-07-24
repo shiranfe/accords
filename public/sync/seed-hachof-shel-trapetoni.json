@@ -1,8 +1,9 @@
 {
   "videoId": "KGk2BOsVpno",
   "source": "https://youtu.be/KGk2BOsVpno",
-  "generatedAt": "2026-07-24T11:47:05+00:00",
+  "generatedAt": "2026-07-24T12:29:47+00:00",
   "beatsPerBar": 4,
+  "meterAutoDetected": true,
   "bpm": 103.36,
   "bpmGlobalEstimate": 103.36,
   "duration": 205.84,

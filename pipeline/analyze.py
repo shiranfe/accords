@@ -78,7 +78,33 @@ def to_wav(src: Path, workdir: Path) -> Path:
     return wav
 
 
-def analyze(wav_path: Path, beats_per_bar: int = 4) -> dict:
+def detect_meter(strengths: np.ndarray) -> tuple[int, dict[int, float]]:
+    """Pick 3/4 vs 4/4 by downbeat accent contrast (experimental heuristic).
+
+    For each candidate grouping, the best phase's mean onset energy is compared
+    to the average phase; a real meter shows a clearly accented phase. 6/8 is
+    not auto-detected (the beat tracker's pulse level is ambiguous there) —
+    pass it explicitly.
+    """
+    contrasts: dict[int, float] = {}
+    for m in (3, 4):
+        scores = np.array([np.mean(strengths[p::m]) for p in range(m)])
+        mean = float(np.mean(scores))
+        contrasts[m] = float((np.max(scores) - mean) / mean) if mean > 0 else 0.0
+    best = max(contrasts, key=lambda m: contrasts[m])
+    return best, contrasts
+
+
+def parse_meter(value: str) -> int | str:
+    if value == "auto":
+        return "auto"
+    n = int(value)
+    if n < 2 or n > 12:
+        raise ValueError(f"unreasonable meter: {n}")
+    return n
+
+
+def analyze(wav_path: Path, beats_per_bar: int | str = 4) -> dict:
     import librosa
 
     y, sr = librosa.load(str(wav_path), sr=22050, mono=True)
@@ -98,6 +124,12 @@ def analyze(wav_path: Path, beats_per_bar: int = 4) -> dict:
     # Downbeat phase: given the meter, pick the beat offset whose beats carry
     # the most onset energy — downbeats are usually accented.
     strengths = onset_env[beat_frames]
+    meter_detected = False
+    if beats_per_bar == "auto":
+        beats_per_bar, contrasts = detect_meter(strengths)
+        meter_detected = True
+        print(f"meter auto-detect: chose {beats_per_bar}/4 (contrast {contrasts})", flush=True)
+    assert isinstance(beats_per_bar, int)
     phase_scores = [
         float(np.mean(strengths[p::beats_per_bar])) for p in range(beats_per_bar)
     ]
@@ -106,6 +138,7 @@ def analyze(wav_path: Path, beats_per_bar: int = 4) -> dict:
 
     return {
         "beatsPerBar": beats_per_bar,
+        "meterAutoDetected": meter_detected,
         "bpm": round(bpm, 2),
         "bpmGlobalEstimate": round(float(np.atleast_1d(tempo)[0]), 2),
         "duration": round(duration, 2),
@@ -123,13 +156,14 @@ def main() -> int:
     parser.add_argument("--input", help="Local audio file (mp3/m4a/wav)")
     parser.add_argument("--out", required=True, help="Output JSON path")
     parser.add_argument(
-        "--meter", type=int, default=4,
-        help="Beats per bar (4 for 4/4, 3 for 3/4, 6 for 6/8). Default 4.",
+        "--meter", default="4",
+        help="Beats per bar (4, 3, 6...) or 'auto' to detect 3/4 vs 4/4. Default 4.",
     )
     args = parser.parse_args()
 
     if not args.url and not args.input:
         parser.error("provide --url or --input")
+    meter = parse_meter(args.meter)
 
     with tempfile.TemporaryDirectory() as tmp:
         workdir = Path(tmp)
@@ -146,7 +180,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        result = analyze(wav, beats_per_bar=args.meter)
+        result = analyze(wav, beats_per_bar=meter)
 
     result = {
         "videoId": youtube_id(args.url) if args.url else None,

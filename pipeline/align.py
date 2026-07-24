@@ -24,7 +24,7 @@ from pathlib import Path
 
 import numpy as np
 
-from analyze import analyze, download_audio, to_wav, youtube_id
+from analyze import analyze, download_audio, parse_meter, to_wav, youtube_id
 
 NOTE_TO_PC = {
     "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "Fb": 4,
@@ -150,10 +150,11 @@ def main() -> int:
     parser.add_argument("--negina", required=True, help="Negina-format source file")
     parser.add_argument("--out", required=True, help="Output JSON path")
     parser.add_argument(
-        "--meter", type=int, default=4,
-        help="Beats per bar (4 for 4/4, 3 for 3/4, 6 for 6/8). Default 4.",
+        "--meter", default="4",
+        help="Beats per bar (4, 3, 6...) or 'auto' to detect 3/4 vs 4/4. Default 4.",
     )
     args = parser.parse_args()
+    meter = parse_meter(args.meter)
 
     if not args.url and not args.input:
         parser.error("provide --url or --input")
@@ -176,7 +177,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        base = analyze(wav, beats_per_bar=args.meter)
+        base = analyze(wav, beats_per_bar=meter)
 
         print("aligning chords to audio (viterbi over beat chroma)...", flush=True)
         beat_times = np.array(base["beats"])
@@ -184,10 +185,11 @@ def main() -> int:
 
     # True bar number at each chord start
     bars = base["bars"]
+    beats_per_bar = int(base["beatsPerBar"])
     for c in chords:
         idx = int(np.searchsorted(np.array(bars), c["start"], side="right")) - 1
         c["startBar"] = max(idx, 0) + 1
-        c["bars"] = round(c["beats"] / args.meter, 2)
+        c["bars"] = round(c["beats"] / beats_per_bar, 2)
 
     result = {
         "videoId": youtube_id(args.url) if args.url else None,

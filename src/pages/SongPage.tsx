@@ -30,6 +30,7 @@ export function SongPage({ songId }: { songId: string }) {
     () => localStorage.getItem(BAR_ALIGN_KEY) === "true",
   );
   const [bpm, setBpm] = useState<number>(song?.bpm ?? DEFAULT_BPM);
+  const [meter, setMeter] = useState<number>(song?.meter ?? 4);
   const [sync, setSync] = useState<SyncData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
@@ -58,7 +59,10 @@ export function SongPage({ songId }: { songId: string }) {
     };
   }, [songId]);
 
-  const timeline = useMemo(() => (song ? buildTimeline(song, bpm) : null), [song, bpm]);
+  const timeline = useMemo(
+    () => (song ? buildTimeline({ ...song, meter }, bpm) : null),
+    [song, meter, bpm],
+  );
   const isSynced = Boolean(sync && player);
 
   // Sheet chords in pipeline order; when align.py produced per-chord timings
@@ -168,6 +172,11 @@ export function SongPage({ songId }: { songId: string }) {
     const next = Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(value)));
     setBpm(next);
     if (song) saveSong({ ...song, bpm: next });
+  };
+
+  const updateMeter = (value: number) => {
+    setMeter(value);
+    if (song) saveSong({ ...song, meter: value });
   };
 
   const restart = () => {
@@ -310,7 +319,26 @@ export function SongPage({ songId }: { songId: string }) {
                 )}
               </div>
 
-              <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="rounded-xl bg-slate-50 px-2 py-2.5">
+                  <div className="mb-1 text-[10px] font-semibold text-slate-400">משקל</div>
+                  {sync?.beatsPerBar ? (
+                    <div className="text-lg font-bold text-slate-800">
+                      {sync.beatsPerBar === 6 ? "6/8" : `${sync.beatsPerBar}/4`}
+                    </div>
+                  ) : (
+                    <select
+                      value={meter}
+                      onChange={(e) => updateMeter(Number(e.target.value))}
+                      className="w-full border-none bg-transparent text-center text-lg font-bold text-slate-800 focus:outline-none"
+                      aria-label="משקל"
+                    >
+                      <option value={4}>4/4</option>
+                      <option value={3}>3/4</option>
+                      <option value={6}>6/8</option>
+                    </select>
+                  )}
+                </div>
                 <div className="rounded-xl bg-slate-50 px-2 py-2.5">
                   <div className="mb-1 flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-400">
                     <Gauge size={12} />

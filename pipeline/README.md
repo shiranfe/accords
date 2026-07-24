@@ -28,8 +28,12 @@ Beats/bars only:
 .\.venv\Scripts\python analyze.py --url https://youtu.be/VIDEO_ID --out ..\public\sync\SONG_ID.json
 ```
 
-Both accept `--meter N` (beats per bar: 4 default, 3 for 3/4, 6 for 6/8) and
-`--input file.mp3` instead of `--url`. Downloads are cached in `pipeline/cache/`.
+Both accept `--meter N` (beats per bar: 4 default, 3 for 3/4, 6 for 6/8) or
+`--meter auto` (experimental: picks 3/4 vs 4/4 by downbeat accent contrast;
+6/8 must be passed explicitly), and `--input file.mp3` instead of `--url`.
+Downloads are cached in `pipeline/cache/`. The web app also stores a per-song
+meter (song page side panel) used by the metronome fallback — pass the same
+value to the pipeline when generating sync files.
 
 - `SONG_ID` must match the song's id in the web app library (e.g. `seed-hachof-shel-trapetoni`).
 - The web app auto-detects `public/sync/<songId>.json`: the song page switches

@@ -19,7 +19,8 @@ export type Timeline = {
 
 export const DEFAULT_BPM = 96;
 
-const beatsFor = (kind: TickKind): number => (kind === "bar" ? 4 : kind === "half" ? 2 : 1);
+const beatsFor = (kind: TickKind, beatsPerBar: number): number =>
+  kind === "bar" ? beatsPerBar : kind === "half" ? Math.max(1, Math.round(beatsPerBar / 2)) : 1;
 
 /** Sequential bar numbers for every full-bar chord, across the whole song. */
 export function buildBarNumbers(song: Song): BarNumbers {
@@ -55,6 +56,7 @@ export function flattenChords(song: Song): Array<{ chordId: string; lineId: stri
 /** Metronome timeline: each chord lasts its beat count at the given BPM. */
 export function buildTimeline(song: Song, bpm: number): Timeline {
   const barNumbers = buildBarNumbers(song);
+  const beatsPerBar = song.meter ?? 4;
   const events: PlaybackEvent[] = [];
   let elapsed = 0;
 
@@ -62,7 +64,7 @@ export function buildTimeline(song: Song, bpm: number): Timeline {
     for (const line of section.lines) {
       const ordered = [...line.chords].sort((a, b) => a.charIndex - b.charIndex);
       for (const chord of ordered) {
-        const durationMs = (beatsFor(chord.kind) * 60000) / bpm;
+        const durationMs = (beatsFor(chord.kind, beatsPerBar) * 60000) / bpm;
         events.push({
           sectionId: section.id,
           lineId: line.id,
