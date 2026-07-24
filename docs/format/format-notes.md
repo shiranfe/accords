@@ -49,6 +49,19 @@ chord anchor (caret count still equals chord count) — it is a visible performa
 - `#COLn#` → out-of-band layout metadata; our responsive renderer may supersede fixed column breaks entirely, but preserve them on import for print fidelity
 - standalone `*` → section boundary hint (often redundant with `%...%`)
 
+## Chord duration semantics (critical for audio alignment)
+
+- A chord written once nominally means one bar, **but this is a convention, not
+  a guarantee**: measured audio for "החוף של טרפטוני" found 88 real bars vs 132
+  written chords — many written chords actually last half a bar.
+- **A chord held for N bars is written N times** (user-confirmed 2026-07-24).
+  So consecutive duplicate chords in the sheet usually mean one sustained chord
+  — there is NO chord-change boundary in the audio between them.
+- Alignment consequence: align the sheet to audio on **chord-change points**
+  only. Runs of identical consecutive chords contribute a single change
+  boundary; distribute their bar times evenly (or on detected downbeats)
+  within the run. Never assume slot k of the sheet equals bar k of the audio.
+
 ## References
 
 - Markato: original format the dialect extends (tutorial saved here).
