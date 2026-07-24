@@ -188,26 +188,40 @@ export function SongPage({ songId }: { songId: string }) {
 
   const activeLineId = activeEvent?.lineId ?? null;
 
+  // Smoother follow: only scroll when the active line leaves the comfortable
+  // middle band of the viewport, instead of re-centering on every line change.
   useEffect(() => {
     if (!activeLineId) return;
-    lineRefs.current[activeLineId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const el = lineRefs.current[activeLineId];
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const inComfortBand = rect.top >= viewportHeight * 0.18 && rect.bottom <= viewportHeight * 0.72;
+    if (inComfortBand) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [activeLineId]);
 
   const registerLineRef = useCallback((lineId: string, node: HTMLDivElement | null) => {
     lineRefs.current[lineId] = node;
   }, []);
 
-  // Clicking a line jumps playback there: seeks the recording when synced,
-  // or moves the metronome clock otherwise. Works while paused too — the
-  // highlight moves immediately.
+  // Clicking a line: the active line toggles play/pause; any other line
+  // jumps playback there and starts playing if stopped.
   const jumpToLine = useCallback(
     (lineId: string) => {
       if (!timeline) return;
+
+      if (activeLineId === lineId) {
+        setIsPlaying((p) => !p);
+        return;
+      }
+
       if (sync && player && alignedChords) {
         const idx = flatChords.findIndex((f) => f.lineId === lineId);
         if (idx === -1) return;
         player.seekTo(alignedChords[idx].start, true);
         setSyncedBar(idx);
+        setIsPlaying(true);
         return;
       }
       if (sync && player) {
@@ -216,6 +230,7 @@ export function SongPage({ songId }: { songId: string }) {
         if (event?.bar == null || barTime === undefined) return;
         player.seekTo(barTime, true);
         setSyncedBar(event.bar);
+        setIsPlaying(true);
         return;
       }
       const event = timeline.events.find((e) => e.lineId === lineId);
@@ -223,8 +238,9 @@ export function SongPage({ songId }: { songId: string }) {
       playbackMsRef.current = event.startMs;
       setPlaybackMs(event.startMs);
       setMetronomeSeek((n) => n + 1);
+      setIsPlaying(true);
     },
-    [timeline, sync, player, alignedChords, flatChords],
+    [timeline, sync, player, alignedChords, flatChords, activeLineId],
   );
 
   const updateBpm = (value: number) => {

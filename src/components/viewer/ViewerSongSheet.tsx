@@ -233,18 +233,56 @@ function ViewerLine({
             <span
               key={group.items[0].id ?? gi}
               data-bar-cell={barAlign ? span : undefined}
-              className="flex items-baseline"
+              className={`flex items-baseline ${barAlign ? "relative" : ""}`}
               style={barAlign ? { ...barCellStyle(span), gap: "0.7em" } : undefined}
             >
               {group.items.map((chord) => (
-                <ChordBadge
-                  key={chord.id}
-                  chord={chord}
-                  barNumber={barNumbers[chord.id]}
-                  active={activeChordId === chord.id}
-                  showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
-                />
+                <span key={chord.id} className="flex items-baseline" style={{ gap: "0.7em" }}>
+                  <ChordBadge
+                    chord={chord}
+                    barNumber={barNumbers[chord.id]}
+                    active={activeChordId === chord.id}
+                    showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
+                  />
+                  {!barAlign &&
+                    Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => (
+                      <GhostChord
+                        key={g}
+                        name={chord.name}
+                        barNumber={
+                          chordBars?.[chord.id] !== undefined
+                            ? chordBars[chord.id] + g + 1
+                            : undefined
+                        }
+                      />
+                    ))}
+                </span>
               ))}
+              {barAlign &&
+                group.items.flatMap((chord) =>
+                  Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => {
+                    const startBar = chordBars?.[chord.id];
+                    const offset =
+                      startBar !== undefined && group.bar !== undefined
+                        ? startBar - group.bar + g + 1
+                        : g + 1;
+                    return (
+                      <span
+                        key={`${chord.id}-g${g}`}
+                        className="absolute"
+                        style={{
+                          insetInlineStart: `calc(var(${BAR_WIDTH_VAR}, 8em) * ${offset})`,
+                          top: 0,
+                        }}
+                      >
+                        <GhostChord
+                          name={chord.name}
+                          barNumber={startBar !== undefined ? startBar + g + 1 : undefined}
+                        />
+                      </span>
+                    );
+                  }),
+                )}
             </span>
           );
         })}
@@ -267,6 +305,44 @@ function ViewerLine({
 
   const chunks = buildWordChunks(line);
 
+  // Flow-mode ghosts: a sustained chord's continuation bars appear as gray
+  // chords in the text flow, right before the next chord's word (or line end)
+  const ordered = [...line.chords].sort((a, b) => a.charIndex - b.charIndex);
+  const chordChunkIdx = new Map<string, number>();
+  chunks.forEach((chunk, ci) =>
+    chunk.subs.forEach((sub) => {
+      if (sub.chord && !chordChunkIdx.has(sub.chord.id)) chordChunkIdx.set(sub.chord.id, ci);
+    }),
+  );
+  const ghostsBefore = new Map<number, Array<{ key: string; name: string; bar?: number }>>();
+  if (ghostBars) {
+    ordered.forEach((chord, i) => {
+      const extra = ghostBars[chord.id] ?? 0;
+      if (!extra) return;
+      const insertAt =
+        i + 1 < ordered.length
+          ? (chordChunkIdx.get(ordered[i + 1].id) ?? chunks.length)
+          : chunks.length;
+      const list = ghostsBefore.get(insertAt) ?? [];
+      for (let g = 0; g < extra; g++) {
+        list.push({
+          key: `${chord.id}-g${g}`,
+          name: chord.name,
+          bar: chordBars?.[chord.id] !== undefined ? chordBars[chord.id] + g + 1 : undefined,
+        });
+      }
+      ghostsBefore.set(insertAt, list);
+    });
+  }
+
+  const renderGhosts = (at: number) =>
+    (ghostsBefore.get(at) ?? []).map((ghost) => (
+      <span key={ghost.key} className="inline-block align-bottom">
+        <GhostChord name={ghost.name} barNumber={ghost.bar} />
+        <span className="block whitespace-pre">{" "}</span>
+      </span>
+    ));
+
   return (
     <div
       dir="rtl"
@@ -279,25 +355,29 @@ function ViewerLine({
       }}
     >
       {chunks.map((chunk, i) => (
-        <span key={i} className="inline-flex items-end whitespace-nowrap">
-          {chunk.subs.map((sub, j) => (
-            // A sub-segment with a chord stacks the badge in-flow above its
-            // text, so the segment is never narrower than the badge — adjacent
-            // chords can't overlap; the word just opens up like in print sheets.
-            <span key={j} className="inline-block whitespace-pre align-bottom">
-              {sub.chord && (
-                <ChordBadge
-                  chord={sub.chord}
-                  barNumber={barNumbers[sub.chord.id]}
-                  active={activeChordId === sub.chord.id}
-                  showTick={!tickOnlyOnBarStart || barNumbers[sub.chord.id] !== undefined}
-                />
-              )}
-              <span className="block whitespace-pre">{sub.text}</span>
-            </span>
-          ))}
+        <span key={i} className="contents">
+          {renderGhosts(i)}
+          <span className="inline-flex items-end whitespace-nowrap">
+            {chunk.subs.map((sub, j) => (
+              // A sub-segment with a chord stacks the badge in-flow above its
+              // text, so the segment is never narrower than the badge — adjacent
+              // chords can't overlap; the word just opens up like in print sheets.
+              <span key={j} className="inline-block whitespace-pre align-bottom">
+                {sub.chord && (
+                  <ChordBadge
+                    chord={sub.chord}
+                    barNumber={barNumbers[sub.chord.id]}
+                    active={activeChordId === sub.chord.id}
+                    showTick={!tickOnlyOnBarStart || barNumbers[sub.chord.id] !== undefined}
+                  />
+                )}
+                <span className="block whitespace-pre">{sub.text}</span>
+              </span>
+            ))}
+          </span>
         </span>
       ))}
+      {renderGhosts(chunks.length)}
     </div>
   );
 }
@@ -419,7 +499,7 @@ function BarAlignedLine({
           <span
             key={group.items[0].chord!.id ?? gi}
             data-bar-cell={uniform ? span : ""}
-            className="flex items-end"
+            className={`flex items-end ${uniform ? "relative" : ""}`}
             style={
               uniform
                 ? { ...barCellStyle(span), columnGap: "0.3em" }
@@ -436,10 +516,64 @@ function BarAlignedLine({
                 grow={segment.chord!.id === lastChordId}
               />
             ))}
+            {uniform &&
+              group.items.flatMap((segment) => {
+                const chord = segment.chord!;
+                const startBar = chordBars?.[chord.id];
+                return Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => {
+                  const offset =
+                    startBar !== undefined && group.bar !== undefined
+                      ? startBar - group.bar + g + 1
+                      : g + 1;
+                  return (
+                    <span
+                      key={`${chord.id}-g${g}`}
+                      className="absolute"
+                      style={{
+                        insetInlineStart: `calc(var(${BAR_WIDTH_VAR}, 8em) * ${offset})`,
+                        top: 0,
+                      }}
+                    >
+                      <GhostChord
+                        name={chord.name}
+                        barNumber={startBar !== undefined ? startBar + g + 1 : undefined}
+                      />
+                    </span>
+                  );
+                });
+              })}
           </span>
         );
       })}
     </div>
+  );
+}
+
+/** Grayed continuation marker: the chord sustains into another bar. Shown in
+ *  BOTH view modes so the chord content is identical between them. */
+function GhostChord({ name, barNumber }: { name: string; barNumber?: number }) {
+  return (
+    <span
+      className="inline-flex flex-col items-start whitespace-nowrap"
+      style={{ marginBottom: "0.1em" }}
+      title="האקורד ממשיך בתיבה הזו"
+    >
+      <span
+        className="font-bold leading-none text-slate-300"
+        style={{ fontSize: "0.72em", paddingInlineEnd: "0.4em" }}
+        dir="ltr"
+      >
+        {name}
+      </span>
+      <span className="flex items-center" style={{ gap: "0.2em", marginTop: "0.1em" }}>
+        <span className="rounded-full bg-slate-200" style={{ width: 2, height: "0.45em" }} />
+        {barNumber !== undefined && (
+          <span className="leading-none text-slate-300" style={{ fontSize: "0.5em" }}>
+            {barNumber}
+          </span>
+        )}
+      </span>
+    </span>
   );
 }
 
