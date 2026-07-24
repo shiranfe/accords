@@ -5,7 +5,7 @@ import { youtubeIdFrom } from "../lib/neginaParser";
 import { buildTimeline, DEFAULT_BPM, flattenChords } from "../lib/songStats";
 import { barAtTime, chordIndexAtTime, loadSync } from "../lib/sync";
 import type { SyncData } from "../lib/sync";
-import { useYouTubePlayer } from "../hooks/useYouTubePlayer";
+import { useYouTubePlayer, YT_STATE } from "../hooks/useYouTubePlayer";
 import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
 import { navigate } from "../lib/navigate";
 
@@ -35,11 +35,21 @@ export function SongPage({ songId }: { songId: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
+  // Bumped when a line click seeks the metronome, so the running interval
+  // restarts from the new playbackMsRef position.
+  const [metronomeSeek, setMetronomeSeek] = useState(0);
   const playbackMsRef = useRef(0);
   const lineRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const videoId = youtubeIdFrom(song?.youtubeUrl);
-  const { containerRef, player } = useYouTubePlayer(videoId);
+  // Clicking play/pause inside the YouTube iframe itself drives the karaoke
+  // too — only when sync data exists (the metronome timeline is unrelated to
+  // the video, so video clicks shouldn't start it).
+  const { containerRef, player } = useYouTubePlayer(videoId, (state) => {
+    if (!sync) return;
+    if (state === YT_STATE.PLAYING) setIsPlaying(true);
+    else if (state === YT_STATE.PAUSED || state === YT_STATE.ENDED) setIsPlaying(false);
+  });
 
   useEffect(() => {
     localStorage.setItem(FONT_SIZE_KEY, String(fontSize));
@@ -115,10 +125,12 @@ export function SongPage({ songId }: { songId: string }) {
     }, 60);
 
     return () => window.clearInterval(intervalId);
-  }, [isPlaying, isSynced, timeline]);
+  }, [isPlaying, isSynced, timeline, metronomeSeek]);
 
+  // Highlight survives pause: synced position (syncedBar) and metronome
+  // position (playbackMs) both persist until an explicit restart.
   const activeEvent = useMemo(() => {
-    if (!isPlaying || !timeline) return null;
+    if (!timeline) return null;
     if (isSynced && alignedChords) {
       if (syncedBar == null) return null;
       const flat = flatChords[syncedBar];
@@ -133,6 +145,7 @@ export function SongPage({ songId }: { songId: string }) {
       if (syncedBar == null) return null;
       return timeline.events.find((e) => e.bar === syncedBar) ?? null;
     }
+    if (!isPlaying && playbackMs === 0) return null; // never started
     return timeline.events.find((e) => playbackMs >= e.startMs && playbackMs < e.endMs) ?? null;
   }, [isPlaying, isSynced, alignedChords, flatChords, syncedBar, playbackMs, timeline]);
 
@@ -151,6 +164,17 @@ export function SongPage({ songId }: { songId: string }) {
     });
     return map;
   }, [alignedChords, flatChords, sync]);
+
+  // Every chord's true bar (including mid-bar chords) — used by the
+  // bar-align view to group same-bar chords into one equal-width cell.
+  const chordBars = useMemo(() => {
+    if (!alignedChords) return undefined;
+    const map: Record<string, number> = {};
+    flatChords.forEach((flat, i) => {
+      map[flat.chordId] = alignedChords[i].startBar;
+    });
+    return map;
+  }, [alignedChords, flatChords]);
 
   const ghostBars = useMemo(() => {
     if (!alignedChords) return undefined;
@@ -172,6 +196,36 @@ export function SongPage({ songId }: { songId: string }) {
   const registerLineRef = useCallback((lineId: string, node: HTMLDivElement | null) => {
     lineRefs.current[lineId] = node;
   }, []);
+
+  // Clicking a line jumps playback there: seeks the recording when synced,
+  // or moves the metronome clock otherwise. Works while paused too — the
+  // highlight moves immediately.
+  const jumpToLine = useCallback(
+    (lineId: string) => {
+      if (!timeline) return;
+      if (sync && player && alignedChords) {
+        const idx = flatChords.findIndex((f) => f.lineId === lineId);
+        if (idx === -1) return;
+        player.seekTo(alignedChords[idx].start, true);
+        setSyncedBar(idx);
+        return;
+      }
+      if (sync && player) {
+        const event = timeline.events.find((e) => e.lineId === lineId && e.bar != null);
+        const barTime = event?.bar != null ? sync.bars[event.bar - 1] : undefined;
+        if (event?.bar == null || barTime === undefined) return;
+        player.seekTo(barTime, true);
+        setSyncedBar(event.bar);
+        return;
+      }
+      const event = timeline.events.find((e) => e.lineId === lineId);
+      if (!event) return;
+      playbackMsRef.current = event.startMs;
+      setPlaybackMs(event.startMs);
+      setMetronomeSeek((n) => n + 1);
+    },
+    [timeline, sync, player, alignedChords, flatChords],
+  );
 
   const updateBpm = (value: number) => {
     if (!Number.isFinite(value)) return;
@@ -286,6 +340,8 @@ export function SongPage({ songId }: { songId: string }) {
               registerLineRef={registerLineRef}
               barNumbersOverride={barNumbersOverride}
               ghostBars={ghostBars}
+              chordBars={chordBars}
+              onLineClick={jumpToLine}
             />
           </main>
 

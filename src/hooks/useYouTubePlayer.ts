@@ -15,7 +15,10 @@ type YTNamespace = {
     options: {
       videoId: string;
       playerVars?: Record<string, string | number>;
-      events?: { onReady?: () => void };
+      events?: {
+        onReady?: () => void;
+        onStateChange?: (event: { data: number }) => void;
+      };
     },
   ) => YTPlayer;
 };
@@ -46,13 +49,24 @@ function loadIframeApi(): Promise<YTNamespace> {
   return apiPromise;
 }
 
+/** YT.PlayerState values the app cares about. */
+export const YT_STATE = { ENDED: 0, PLAYING: 1, PAUSED: 2 } as const;
+
 /**
  * Mounts a controllable YouTube player into the returned container ref.
- * `player` is null until the player is ready.
+ * `player` is null until the player is ready. `onStateChange` fires with the
+ * raw YT.PlayerState number, including for clicks inside the iframe itself.
  */
-export function useYouTubePlayer(videoId: string | null) {
+export function useYouTubePlayer(
+  videoId: string | null,
+  onStateChange?: (state: number) => void,
+) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [player, setPlayer] = useState<YTPlayer | null>(null);
+  const onStateChangeRef = useRef(onStateChange);
+  useEffect(() => {
+    onStateChangeRef.current = onStateChange;
+  }, [onStateChange]);
 
   useEffect(() => {
     const host = containerRef.current;
@@ -79,6 +93,10 @@ export function useYouTubePlayer(videoId: string | null) {
             if (import.meta.env.DEV) {
               (window as unknown as Record<string, unknown>).__ytPlayer = instance;
             }
+          },
+          onStateChange: (event) => {
+            if (disposed) return;
+            onStateChangeRef.current?.(event.data);
           },
         },
       });

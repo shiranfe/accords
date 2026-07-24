@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import type { ChordAnchor, Line, Song } from "../../types/song";
 import { buildBarNumbers } from "../../lib/songStats";
 import type { BarNumbers } from "../../lib/songStats";
+
+const BAR_WIDTH_VAR = "--accords-bar-w";
 
 type SheetProps = {
   song: Song;
@@ -17,6 +19,12 @@ type SheetProps = {
   /** Extra bars each chord sustains beyond its first (audio alignment) —
    *  rendered as grayed ghost chords in bar-align mode */
   ghostBars?: Record<string, number>;
+  /** Every chord's true bar (audio alignment). In bar-align mode, same-bar
+   *  chords share one cell and all bar cells get a uniform width, measured
+   *  from the widest bar's content. */
+  chordBars?: Record<string, number>;
+  /** When set, lines become clickable and report their id (jump-to-line) */
+  onLineClick?: (lineId: string) => void;
 };
 
 /**
@@ -37,14 +45,43 @@ export function ViewerSongSheet({
   registerLineRef,
   barNumbersOverride,
   ghostBars,
+  chordBars,
+  onLineClick,
 }: SheetProps) {
   const ordinalNumbers = useMemo<BarNumbers>(() => buildBarNumbers(song), [song]);
   const barNumbers = barNumbersOverride ?? ordinalNumbers;
   // With alignment data, only bar-start chords carry a tick + bar number
   const tickOnlyOnBarStart = barNumbersOverride != null;
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // Uniform bar width: let cells size to their content, measure the widest,
+  // then lock every bar cell to that width via a CSS variable.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (!barAlign || !chordBars) {
+      root.style.removeProperty(BAR_WIDTH_VAR);
+      return;
+    }
+    root.style.setProperty(BAR_WIDTH_VAR, "auto");
+    let max = 0;
+    root.querySelectorAll<HTMLElement>("[data-bar-cell]").forEach((cell) => {
+      max = Math.max(max, cell.offsetWidth);
+    });
+    if (max > 0) root.style.setProperty(BAR_WIDTH_VAR, `${Math.ceil(max) + 2}px`);
+  }, [barAlign, chordBars, ghostBars, fontSize, song]);
 
   return (
-    <div dir="rtl" style={{ fontSize: `${fontSize}px` }} className="space-y-7 text-slate-800">
+    <div
+      dir="rtl"
+      ref={rootRef}
+      style={{
+        fontSize: `${fontSize}px`,
+        // Bar rows must not wrap — scroll the sheet instead of the page
+        overflowX: barAlign ? "auto" : undefined,
+      }}
+      className="space-y-7 text-slate-800"
+    >
       {song.sections.map((section) => (
         <section key={section.id}>
           <div className="mb-2.5 flex items-center gap-3">
@@ -58,9 +95,11 @@ export function ViewerSongSheet({
               <div
                 key={line.id}
                 ref={(node) => registerLineRef?.(line.id, node)}
+                onClick={onLineClick ? () => onLineClick(line.id) : undefined}
                 className={`rounded-lg px-2 transition-colors duration-300 ${
                   activeLineId === line.id ? "bg-orange-50 ring-1 ring-orange-200" : ""
-                }`}
+                } ${onLineClick ? "cursor-pointer hover:bg-slate-50" : ""}`}
+                title={onLineClick ? "לחיצה קופצת לשורה הזו" : undefined}
               >
                 <ViewerLine
                   line={line}
@@ -68,6 +107,7 @@ export function ViewerSongSheet({
                   activeChordId={activeChordId}
                   barAlign={barAlign}
                   ghostBars={ghostBars}
+                  chordBars={chordBars}
                   tickOnlyOnBarStart={tickOnlyOnBarStart}
                 />
               </div>
@@ -130,8 +170,30 @@ type LineProps = {
   activeChordId?: string | null;
   barAlign?: boolean;
   ghostBars?: Record<string, number>;
+  chordBars?: Record<string, number>;
   tickOnlyOnBarStart?: boolean;
 };
+
+/** Group consecutive same-bar chords together (bar-align + alignment data). */
+function groupByBar<T>(
+  items: T[],
+  barOf: (item: T) => number | undefined,
+): Array<{ bar?: number; items: T[] }> {
+  const groups: Array<{ bar?: number; items: T[] }> = [];
+  for (const item of items) {
+    const bar = barOf(item);
+    const prev = groups[groups.length - 1];
+    if (prev && bar != null && prev.bar === bar) prev.items.push(item);
+    else groups.push({ bar, items: [item] });
+  }
+  return groups;
+}
+
+const barCellStyle = {
+  width: `var(${BAR_WIDTH_VAR}, auto)`,
+  minWidth: "fit-content",
+  flexShrink: 0,
+} as const;
 
 function ViewerLine({
   line,
@@ -139,6 +201,7 @@ function ViewerLine({
   activeChordId,
   barAlign,
   ghostBars,
+  chordBars,
   tickOnlyOnBarStart,
 }: LineProps) {
   const isInstrumental = line.text.trim().length === 0 && line.chords.length > 0;
@@ -147,28 +210,42 @@ function ViewerLine({
   if (isEmpty) return <div className="h-[1em]" />;
 
   if (isInstrumental) {
+    const groups =
+      barAlign && chordBars
+        ? groupByBar(line.chords, (c) => chordBars[c.id])
+        : line.chords.map((c) => ({ bar: undefined, items: [c] }));
+
     return (
       <div
         dir="rtl"
         className={`flex items-center py-[0.35em] ${barAlign ? "" : "flex-wrap"}`}
-        style={{ gap: "0.9em" }}
+        style={{ gap: barAlign ? "0.4em" : "0.9em" }}
       >
-        {line.chords.map((chord) => (
-          <span key={chord.id} className="contents">
+        {groups.map((group, gi) => (
+          <span key={group.items[0].id ?? gi} className="contents">
             <span
-              style={barAlign ? { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" } : undefined}
+              data-bar-cell={barAlign ? "" : undefined}
+              className="flex items-baseline"
+              style={barAlign ? { ...barCellStyle, gap: "0.7em" } : undefined}
             >
-              <ChordBadge
-                chord={chord}
-                barNumber={barNumbers[chord.id]}
-                active={activeChordId === chord.id}
-                showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
-              />
+              {group.items.map((chord) => (
+                <ChordBadge
+                  key={chord.id}
+                  chord={chord}
+                  barNumber={barNumbers[chord.id]}
+                  active={activeChordId === chord.id}
+                  showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
+                />
+              ))}
             </span>
             {barAlign &&
-              Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => (
-                <GhostChord key={g} name={chord.name} />
-              ))}
+              group.items.map((chord) =>
+                Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => (
+                  <span key={`${chord.id}-g${g}`} data-bar-cell="" style={barCellStyle}>
+                    <GhostChord name={chord.name} />
+                  </span>
+                )),
+              )}
           </span>
         ))}
       </div>
@@ -182,6 +259,7 @@ function ViewerLine({
         barNumbers={barNumbers}
         activeChordId={activeChordId}
         ghostBars={ghostBars}
+        chordBars={chordBars}
         tickOnlyOnBarStart={tickOnlyOnBarStart}
       />
     );
@@ -251,65 +329,127 @@ function buildBarSegments(line: Line): BarSegment[] {
   return segments;
 }
 
+function DotLeader() {
+  return (
+    // Relative wrapper + absolute dots: the dot run must not add intrinsic
+    // width, or min-width:fit-content blows past the bar's width cap.
+    <span className="relative flex-1 self-stretch" style={{ minWidth: 0 }}>
+      <span
+        className="absolute inset-0 select-none overflow-hidden whitespace-nowrap text-slate-300"
+        style={{ padding: "0 0.2em", letterSpacing: "0.15em", top: "auto" }}
+        aria-hidden="true"
+      >
+        {".".repeat(60)}
+      </span>
+    </span>
+  );
+}
+
+function ChordSegmentView({
+  segment,
+  barNumbers,
+  activeChordId,
+  tickOnlyOnBarStart,
+  grow,
+}: {
+  segment: BarSegment;
+  barNumbers: BarNumbers;
+  activeChordId?: string | null;
+  tickOnlyOnBarStart?: boolean;
+  /** Last segment in its bar cell — stretches so dot leaders reach the edge */
+  grow?: boolean;
+}) {
+  const chord = segment.chord!;
+  return (
+    <span
+      className="flex flex-col items-start"
+      style={grow ? { flex: "1 1 auto", minWidth: 0 } : { flex: "0 0 auto" }}
+    >
+      <ChordBadge
+        chord={chord}
+        barNumber={barNumbers[chord.id]}
+        active={activeChordId === chord.id}
+        showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
+      />
+      <span className="flex w-full items-baseline">
+        <span className="whitespace-pre">{segment.text}</span>
+        {segment.cut && <DotLeader />}
+      </span>
+    </span>
+  );
+}
+
 function BarAlignedLine({
   line,
   barNumbers,
   activeChordId,
   ghostBars,
+  chordBars,
   tickOnlyOnBarStart,
 }: {
   line: Line;
   barNumbers: BarNumbers;
   activeChordId?: string | null;
   ghostBars?: Record<string, number>;
+  chordBars?: Record<string, number>;
   tickOnlyOnBarStart?: boolean;
 }) {
   const segments = buildBarSegments(line);
+  const pickup = segments.filter((s) => !s.chord);
+  const chordSegments = segments.filter((s) => s.chord);
+  const uniform = chordBars != null;
+
+  const groups = uniform
+    ? groupByBar(chordSegments, (s) => chordBars[s.chord!.id])
+    : chordSegments.map((s) => ({ bar: undefined, items: [s] }));
 
   return (
     <div dir="rtl" className="flex items-end" style={{ padding: "0.25em 0", lineHeight: 1.35 }}>
-      {segments.map((segment, i) => (
-        <span
-          key={segment.chord?.id ?? `pickup-${i}`}
-          className="flex flex-col items-start"
-          style={
-            segment.chord
-              ? { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" }
-              : { flex: "0 0 auto" }
-          }
-        >
-          {segment.chord && (
-            <span className="flex items-baseline" style={{ gap: "1.2em" }}>
-              <ChordBadge
-                chord={segment.chord}
-                barNumber={barNumbers[segment.chord.id]}
-                active={activeChordId === segment.chord.id}
-                showTick={!tickOnlyOnBarStart || barNumbers[segment.chord.id] !== undefined}
-              />
-              {Array.from({ length: ghostBars?.[segment.chord.id] ?? 0 }, (_, g) => (
-                <GhostChord key={g} name={segment.chord!.name} />
-              ))}
-            </span>
-          )}
-          <span className="flex w-full items-baseline">
-            <span className="whitespace-pre">{segment.text}</span>
-            {segment.cut && (
-              // Relative wrapper + absolute dots: the dot run must not add
-              // intrinsic width, or min-width:fit-content blows past the
-              // bar's max-width cap.
-              <span className="relative flex-1 self-stretch" style={{ minWidth: 0 }}>
-                <span
-                  className="absolute inset-0 select-none overflow-hidden whitespace-nowrap text-slate-300"
-                  style={{ padding: "0 0.2em", letterSpacing: "0.15em", top: "auto" }}
-                  aria-hidden="true"
-                >
-                  {".".repeat(60)}
-                </span>
-              </span>
-            )}
-          </span>
+      {pickup.map((segment, i) => (
+        <span key={`pickup-${i}`} className="whitespace-pre" style={{ flex: "0 0 auto" }}>
+          {segment.text}
         </span>
       ))}
+      {groups.map((group, gi) => {
+        const lastChordId = group.items[group.items.length - 1].chord!.id;
+        return (
+          <span key={group.items[0].chord!.id ?? gi} className="contents">
+            <span
+              data-bar-cell=""
+              className="flex items-end"
+              style={
+                uniform
+                  ? { ...barCellStyle, columnGap: "0.3em" }
+                  : { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" }
+              }
+            >
+              {group.items.map((segment) => (
+                <ChordSegmentView
+                  key={segment.chord!.id}
+                  segment={segment}
+                  barNumbers={barNumbers}
+                  activeChordId={activeChordId}
+                  tickOnlyOnBarStart={tickOnlyOnBarStart}
+                  grow={segment.chord!.id === lastChordId}
+                />
+              ))}
+            </span>
+            {uniform &&
+              group.items.map((segment) =>
+                Array.from({ length: ghostBars?.[segment.chord!.id] ?? 0 }, (_, g) => (
+                  <span
+                    key={`${segment.chord!.id}-g${g}`}
+                    data-bar-cell=""
+                    className="flex items-end"
+                    style={barCellStyle}
+                  >
+                    <GhostChord name={segment.chord!.name} />
+                  </span>
+                )),
+              )}
+          </span>
+        );
+      })}
     </div>
   );
 }
