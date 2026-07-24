@@ -64,11 +64,12 @@ export function ViewerSongSheet({
       return;
     }
     root.style.setProperty(BAR_WIDTH_VAR, "auto");
-    let max = 0;
+    let unit = 0;
     root.querySelectorAll<HTMLElement>("[data-bar-cell]").forEach((cell) => {
-      max = Math.max(max, cell.offsetWidth);
+      const span = Math.max(1, Number(cell.dataset.barCell) || 1);
+      unit = Math.max(unit, cell.offsetWidth / span);
     });
-    if (max > 0) root.style.setProperty(BAR_WIDTH_VAR, `${Math.ceil(max) + 2}px`);
+    if (unit > 0) root.style.setProperty(BAR_WIDTH_VAR, `${Math.ceil(unit) + 2}px`);
   }, [barAlign, chordBars, ghostBars, fontSize, song]);
 
   return (
@@ -189,11 +190,15 @@ function groupByBar<T>(
   return groups;
 }
 
-const barCellStyle = {
-  width: `var(${BAR_WIDTH_VAR}, auto)`,
-  minWidth: "fit-content",
-  flexShrink: 0,
-} as const;
+/** A cell spanning `span` bars: width = span × the uniform bar width. During
+ *  the measure phase the CSS var is set to "auto", which invalidates the calc
+ *  and drops the cell to content width — exactly what measurement needs. */
+const barCellStyle = (span: number) =>
+  ({
+    width: `calc(var(${BAR_WIDTH_VAR}, 8em) * ${span})`,
+    minWidth: "fit-content",
+    flexShrink: 0,
+  }) as const;
 
 function ViewerLine({
   line,
@@ -221,12 +226,15 @@ function ViewerLine({
         className={`flex items-center py-[0.35em] ${barAlign ? "" : "flex-wrap"}`}
         style={{ gap: barAlign ? "0.4em" : "0.9em" }}
       >
-        {groups.map((group, gi) => (
-          <span key={group.items[0].id ?? gi} className="contents">
+        {groups.map((group, gi) => {
+          const span =
+            1 + group.items.reduce((sum, chord) => sum + (ghostBars?.[chord.id] ?? 0), 0);
+          return (
             <span
-              data-bar-cell={barAlign ? "" : undefined}
+              key={group.items[0].id ?? gi}
+              data-bar-cell={barAlign ? span : undefined}
               className="flex items-baseline"
-              style={barAlign ? { ...barCellStyle, gap: "0.7em" } : undefined}
+              style={barAlign ? { ...barCellStyle(span), gap: "0.7em" } : undefined}
             >
               {group.items.map((chord) => (
                 <ChordBadge
@@ -238,16 +246,8 @@ function ViewerLine({
                 />
               ))}
             </span>
-            {barAlign &&
-              group.items.map((chord) =>
-                Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => (
-                  <span key={`${chord.id}-g${g}`} data-bar-cell="" style={barCellStyle}>
-                    <GhostChord name={chord.name} />
-                  </span>
-                )),
-              )}
-          </span>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -412,59 +412,34 @@ function BarAlignedLine({
       ))}
       {groups.map((group, gi) => {
         const lastChordId = group.items[group.items.length - 1].chord!.id;
+        const span =
+          1 +
+          group.items.reduce((sum, segment) => sum + (ghostBars?.[segment.chord!.id] ?? 0), 0);
         return (
-          <span key={group.items[0].chord!.id ?? gi} className="contents">
-            <span
-              data-bar-cell=""
-              className="flex items-end"
-              style={
-                uniform
-                  ? { ...barCellStyle, columnGap: "0.3em" }
-                  : { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" }
-              }
-            >
-              {group.items.map((segment) => (
-                <ChordSegmentView
-                  key={segment.chord!.id}
-                  segment={segment}
-                  barNumbers={barNumbers}
-                  activeChordId={activeChordId}
-                  tickOnlyOnBarStart={tickOnlyOnBarStart}
-                  grow={segment.chord!.id === lastChordId}
-                />
-              ))}
-            </span>
-            {uniform &&
-              group.items.map((segment) =>
-                Array.from({ length: ghostBars?.[segment.chord!.id] ?? 0 }, (_, g) => (
-                  <span
-                    key={`${segment.chord!.id}-g${g}`}
-                    data-bar-cell=""
-                    className="flex items-end"
-                    style={barCellStyle}
-                  >
-                    <GhostChord name={segment.chord!.name} />
-                  </span>
-                )),
-              )}
+          <span
+            key={group.items[0].chord!.id ?? gi}
+            data-bar-cell={uniform ? span : ""}
+            className="flex items-end"
+            style={
+              uniform
+                ? { ...barCellStyle(span), columnGap: "0.3em" }
+                : { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" }
+            }
+          >
+            {group.items.map((segment) => (
+              <ChordSegmentView
+                key={segment.chord!.id}
+                segment={segment}
+                barNumbers={barNumbers}
+                activeChordId={activeChordId}
+                tickOnlyOnBarStart={tickOnlyOnBarStart}
+                grow={segment.chord!.id === lastChordId}
+              />
+            ))}
           </span>
         );
       })}
     </div>
-  );
-}
-
-/** Grayed continuation marker: the chord sustains into another bar. */
-function GhostChord({ name }: { name: string }) {
-  return (
-    <span
-      className="font-bold leading-none text-slate-300"
-      style={{ fontSize: "0.72em" }}
-      dir="ltr"
-      title="האקורד ממשיך בתיבה הזו"
-    >
-      {name}
-    </span>
   );
 }
 
