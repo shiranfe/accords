@@ -40,6 +40,8 @@ export function ViewerSongSheet({
 }: SheetProps) {
   const ordinalNumbers = useMemo<BarNumbers>(() => buildBarNumbers(song), [song]);
   const barNumbers = barNumbersOverride ?? ordinalNumbers;
+  // With alignment data, only bar-start chords carry a tick + bar number
+  const tickOnlyOnBarStart = barNumbersOverride != null;
 
   return (
     <div dir="rtl" style={{ fontSize: `${fontSize}px` }} className="space-y-7 text-slate-800">
@@ -66,6 +68,7 @@ export function ViewerSongSheet({
                   activeChordId={activeChordId}
                   barAlign={barAlign}
                   ghostBars={ghostBars}
+                  tickOnlyOnBarStart={tickOnlyOnBarStart}
                 />
               </div>
             ))}
@@ -127,9 +130,17 @@ type LineProps = {
   activeChordId?: string | null;
   barAlign?: boolean;
   ghostBars?: Record<string, number>;
+  tickOnlyOnBarStart?: boolean;
 };
 
-function ViewerLine({ line, barNumbers, activeChordId, barAlign, ghostBars }: LineProps) {
+function ViewerLine({
+  line,
+  barNumbers,
+  activeChordId,
+  barAlign,
+  ghostBars,
+  tickOnlyOnBarStart,
+}: LineProps) {
   const isInstrumental = line.text.trim().length === 0 && line.chords.length > 0;
   const isEmpty = line.text.trim().length === 0 && line.chords.length === 0;
 
@@ -151,6 +162,7 @@ function ViewerLine({ line, barNumbers, activeChordId, barAlign, ghostBars }: Li
                 chord={chord}
                 barNumber={barNumbers[chord.id]}
                 active={activeChordId === chord.id}
+                showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
               />
             </span>
             {barAlign &&
@@ -170,6 +182,7 @@ function ViewerLine({ line, barNumbers, activeChordId, barAlign, ghostBars }: Li
         barNumbers={barNumbers}
         activeChordId={activeChordId}
         ghostBars={ghostBars}
+        tickOnlyOnBarStart={tickOnlyOnBarStart}
       />
     );
   }
@@ -199,6 +212,7 @@ function ViewerLine({ line, barNumbers, activeChordId, barAlign, ghostBars }: Li
                   chord={sub.chord}
                   barNumber={barNumbers[sub.chord.id]}
                   active={activeChordId === sub.chord.id}
+                  showTick={!tickOnlyOnBarStart || barNumbers[sub.chord.id] !== undefined}
                 />
               )}
               <span className="block whitespace-pre">{sub.text}</span>
@@ -242,11 +256,13 @@ function BarAlignedLine({
   barNumbers,
   activeChordId,
   ghostBars,
+  tickOnlyOnBarStart,
 }: {
   line: Line;
   barNumbers: BarNumbers;
   activeChordId?: string | null;
   ghostBars?: Record<string, number>;
+  tickOnlyOnBarStart?: boolean;
 }) {
   const segments = buildBarSegments(line);
 
@@ -268,6 +284,7 @@ function BarAlignedLine({
                 chord={segment.chord}
                 barNumber={barNumbers[segment.chord.id]}
                 active={activeChordId === segment.chord.id}
+                showTick={!tickOnlyOnBarStart || barNumbers[segment.chord.id] !== undefined}
               />
               {Array.from({ length: ghostBars?.[segment.chord.id] ?? 0 }, (_, g) => (
                 <GhostChord key={g} name={segment.chord!.name} />
@@ -315,10 +332,13 @@ function ChordBadge({
   chord,
   barNumber,
   active,
+  showTick = true,
 }: {
   chord: ChordAnchor;
   barNumber?: number;
   active?: boolean;
+  /** Bar-start chords get a tick + bar number; mid-bar chords show name only */
+  showTick?: boolean;
 }) {
   return (
     <span
@@ -334,17 +354,19 @@ function ChordBadge({
       >
         {chord.name}
       </span>
-      <span className="flex items-center" style={{ gap: "0.2em", marginTop: "0.1em" }}>
-        <span
-          className={`rounded-full ${active ? "bg-emerald-400" : "bg-slate-300"}`}
-          style={{ width: 2, height: "0.45em" }}
-        />
-        {barNumber !== undefined && (
-          <span className="leading-none text-slate-400" style={{ fontSize: "0.5em" }}>
-            {barNumber}
-          </span>
-        )}
-      </span>
+      {showTick && (
+        <span className="flex items-center" style={{ gap: "0.2em", marginTop: "0.1em" }}>
+          <span
+            className={`rounded-full ${active ? "bg-emerald-400" : "bg-slate-300"}`}
+            style={{ width: 2, height: "0.45em" }}
+          />
+          {barNumber !== undefined && (
+            <span className="leading-none text-slate-400" style={{ fontSize: "0.5em" }}>
+              {barNumber}
+            </span>
+          )}
+        </span>
+      )}
     </span>
   );
 }

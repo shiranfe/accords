@@ -17,6 +17,7 @@ export type SyncData = {
   bpm: number;
   duration: number;
   beatsPerBar?: number;
+  downbeatPhase?: number;
   beats: number[];
   /** Start time (seconds) of each bar in the recording, from the pipeline */
   bars: number[];

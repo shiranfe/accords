@@ -136,15 +136,21 @@ export function SongPage({ songId }: { songId: string }) {
     return timeline.events.find((e) => playbackMs >= e.startMs && playbackMs < e.endMs) ?? null;
   }, [isPlaying, isSynced, alignedChords, flatChords, syncedBar, playbackMs, timeline]);
 
-  // True bar numbers + ghost continuation bars, from the alignment
+  // True bar numbers from the alignment — only for chords that actually land
+  // on a bar start; mid-bar chords show no tick and no number.
   const barNumbersOverride = useMemo(() => {
-    if (!alignedChords) return undefined;
+    if (!alignedChords || !sync) return undefined;
+    const phase = sync.downbeatPhase ?? 0;
+    const beatsPerBar = sync.beatsPerBar ?? 4;
     const map: Record<string, number> = {};
     flatChords.forEach((flat, i) => {
-      map[flat.chordId] = alignedChords[i].startBar;
+      const chord = alignedChords[i];
+      if ((chord.startBeat - phase) % beatsPerBar === 0) {
+        map[flat.chordId] = chord.startBar;
+      }
     });
     return map;
-  }, [alignedChords, flatChords]);
+  }, [alignedChords, flatChords, sync]);
 
   const ghostBars = useMemo(() => {
     if (!alignedChords) return undefined;
