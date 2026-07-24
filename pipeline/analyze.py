@@ -39,16 +39,26 @@ def youtube_id(url: str) -> str | None:
 def download_audio(url: str, workdir: Path) -> Path:
     import yt_dlp
 
+    # Cache downloads next to the pipeline so re-runs (and re-alignments)
+    # don't hit YouTube again — repeat downloads trigger 403 throttling.
+    vid = youtube_id(url) or "audio"
+    cache = Path(__file__).resolve().parent / "cache"
+    cache.mkdir(exist_ok=True)
+    cached = sorted(cache.glob(f"{vid}.*"))
+    if cached:
+        print(f"using cached audio: {cached[0].name}", flush=True)
+        return cached[0]
+
     opts = {
         "format": "bestaudio/best",
-        "outtmpl": str(workdir / "audio.%(ext)s"),
+        "outtmpl": str(cache / f"{vid}.%(ext)s"),
         "quiet": True,
         "no_warnings": True,
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         ydl.extract_info(url, download=True)
 
-    files = [p for p in workdir.iterdir() if p.stem == "audio"]
+    files = sorted(cache.glob(f"{vid}.*"))
     if not files:
         raise RuntimeError("yt-dlp did not produce an audio file")
     return files[0]
@@ -68,7 +78,7 @@ def to_wav(src: Path, workdir: Path) -> Path:
     return wav
 
 
-def analyze(wav_path: Path) -> dict:
+def analyze(wav_path: Path, beats_per_bar: int = 4) -> dict:
     import librosa
 
     y, sr = librosa.load(str(wav_path), sr=22050, mono=True)
@@ -85,14 +95,17 @@ def analyze(wav_path: Path) -> dict:
     ibis = np.diff(beat_times)
     bpm = float(60.0 / np.median(ibis))
 
-    # Downbeat phase: assuming 4/4, pick the beat offset (0-3) whose beats
-    # carry the most onset energy — downbeats are usually accented.
+    # Downbeat phase: given the meter, pick the beat offset whose beats carry
+    # the most onset energy — downbeats are usually accented.
     strengths = onset_env[beat_frames]
-    phase_scores = [float(np.mean(strengths[p::4])) for p in range(4)]
+    phase_scores = [
+        float(np.mean(strengths[p::beats_per_bar])) for p in range(beats_per_bar)
+    ]
     phase = int(np.argmax(phase_scores))
-    bar_times = beat_times[phase::4]
+    bar_times = beat_times[phase::beats_per_bar]
 
     return {
+        "beatsPerBar": beats_per_bar,
         "bpm": round(bpm, 2),
         "bpmGlobalEstimate": round(float(np.atleast_1d(tempo)[0]), 2),
         "duration": round(duration, 2),
@@ -109,6 +122,10 @@ def main() -> int:
     parser.add_argument("--url", help="YouTube URL")
     parser.add_argument("--input", help="Local audio file (mp3/m4a/wav)")
     parser.add_argument("--out", required=True, help="Output JSON path")
+    parser.add_argument(
+        "--meter", type=int, default=4,
+        help="Beats per bar (4 for 4/4, 3 for 3/4, 6 for 6/8). Default 4.",
+    )
     args = parser.parse_args()
 
     if not args.url and not args.input:
@@ -129,7 +146,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        result = analyze(wav)
+        result = analyze(wav, beats_per_bar=args.meter)
 
     result = {
         "videoId": youtube_id(args.url) if args.url else None,

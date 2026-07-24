@@ -38,6 +38,20 @@ export function buildBarNumbers(song: Song): BarNumbers {
   return numbers;
 }
 
+/** All chords in sheet order (matching the pipeline's negina-file order). */
+export function flattenChords(song: Song): Array<{ chordId: string; lineId: string; name: string }> {
+  const out: Array<{ chordId: string; lineId: string; name: string }> = [];
+  for (const section of song.sections) {
+    for (const line of section.lines) {
+      const ordered = [...line.chords].sort((a, b) => a.charIndex - b.charIndex);
+      for (const chord of ordered) {
+        out.push({ chordId: chord.id, lineId: line.id, name: chord.name });
+      }
+    }
+  }
+  return out;
+}
+
 /** Metronome timeline: each chord lasts its beat count at the given BPM. */
 export function buildTimeline(song: Song, bpm: number): Timeline {
   const barNumbers = buildBarNumbers(song);

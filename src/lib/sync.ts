@@ -1,10 +1,27 @@
+export type SyncChord = {
+  i: number;
+  name: string;
+  /** Measured start/end time (seconds) of this written chord in the recording */
+  start: number;
+  end: number;
+  startBeat: number;
+  beats: number;
+  /** True bar number (1-based) where this chord starts */
+  startBar: number;
+  /** Real duration in bars */
+  bars: number;
+};
+
 export type SyncData = {
   videoId: string | null;
   bpm: number;
   duration: number;
+  beatsPerBar?: number;
   beats: number[];
   /** Start time (seconds) of each bar in the recording, from the pipeline */
   bars: number[];
+  /** Aligned written-chord timings (pipeline/align.py), in sheet order */
+  chords?: SyncChord[];
 };
 
 /**
@@ -21,6 +38,19 @@ export async function loadSync(songId: string): Promise<SyncData | null> {
   } catch {
     return null;
   }
+}
+
+/** Index of the aligned chord sounding at time t, or null before the first. */
+export function chordIndexAtTime(chords: SyncChord[], t: number): number | null {
+  if (chords.length === 0 || t < chords[0].start) return null;
+  let low = 0;
+  let high = chords.length - 1;
+  while (low < high) {
+    const mid = (low + high + 1) >> 1;
+    if (chords[mid].start <= t) low = mid;
+    else high = mid - 1;
+  }
+  return low;
 }
 
 /** 1-based bar number at time t, or null before the first bar. */

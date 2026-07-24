@@ -1,7 +1,8 @@
 {
   "videoId": "KGk2BOsVpno",
   "source": "https://youtu.be/KGk2BOsVpno",
-  "generatedAt": "2026-07-24T10:50:43+00:00",
+  "generatedAt": "2026-07-24T11:47:05+00:00",
+  "beatsPerBar": 4,
   "bpm": 103.36,
   "bpmGlobalEstimate": 103.36,
   "duration": 205.84,
@@ -454,5 +455,1327 @@
     200.876,
     203.244,
     205.589
+  ],
+  "chords": [
+    {
+      "i": 0,
+      "name": "Cm",
+      "startBeat": 0,
+      "beats": 1,
+      "start": 0.255,
+      "end": 0.882,
+      "startBar": 1,
+      "bars": 0.25
+    },
+    {
+      "i": 1,
+      "name": "Gm7",
+      "startBeat": 1,
+      "beats": 5,
+      "start": 0.882,
+      "end": 3.808,
+      "startBar": 1,
+      "bars": 1.25
+    },
+    {
+      "i": 2,
+      "name": "Fm7",
+      "startBeat": 6,
+      "beats": 6,
+      "start": 3.808,
+      "end": 7.338,
+      "startBar": 2,
+      "bars": 1.5
+    },
+    {
+      "i": 3,
+      "name": "Cm",
+      "startBeat": 12,
+      "beats": 3,
+      "start": 7.338,
+      "end": 9.102,
+      "startBar": 3,
+      "bars": 0.75
+    },
+    {
+      "i": 4,
+      "name": "Gm7",
+      "startBeat": 15,
+      "beats": 3,
+      "start": 9.102,
+      "end": 10.867,
+      "startBar": 4,
+      "bars": 0.75
+    },
+    {
+      "i": 5,
+      "name": "Fm7",
+      "startBeat": 18,
+      "beats": 2,
+      "start": 10.867,
+      "end": 12.051,
+      "startBar": 5,
+      "bars": 0.5
+    },
+    {
+      "i": 6,
+      "name": "Cm",
+      "startBeat": 20,
+      "beats": 3,
+      "start": 12.051,
+      "end": 13.816,
+      "startBar": 5,
+      "bars": 0.75
+    },
+    {
+      "i": 7,
+      "name": "Gm7",
+      "startBeat": 23,
+      "beats": 7,
+      "start": 13.816,
+      "end": 17.926,
+      "startBar": 6,
+      "bars": 1.75
+    },
+    {
+      "i": 8,
+      "name": "Fm7",
+      "startBeat": 30,
+      "beats": 5,
+      "start": 17.926,
+      "end": 20.875,
+      "startBar": 8,
+      "bars": 1.25
+    },
+    {
+      "i": 9,
+      "name": "Ab",
+      "startBeat": 35,
+      "beats": 1,
+      "start": 20.875,
+      "end": 21.455,
+      "startBar": 9,
+      "bars": 0.25
+    },
+    {
+      "i": 10,
+      "name": "Gm7",
+      "startBeat": 36,
+      "beats": 2,
+      "start": 21.455,
+      "end": 22.639,
+      "startBar": 9,
+      "bars": 0.5
+    },
+    {
+      "i": 11,
+      "name": "Fm7",
+      "startBeat": 38,
+      "beats": 5,
+      "start": 22.639,
+      "end": 25.588,
+      "startBar": 10,
+      "bars": 1.25
+    },
+    {
+      "i": 12,
+      "name": "Fm7",
+      "startBeat": 43,
+      "beats": 1,
+      "start": 25.588,
+      "end": 26.169,
+      "startBar": 11,
+      "bars": 0.25
+    },
+    {
+      "i": 13,
+      "name": "Gm7",
+      "startBeat": 44,
+      "beats": 2,
+      "start": 26.169,
+      "end": 27.353,
+      "startBar": 11,
+      "bars": 0.5
+    },
+    {
+      "i": 14,
+      "name": "Cm",
+      "startBeat": 46,
+      "beats": 2,
+      "start": 27.353,
+      "end": 28.537,
+      "startBar": 12,
+      "bars": 0.5
+    },
+    {
+      "i": 15,
+      "name": "Fm7",
+      "startBeat": 48,
+      "beats": 4,
+      "start": 28.537,
+      "end": 30.883,
+      "startBar": 12,
+      "bars": 1.0
+    },
+    {
+      "i": 16,
+      "name": "Gm7",
+      "startBeat": 52,
+      "beats": 2,
+      "start": 30.883,
+      "end": 32.044,
+      "startBar": 13,
+      "bars": 0.5
+    },
+    {
+      "i": 17,
+      "name": "Cm",
+      "startBeat": 54,
+      "beats": 3,
+      "start": 32.044,
+      "end": 33.831,
+      "startBar": 14,
+      "bars": 0.75
+    },
+    {
+      "i": 18,
+      "name": "Fm7",
+      "startBeat": 57,
+      "beats": 3,
+      "start": 33.831,
+      "end": 35.573,
+      "startBar": 15,
+      "bars": 0.75
+    },
+    {
+      "i": 19,
+      "name": "Gm7",
+      "startBeat": 60,
+      "beats": 1,
+      "start": 35.573,
+      "end": 36.177,
+      "startBar": 15,
+      "bars": 0.25
+    },
+    {
+      "i": 20,
+      "name": "Cm",
+      "startBeat": 61,
+      "beats": 2,
+      "start": 36.177,
+      "end": 37.361,
+      "startBar": 16,
+      "bars": 0.5
+    },
+    {
+      "i": 21,
+      "name": "Fm7",
+      "startBeat": 63,
+      "beats": 1,
+      "start": 37.361,
+      "end": 37.941,
+      "startBar": 16,
+      "bars": 0.25
+    },
+    {
+      "i": 22,
+      "name": "Gm7",
+      "startBeat": 64,
+      "beats": 6,
+      "start": 37.941,
+      "end": 41.471,
+      "startBar": 16,
+      "bars": 1.5
+    },
+    {
+      "i": 23,
+      "name": "Cm",
+      "startBeat": 70,
+      "beats": 2,
+      "start": 41.471,
+      "end": 42.655,
+      "startBar": 18,
+      "bars": 0.5
+    },
+    {
+      "i": 24,
+      "name": "Cm",
+      "startBeat": 72,
+      "beats": 1,
+      "start": 42.655,
+      "end": 43.236,
+      "startBar": 18,
+      "bars": 0.25
+    },
+    {
+      "i": 25,
+      "name": "Gm7",
+      "startBeat": 73,
+      "beats": 1,
+      "start": 43.236,
+      "end": 43.816,
+      "startBar": 19,
+      "bars": 0.25
+    },
+    {
+      "i": 26,
+      "name": "Fm7",
+      "startBeat": 74,
+      "beats": 1,
+      "start": 43.816,
+      "end": 44.42,
+      "startBar": 19,
+      "bars": 0.25
+    },
+    {
+      "i": 27,
+      "name": "Fm7",
+      "startBeat": 75,
+      "beats": 1,
+      "start": 44.42,
+      "end": 45.0,
+      "startBar": 19,
+      "bars": 0.25
+    },
+    {
+      "i": 28,
+      "name": "Bb",
+      "startBeat": 76,
+      "beats": 2,
+      "start": 45.0,
+      "end": 46.161,
+      "startBar": 19,
+      "bars": 0.5
+    },
+    {
+      "i": 29,
+      "name": "Eb",
+      "startBeat": 78,
+      "beats": 2,
+      "start": 46.161,
+      "end": 47.345,
+      "startBar": 20,
+      "bars": 0.5
+    },
+    {
+      "i": 30,
+      "name": "Ab",
+      "startBeat": 80,
+      "beats": 1,
+      "start": 47.345,
+      "end": 47.949,
+      "startBar": 20,
+      "bars": 0.25
+    },
+    {
+      "i": 31,
+      "name": "Fm7",
+      "startBeat": 81,
+      "beats": 3,
+      "start": 47.949,
+      "end": 49.691,
+      "startBar": 21,
+      "bars": 0.75
+    },
+    {
+      "i": 32,
+      "name": "Bb",
+      "startBeat": 84,
+      "beats": 1,
+      "start": 49.691,
+      "end": 50.294,
+      "startBar": 21,
+      "bars": 0.25
+    },
+    {
+      "i": 33,
+      "name": "Gm7",
+      "startBeat": 85,
+      "beats": 3,
+      "start": 50.294,
+      "end": 52.059,
+      "startBar": 22,
+      "bars": 0.75
+    },
+    {
+      "i": 34,
+      "name": "Cm",
+      "startBeat": 88,
+      "beats": 2,
+      "start": 52.059,
+      "end": 53.243,
+      "startBar": 22,
+      "bars": 0.5
+    },
+    {
+      "i": 35,
+      "name": "Fm7",
+      "startBeat": 90,
+      "beats": 2,
+      "start": 53.243,
+      "end": 54.404,
+      "startBar": 23,
+      "bars": 0.5
+    },
+    {
+      "i": 36,
+      "name": "Bb",
+      "startBeat": 92,
+      "beats": 2,
+      "start": 54.404,
+      "end": 55.589,
+      "startBar": 23,
+      "bars": 0.5
+    },
+    {
+      "i": 37,
+      "name": "Eb",
+      "startBeat": 94,
+      "beats": 2,
+      "start": 55.589,
+      "end": 56.75,
+      "startBar": 24,
+      "bars": 0.5
+    },
+    {
+      "i": 38,
+      "name": "Ab",
+      "startBeat": 96,
+      "beats": 2,
+      "start": 56.75,
+      "end": 57.934,
+      "startBar": 24,
+      "bars": 0.5
+    },
+    {
+      "i": 39,
+      "name": "Fm7",
+      "startBeat": 98,
+      "beats": 2,
+      "start": 57.934,
+      "end": 59.118,
+      "startBar": 25,
+      "bars": 0.5
+    },
+    {
+      "i": 40,
+      "name": "Bb",
+      "startBeat": 100,
+      "beats": 1,
+      "start": 59.118,
+      "end": 59.699,
+      "startBar": 25,
+      "bars": 0.25
+    },
+    {
+      "i": 41,
+      "name": "Gm7",
+      "startBeat": 101,
+      "beats": 5,
+      "start": 59.699,
+      "end": 62.647,
+      "startBar": 26,
+      "bars": 1.25
+    },
+    {
+      "i": 42,
+      "name": "Fm7",
+      "startBeat": 106,
+      "beats": 2,
+      "start": 62.647,
+      "end": 63.832,
+      "startBar": 27,
+      "bars": 0.5
+    },
+    {
+      "i": 43,
+      "name": "Gm7",
+      "startBeat": 108,
+      "beats": 2,
+      "start": 63.832,
+      "end": 64.993,
+      "startBar": 27,
+      "bars": 0.5
+    },
+    {
+      "i": 44,
+      "name": "Cm",
+      "startBeat": 110,
+      "beats": 2,
+      "start": 64.993,
+      "end": 66.177,
+      "startBar": 28,
+      "bars": 0.5
+    },
+    {
+      "i": 45,
+      "name": "Fm7",
+      "startBeat": 112,
+      "beats": 4,
+      "start": 66.177,
+      "end": 68.545,
+      "startBar": 28,
+      "bars": 1.0
+    },
+    {
+      "i": 46,
+      "name": "Gm7",
+      "startBeat": 116,
+      "beats": 2,
+      "start": 68.545,
+      "end": 69.706,
+      "startBar": 29,
+      "bars": 0.5
+    },
+    {
+      "i": 47,
+      "name": "Ab",
+      "startBeat": 118,
+      "beats": 3,
+      "start": 69.706,
+      "end": 71.471,
+      "startBar": 30,
+      "bars": 0.75
+    },
+    {
+      "i": 48,
+      "name": "Fm7",
+      "startBeat": 121,
+      "beats": 3,
+      "start": 71.471,
+      "end": 73.236,
+      "startBar": 31,
+      "bars": 0.75
+    },
+    {
+      "i": 49,
+      "name": "Gm7",
+      "startBeat": 124,
+      "beats": 2,
+      "start": 73.236,
+      "end": 74.42,
+      "startBar": 31,
+      "bars": 0.5
+    },
+    {
+      "i": 50,
+      "name": "Cm",
+      "startBeat": 126,
+      "beats": 4,
+      "start": 74.42,
+      "end": 76.765,
+      "startBar": 32,
+      "bars": 1.0
+    },
+    {
+      "i": 51,
+      "name": "Fm7",
+      "startBeat": 130,
+      "beats": 2,
+      "start": 76.765,
+      "end": 77.949,
+      "startBar": 33,
+      "bars": 0.5
+    },
+    {
+      "i": 52,
+      "name": "Gm7",
+      "startBeat": 132,
+      "beats": 2,
+      "start": 77.949,
+      "end": 79.134,
+      "startBar": 33,
+      "bars": 0.5
+    },
+    {
+      "i": 53,
+      "name": "Cm",
+      "startBeat": 134,
+      "beats": 2,
+      "start": 79.134,
+      "end": 80.295,
+      "startBar": 34,
+      "bars": 0.5
+    },
+    {
+      "i": 54,
+      "name": "Cm",
+      "startBeat": 136,
+      "beats": 1,
+      "start": 80.295,
+      "end": 80.875,
+      "startBar": 34,
+      "bars": 0.25
+    },
+    {
+      "i": 55,
+      "name": "Gm7",
+      "startBeat": 137,
+      "beats": 1,
+      "start": 80.875,
+      "end": 81.456,
+      "startBar": 35,
+      "bars": 0.25
+    },
+    {
+      "i": 56,
+      "name": "Fm7",
+      "startBeat": 138,
+      "beats": 2,
+      "start": 81.456,
+      "end": 82.64,
+      "startBar": 35,
+      "bars": 0.5
+    },
+    {
+      "i": 57,
+      "name": "Cm",
+      "startBeat": 140,
+      "beats": 4,
+      "start": 82.64,
+      "end": 85.008,
+      "startBar": 35,
+      "bars": 1.0
+    },
+    {
+      "i": 58,
+      "name": "Gm7",
+      "startBeat": 144,
+      "beats": 2,
+      "start": 85.008,
+      "end": 86.192,
+      "startBar": 36,
+      "bars": 0.5
+    },
+    {
+      "i": 59,
+      "name": "Fm7",
+      "startBeat": 146,
+      "beats": 2,
+      "start": 86.192,
+      "end": 87.353,
+      "startBar": 37,
+      "bars": 0.5
+    },
+    {
+      "i": 60,
+      "name": "Cm",
+      "startBeat": 148,
+      "beats": 3,
+      "start": 87.353,
+      "end": 89.118,
+      "startBar": 37,
+      "bars": 0.75
+    },
+    {
+      "i": 61,
+      "name": "Gm7",
+      "startBeat": 151,
+      "beats": 7,
+      "start": 89.118,
+      "end": 93.228,
+      "startBar": 38,
+      "bars": 1.75
+    },
+    {
+      "i": 62,
+      "name": "Fm7",
+      "startBeat": 158,
+      "beats": 5,
+      "start": 93.228,
+      "end": 96.177,
+      "startBar": 40,
+      "bars": 1.25
+    },
+    {
+      "i": 63,
+      "name": "Ab",
+      "startBeat": 163,
+      "beats": 1,
+      "start": 96.177,
+      "end": 96.781,
+      "startBar": 41,
+      "bars": 0.25
+    },
+    {
+      "i": 64,
+      "name": "Gm7",
+      "startBeat": 164,
+      "beats": 2,
+      "start": 96.781,
+      "end": 97.942,
+      "startBar": 41,
+      "bars": 0.5
+    },
+    {
+      "i": 65,
+      "name": "Fm7",
+      "startBeat": 166,
+      "beats": 5,
+      "start": 97.942,
+      "end": 100.867,
+      "startBar": 42,
+      "bars": 1.25
+    },
+    {
+      "i": 66,
+      "name": "Fm7",
+      "startBeat": 171,
+      "beats": 1,
+      "start": 100.867,
+      "end": 101.471,
+      "startBar": 43,
+      "bars": 0.25
+    },
+    {
+      "i": 67,
+      "name": "Gm7",
+      "startBeat": 172,
+      "beats": 2,
+      "start": 101.471,
+      "end": 102.655,
+      "startBar": 43,
+      "bars": 0.5
+    },
+    {
+      "i": 68,
+      "name": "Cm",
+      "startBeat": 174,
+      "beats": 4,
+      "start": 102.655,
+      "end": 105.001,
+      "startBar": 44,
+      "bars": 1.0
+    },
+    {
+      "i": 69,
+      "name": "Fm7",
+      "startBeat": 178,
+      "beats": 2,
+      "start": 105.001,
+      "end": 106.185,
+      "startBar": 45,
+      "bars": 0.5
+    },
+    {
+      "i": 70,
+      "name": "Gm7",
+      "startBeat": 180,
+      "beats": 2,
+      "start": 106.185,
+      "end": 107.346,
+      "startBar": 45,
+      "bars": 0.5
+    },
+    {
+      "i": 71,
+      "name": "Cm",
+      "startBeat": 182,
+      "beats": 4,
+      "start": 107.346,
+      "end": 109.714,
+      "startBar": 46,
+      "bars": 1.0
+    },
+    {
+      "i": 72,
+      "name": "Fm7",
+      "startBeat": 186,
+      "beats": 2,
+      "start": 109.714,
+      "end": 110.875,
+      "startBar": 47,
+      "bars": 0.5
+    },
+    {
+      "i": 73,
+      "name": "Gm7",
+      "startBeat": 188,
+      "beats": 2,
+      "start": 110.875,
+      "end": 112.06,
+      "startBar": 47,
+      "bars": 0.5
+    },
+    {
+      "i": 74,
+      "name": "Cm",
+      "startBeat": 190,
+      "beats": 4,
+      "start": 112.06,
+      "end": 114.405,
+      "startBar": 48,
+      "bars": 1.0
+    },
+    {
+      "i": 75,
+      "name": "Fm7",
+      "startBeat": 194,
+      "beats": 2,
+      "start": 114.405,
+      "end": 115.589,
+      "startBar": 49,
+      "bars": 0.5
+    },
+    {
+      "i": 76,
+      "name": "Gm7",
+      "startBeat": 196,
+      "beats": 10,
+      "start": 115.589,
+      "end": 121.487,
+      "startBar": 49,
+      "bars": 2.5
+    },
+    {
+      "i": 77,
+      "name": "Cm",
+      "startBeat": 206,
+      "beats": 2,
+      "start": 121.487,
+      "end": 122.648,
+      "startBar": 52,
+      "bars": 0.5
+    },
+    {
+      "i": 78,
+      "name": "Cm",
+      "startBeat": 208,
+      "beats": 1,
+      "start": 122.648,
+      "end": 123.228,
+      "startBar": 52,
+      "bars": 0.25
+    },
+    {
+      "i": 79,
+      "name": "Gm7",
+      "startBeat": 209,
+      "beats": 1,
+      "start": 123.228,
+      "end": 123.809,
+      "startBar": 53,
+      "bars": 0.25
+    },
+    {
+      "i": 80,
+      "name": "Fm7",
+      "startBeat": 210,
+      "beats": 1,
+      "start": 123.809,
+      "end": 124.413,
+      "startBar": 53,
+      "bars": 0.25
+    },
+    {
+      "i": 81,
+      "name": "Fm7",
+      "startBeat": 211,
+      "beats": 1,
+      "start": 124.413,
+      "end": 124.993,
+      "startBar": 53,
+      "bars": 0.25
+    },
+    {
+      "i": 82,
+      "name": "Bb",
+      "startBeat": 212,
+      "beats": 2,
+      "start": 124.993,
+      "end": 126.177,
+      "startBar": 53,
+      "bars": 0.5
+    },
+    {
+      "i": 83,
+      "name": "Eb",
+      "startBeat": 214,
+      "beats": 2,
+      "start": 126.177,
+      "end": 127.361,
+      "startBar": 54,
+      "bars": 0.5
+    },
+    {
+      "i": 84,
+      "name": "Ab",
+      "startBeat": 216,
+      "beats": 1,
+      "start": 127.361,
+      "end": 127.942,
+      "startBar": 54,
+      "bars": 0.25
+    },
+    {
+      "i": 85,
+      "name": "Fm7",
+      "startBeat": 217,
+      "beats": 3,
+      "start": 127.942,
+      "end": 129.707,
+      "startBar": 55,
+      "bars": 0.75
+    },
+    {
+      "i": 86,
+      "name": "Bb",
+      "startBeat": 220,
+      "beats": 1,
+      "start": 129.707,
+      "end": 130.287,
+      "startBar": 55,
+      "bars": 0.25
+    },
+    {
+      "i": 87,
+      "name": "Gm7",
+      "startBeat": 221,
+      "beats": 3,
+      "start": 130.287,
+      "end": 132.052,
+      "startBar": 56,
+      "bars": 0.75
+    },
+    {
+      "i": 88,
+      "name": "Cm",
+      "startBeat": 224,
+      "beats": 2,
+      "start": 132.052,
+      "end": 133.236,
+      "startBar": 56,
+      "bars": 0.5
+    },
+    {
+      "i": 89,
+      "name": "Fm7",
+      "startBeat": 226,
+      "beats": 2,
+      "start": 133.236,
+      "end": 134.397,
+      "startBar": 57,
+      "bars": 0.5
+    },
+    {
+      "i": 90,
+      "name": "Bb",
+      "startBeat": 228,
+      "beats": 2,
+      "start": 134.397,
+      "end": 135.581,
+      "startBar": 57,
+      "bars": 0.5
+    },
+    {
+      "i": 91,
+      "name": "Eb",
+      "startBeat": 230,
+      "beats": 1,
+      "start": 135.581,
+      "end": 136.185,
+      "startBar": 58,
+      "bars": 0.25
+    },
+    {
+      "i": 92,
+      "name": "Ab",
+      "startBeat": 231,
+      "beats": 2,
+      "start": 136.185,
+      "end": 137.369,
+      "startBar": 58,
+      "bars": 0.5
+    },
+    {
+      "i": 93,
+      "name": "Fm7",
+      "startBeat": 233,
+      "beats": 2,
+      "start": 137.369,
+      "end": 138.53,
+      "startBar": 59,
+      "bars": 0.5
+    },
+    {
+      "i": 94,
+      "name": "Bb",
+      "startBeat": 235,
+      "beats": 2,
+      "start": 138.53,
+      "end": 139.714,
+      "startBar": 59,
+      "bars": 0.5
+    },
+    {
+      "i": 95,
+      "name": "Gm7",
+      "startBeat": 237,
+      "beats": 5,
+      "start": 139.714,
+      "end": 142.663,
+      "startBar": 60,
+      "bars": 1.25
+    },
+    {
+      "i": 96,
+      "name": "Fm7",
+      "startBeat": 242,
+      "beats": 2,
+      "start": 142.663,
+      "end": 143.824,
+      "startBar": 61,
+      "bars": 0.5
+    },
+    {
+      "i": 97,
+      "name": "Gm7",
+      "startBeat": 244,
+      "beats": 2,
+      "start": 143.824,
+      "end": 145.009,
+      "startBar": 61,
+      "bars": 0.5
+    },
+    {
+      "i": 98,
+      "name": "Cm",
+      "startBeat": 246,
+      "beats": 4,
+      "start": 145.009,
+      "end": 147.354,
+      "startBar": 62,
+      "bars": 1.0
+    },
+    {
+      "i": 99,
+      "name": "Fm7",
+      "startBeat": 250,
+      "beats": 2,
+      "start": 147.354,
+      "end": 148.538,
+      "startBar": 63,
+      "bars": 0.5
+    },
+    {
+      "i": 100,
+      "name": "Gm7",
+      "startBeat": 252,
+      "beats": 2,
+      "start": 148.538,
+      "end": 149.699,
+      "startBar": 63,
+      "bars": 0.5
+    },
+    {
+      "i": 101,
+      "name": "Ab",
+      "startBeat": 254,
+      "beats": 4,
+      "start": 149.699,
+      "end": 152.067,
+      "startBar": 64,
+      "bars": 1.0
+    },
+    {
+      "i": 102,
+      "name": "Fm7",
+      "startBeat": 258,
+      "beats": 1,
+      "start": 152.067,
+      "end": 152.648,
+      "startBar": 65,
+      "bars": 0.25
+    },
+    {
+      "i": 103,
+      "name": "Gm7",
+      "startBeat": 259,
+      "beats": 3,
+      "start": 152.648,
+      "end": 154.413,
+      "startBar": 65,
+      "bars": 0.75
+    },
+    {
+      "i": 104,
+      "name": "Cm",
+      "startBeat": 262,
+      "beats": 3,
+      "start": 154.413,
+      "end": 156.177,
+      "startBar": 66,
+      "bars": 0.75
+    },
+    {
+      "i": 105,
+      "name": "Fm7",
+      "startBeat": 265,
+      "beats": 3,
+      "start": 156.177,
+      "end": 157.942,
+      "startBar": 67,
+      "bars": 0.75
+    },
+    {
+      "i": 106,
+      "name": "Gm7",
+      "startBeat": 268,
+      "beats": 2,
+      "start": 157.942,
+      "end": 159.126,
+      "startBar": 67,
+      "bars": 0.5
+    },
+    {
+      "i": 107,
+      "name": "Cm",
+      "startBeat": 270,
+      "beats": 1,
+      "start": 159.126,
+      "end": 159.707,
+      "startBar": 68,
+      "bars": 0.25
+    },
+    {
+      "i": 108,
+      "name": "Fm7",
+      "startBeat": 271,
+      "beats": 5,
+      "start": 159.707,
+      "end": 162.633,
+      "startBar": 68,
+      "bars": 1.25
+    },
+    {
+      "i": 109,
+      "name": "Gm7",
+      "startBeat": 276,
+      "beats": 4,
+      "start": 162.633,
+      "end": 165.001,
+      "startBar": 69,
+      "bars": 1.0
+    },
+    {
+      "i": 110,
+      "name": "Cm",
+      "startBeat": 280,
+      "beats": 2,
+      "start": 165.001,
+      "end": 166.162,
+      "startBar": 70,
+      "bars": 0.5
+    },
+    {
+      "i": 111,
+      "name": "Fm7",
+      "startBeat": 282,
+      "beats": 2,
+      "start": 166.162,
+      "end": 167.369,
+      "startBar": 71,
+      "bars": 0.5
+    },
+    {
+      "i": 112,
+      "name": "Gm7",
+      "startBeat": 284,
+      "beats": 2,
+      "start": 167.369,
+      "end": 168.53,
+      "startBar": 71,
+      "bars": 0.5
+    },
+    {
+      "i": 113,
+      "name": "Ab",
+      "startBeat": 286,
+      "beats": 4,
+      "start": 168.53,
+      "end": 170.899,
+      "startBar": 72,
+      "bars": 1.0
+    },
+    {
+      "i": 114,
+      "name": "Fm7",
+      "startBeat": 290,
+      "beats": 2,
+      "start": 170.899,
+      "end": 172.06,
+      "startBar": 73,
+      "bars": 0.5
+    },
+    {
+      "i": 115,
+      "name": "Gm7",
+      "startBeat": 292,
+      "beats": 2,
+      "start": 172.06,
+      "end": 173.244,
+      "startBar": 73,
+      "bars": 0.5
+    },
+    {
+      "i": 116,
+      "name": "Cm",
+      "startBeat": 294,
+      "beats": 2,
+      "start": 173.244,
+      "end": 174.428,
+      "startBar": 74,
+      "bars": 0.5
+    },
+    {
+      "i": 117,
+      "name": "Fm7",
+      "startBeat": 296,
+      "beats": 4,
+      "start": 174.428,
+      "end": 176.774,
+      "startBar": 74,
+      "bars": 1.0
+    },
+    {
+      "i": 118,
+      "name": "Gm7",
+      "startBeat": 300,
+      "beats": 1,
+      "start": 176.774,
+      "end": 177.354,
+      "startBar": 75,
+      "bars": 0.25
+    },
+    {
+      "i": 119,
+      "name": "Cm",
+      "startBeat": 301,
+      "beats": 1,
+      "start": 177.354,
+      "end": 177.958,
+      "startBar": 76,
+      "bars": 0.25
+    },
+    {
+      "i": 120,
+      "name": "Cm",
+      "startBeat": 302,
+      "beats": 1,
+      "start": 177.958,
+      "end": 178.538,
+      "startBar": 76,
+      "bars": 0.25
+    },
+    {
+      "i": 121,
+      "name": "Gm7",
+      "startBeat": 303,
+      "beats": 15,
+      "start": 178.538,
+      "end": 187.362,
+      "startBar": 76,
+      "bars": 3.75
+    },
+    {
+      "i": 122,
+      "name": "Fm7",
+      "startBeat": 318,
+      "beats": 3,
+      "start": 187.362,
+      "end": 189.127,
+      "startBar": 80,
+      "bars": 0.75
+    },
+    {
+      "i": 123,
+      "name": "Ab",
+      "startBeat": 321,
+      "beats": 1,
+      "start": 189.127,
+      "end": 189.707,
+      "startBar": 81,
+      "bars": 0.25
+    },
+    {
+      "i": 124,
+      "name": "Gm7",
+      "startBeat": 322,
+      "beats": 4,
+      "start": 189.707,
+      "end": 192.052,
+      "startBar": 81,
+      "bars": 1.0
+    },
+    {
+      "i": 125,
+      "name": "Fm7",
+      "startBeat": 326,
+      "beats": 6,
+      "start": 192.052,
+      "end": 195.582,
+      "startBar": 82,
+      "bars": 1.5
+    },
+    {
+      "i": 126,
+      "name": "Cm",
+      "startBeat": 332,
+      "beats": 3,
+      "start": 195.582,
+      "end": 197.37,
+      "startBar": 83,
+      "bars": 0.75
+    },
+    {
+      "i": 127,
+      "name": "Gm7",
+      "startBeat": 335,
+      "beats": 7,
+      "start": 197.37,
+      "end": 201.48,
+      "startBar": 84,
+      "bars": 1.75
+    },
+    {
+      "i": 128,
+      "name": "Fm7",
+      "startBeat": 342,
+      "beats": 3,
+      "start": 201.48,
+      "end": 203.244,
+      "startBar": 86,
+      "bars": 0.75
+    },
+    {
+      "i": 129,
+      "name": "Cm",
+      "startBeat": 345,
+      "beats": 1,
+      "start": 203.244,
+      "end": 203.825,
+      "startBar": 87,
+      "bars": 0.25
+    },
+    {
+      "i": 130,
+      "name": "Gm7",
+      "startBeat": 346,
+      "beats": 3,
+      "start": 203.825,
+      "end": 205.589,
+      "startBar": 87,
+      "bars": 0.75
+    },
+    {
+      "i": 131,
+      "name": "Fm7",
+      "startBeat": 349,
+      "beats": 1,
+      "start": 205.589,
+      "end": 205.589,
+      "startBar": 88,
+      "bars": 0.25
+    }
   ]
 }

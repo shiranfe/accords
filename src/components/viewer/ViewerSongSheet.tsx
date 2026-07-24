@@ -12,6 +12,11 @@ type SheetProps = {
   activeLineId?: string | null;
   activeChordId?: string | null;
   registerLineRef?: (lineId: string, node: HTMLDivElement | null) => void;
+  /** True bar numbers from audio alignment; falls back to chord ordinals */
+  barNumbersOverride?: Record<string, number>;
+  /** Extra bars each chord sustains beyond its first (audio alignment) —
+   *  rendered as grayed ghost chords in bar-align mode */
+  ghostBars?: Record<string, number>;
 };
 
 /**
@@ -30,8 +35,11 @@ export function ViewerSongSheet({
   activeLineId,
   activeChordId,
   registerLineRef,
+  barNumbersOverride,
+  ghostBars,
 }: SheetProps) {
-  const barNumbers = useMemo<BarNumbers>(() => buildBarNumbers(song), [song]);
+  const ordinalNumbers = useMemo<BarNumbers>(() => buildBarNumbers(song), [song]);
+  const barNumbers = barNumbersOverride ?? ordinalNumbers;
 
   return (
     <div dir="rtl" style={{ fontSize: `${fontSize}px` }} className="space-y-7 text-slate-800">
@@ -57,6 +65,7 @@ export function ViewerSongSheet({
                   barNumbers={barNumbers}
                   activeChordId={activeChordId}
                   barAlign={barAlign}
+                  ghostBars={ghostBars}
                 />
               </div>
             ))}
@@ -117,9 +126,10 @@ type LineProps = {
   barNumbers: BarNumbers;
   activeChordId?: string | null;
   barAlign?: boolean;
+  ghostBars?: Record<string, number>;
 };
 
-function ViewerLine({ line, barNumbers, activeChordId, barAlign }: LineProps) {
+function ViewerLine({ line, barNumbers, activeChordId, barAlign, ghostBars }: LineProps) {
   const isInstrumental = line.text.trim().length === 0 && line.chords.length > 0;
   const isEmpty = line.text.trim().length === 0 && line.chords.length === 0;
 
@@ -133,15 +143,20 @@ function ViewerLine({ line, barNumbers, activeChordId, barAlign }: LineProps) {
         style={{ gap: "0.9em" }}
       >
         {line.chords.map((chord) => (
-          <span
-            key={chord.id}
-            style={barAlign ? { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" } : undefined}
-          >
-            <ChordBadge
-              chord={chord}
-              barNumber={barNumbers[chord.id]}
-              active={activeChordId === chord.id}
-            />
+          <span key={chord.id} className="contents">
+            <span
+              style={barAlign ? { flex: "1 1 0", minWidth: "fit-content", maxWidth: "6em" } : undefined}
+            >
+              <ChordBadge
+                chord={chord}
+                barNumber={barNumbers[chord.id]}
+                active={activeChordId === chord.id}
+              />
+            </span>
+            {barAlign &&
+              Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => (
+                <GhostChord key={g} name={chord.name} />
+              ))}
           </span>
         ))}
       </div>
@@ -149,7 +164,14 @@ function ViewerLine({ line, barNumbers, activeChordId, barAlign }: LineProps) {
   }
 
   if (barAlign && line.chords.length > 0) {
-    return <BarAlignedLine line={line} barNumbers={barNumbers} activeChordId={activeChordId} />;
+    return (
+      <BarAlignedLine
+        line={line}
+        barNumbers={barNumbers}
+        activeChordId={activeChordId}
+        ghostBars={ghostBars}
+      />
+    );
   }
 
   const chunks = buildWordChunks(line);
@@ -219,10 +241,12 @@ function BarAlignedLine({
   line,
   barNumbers,
   activeChordId,
+  ghostBars,
 }: {
   line: Line;
   barNumbers: BarNumbers;
   activeChordId?: string | null;
+  ghostBars?: Record<string, number>;
 }) {
   const segments = buildBarSegments(line);
 
@@ -239,11 +263,16 @@ function BarAlignedLine({
           }
         >
           {segment.chord && (
-            <ChordBadge
-              chord={segment.chord}
-              barNumber={barNumbers[segment.chord.id]}
-              active={activeChordId === segment.chord.id}
-            />
+            <span className="flex items-baseline" style={{ gap: "1.2em" }}>
+              <ChordBadge
+                chord={segment.chord}
+                barNumber={barNumbers[segment.chord.id]}
+                active={activeChordId === segment.chord.id}
+              />
+              {Array.from({ length: ghostBars?.[segment.chord.id] ?? 0 }, (_, g) => (
+                <GhostChord key={g} name={segment.chord!.name} />
+              ))}
+            </span>
           )}
           <span className="flex w-full items-baseline">
             <span className="whitespace-pre">{segment.text}</span>
@@ -265,6 +294,20 @@ function BarAlignedLine({
         </span>
       ))}
     </div>
+  );
+}
+
+/** Grayed continuation marker: the chord sustains into another bar. */
+function GhostChord({ name }: { name: string }) {
+  return (
+    <span
+      className="font-bold leading-none text-slate-300"
+      style={{ fontSize: "0.72em" }}
+      dir="ltr"
+      title="האקורד ממשיך בתיבה הזו"
+    >
+      {name}
+    </span>
   );
 }
 

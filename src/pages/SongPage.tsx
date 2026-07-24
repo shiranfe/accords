@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Gauge, LayoutList, ListMusic, Minus, Pause, Play, Plus, RotateCcw } from "lucide-react";
 import { getSong, saveSong } from "../lib/library";
 import { youtubeIdFrom } from "../lib/neginaParser";
-import { buildTimeline, DEFAULT_BPM } from "../lib/songStats";
-import { barAtTime, loadSync } from "../lib/sync";
+import { buildTimeline, DEFAULT_BPM, flattenChords } from "../lib/songStats";
+import { barAtTime, chordIndexAtTime, loadSync } from "../lib/sync";
 import type { SyncData } from "../lib/sync";
 import { useYouTubePlayer } from "../hooks/useYouTubePlayer";
 import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
@@ -61,15 +61,28 @@ export function SongPage({ songId }: { songId: string }) {
   const timeline = useMemo(() => (song ? buildTimeline(song, bpm) : null), [song, bpm]);
   const isSynced = Boolean(sync && player);
 
-  // Synced mode: the YouTube player is the clock — poll its position and
-  // map it to a bar via the pipeline's downbeat times.
+  // Sheet chords in pipeline order; when align.py produced per-chord timings
+  // and the counts match, karaoke maps time -> written chord directly.
+  const flatChords = useMemo(() => (song ? flattenChords(song) : []), [song]);
+  const alignedChords = useMemo(
+    () => (sync?.chords && sync.chords.length === flatChords.length ? sync.chords : null),
+    [sync, flatChords],
+  );
+
+  // Synced mode: the YouTube player is the clock — poll its position and map
+  // it to the aligned chord (or, without alignment, to the audio bar).
   useEffect(() => {
     if (!isPlaying || !sync || !player) return;
 
     player.playVideo();
     const intervalId = window.setInterval(() => {
       const t = player.getCurrentTime();
-      setSyncedBar(barAtTime(sync, t));
+      if (alignedChords) {
+        const idx = chordIndexAtTime(alignedChords, t);
+        setSyncedBar(idx == null ? null : idx);
+      } else {
+        setSyncedBar(barAtTime(sync, t));
+      }
       if (player.getPlayerState() === 0) setIsPlaying(false); // video ended
     }, 150);
 
@@ -77,7 +90,7 @@ export function SongPage({ songId }: { songId: string }) {
       window.clearInterval(intervalId);
       player.pauseVideo();
     };
-  }, [isPlaying, sync, player]);
+  }, [isPlaying, sync, player, alignedChords]);
 
   // Metronome fallback (no sync file): wall-clock interval rather than
   // requestAnimationFrame, which freezes in background tabs.
@@ -102,12 +115,42 @@ export function SongPage({ songId }: { songId: string }) {
 
   const activeEvent = useMemo(() => {
     if (!isPlaying || !timeline) return null;
+    if (isSynced && alignedChords) {
+      if (syncedBar == null) return null;
+      const flat = flatChords[syncedBar];
+      if (!flat) return null;
+      return {
+        chordId: flat.chordId,
+        lineId: flat.lineId,
+        bar: alignedChords[syncedBar].startBar,
+      };
+    }
     if (isSynced) {
       if (syncedBar == null) return null;
       return timeline.events.find((e) => e.bar === syncedBar) ?? null;
     }
     return timeline.events.find((e) => playbackMs >= e.startMs && playbackMs < e.endMs) ?? null;
-  }, [isPlaying, isSynced, syncedBar, playbackMs, timeline]);
+  }, [isPlaying, isSynced, alignedChords, flatChords, syncedBar, playbackMs, timeline]);
+
+  // True bar numbers + ghost continuation bars, from the alignment
+  const barNumbersOverride = useMemo(() => {
+    if (!alignedChords) return undefined;
+    const map: Record<string, number> = {};
+    flatChords.forEach((flat, i) => {
+      map[flat.chordId] = alignedChords[i].startBar;
+    });
+    return map;
+  }, [alignedChords, flatChords]);
+
+  const ghostBars = useMemo(() => {
+    if (!alignedChords) return undefined;
+    const map: Record<string, number> = {};
+    flatChords.forEach((flat, i) => {
+      const extra = Math.round(alignedChords[i].bars) - 1;
+      if (extra > 0) map[flat.chordId] = extra;
+    });
+    return map;
+  }, [alignedChords, flatChords]);
 
   const activeLineId = activeEvent?.lineId ?? null;
 
@@ -226,6 +269,8 @@ export function SongPage({ songId }: { songId: string }) {
               activeLineId={activeLineId}
               activeChordId={activeEvent?.chordId ?? null}
               registerLineRef={registerLineRef}
+              barNumbersOverride={barNumbersOverride}
+              ghostBars={ghostBars}
             />
           </main>
 
@@ -294,10 +339,13 @@ export function SongPage({ songId }: { songId: string }) {
                     {activeEvent?.bar != null ? (
                       <>
                         <span className="text-orange-600">{activeEvent.bar}</span>
-                        <span className="text-sm text-slate-400"> / {timeline?.totalBars}</span>
+                        <span className="text-sm text-slate-400">
+                          {" "}
+                          / {sync ? sync.bars.length : timeline?.totalBars}
+                        </span>
                       </>
                     ) : (
-                      timeline?.totalBars ?? 0
+                      (sync ? sync.bars.length : timeline?.totalBars) ?? 0
                     )}
                   </div>
                 </div>

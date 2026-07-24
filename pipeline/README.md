@@ -1,6 +1,10 @@
 # Audio analysis pipeline
 
-Stage 1 (implemented): beats / bars / BPM extraction → sync JSON for the web app.
+- Stage 1 (analyze.py): beats / bars / BPM extraction → sync JSON.
+- Stage 2 (align.py): aligns the written chord sequence to the recording
+  (beat-synchronized chroma + monotonic Viterbi), recovering each written
+  chord's real start time and duration. This is required because the negina
+  notation records chord changes only — durations are not in the text.
 
 ## Setup (once)
 
@@ -12,9 +16,20 @@ python -m venv .venv
 
 ## Generate a sync file for a song
 
+Full (recommended — includes chord alignment):
+
+```powershell
+.\.venv\Scripts\python align.py --url https://youtu.be/VIDEO_ID --negina path\to\song.txt --out ..\public\sync\SONG_ID.json
+```
+
+Beats/bars only:
+
 ```powershell
 .\.venv\Scripts\python analyze.py --url https://youtu.be/VIDEO_ID --out ..\public\sync\SONG_ID.json
 ```
+
+Both accept `--meter N` (beats per bar: 4 default, 3 for 3/4, 6 for 6/8) and
+`--input file.mp3` instead of `--url`. Downloads are cached in `pipeline/cache/`.
 
 - `SONG_ID` must match the song's id in the web app library (e.g. `seed-hachof-shel-trapetoni`).
 - The web app auto-detects `public/sync/<songId>.json`: the song page switches
