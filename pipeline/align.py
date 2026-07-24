@@ -173,6 +173,10 @@ def main() -> int:
         "--meter", default="4",
         help="Beats per bar (4, 3, 6...) or 'auto' to detect 3/4 vs 4/4. Default 4.",
     )
+    parser.add_argument(
+        "--start", type=float, default=None,
+        help="Music start time in seconds (overrides automatic silence detection).",
+    )
     args = parser.parse_args()
     meter = parse_meter(args.meter)
 
@@ -197,7 +201,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        base = analyze(wav, beats_per_bar=meter)
+        base = analyze(wav, beats_per_bar=meter, start_time=args.start)
 
         print("aligning chords to audio (viterbi over beat chroma)...", flush=True)
         beat_times = np.array(base["beats"])
@@ -231,8 +235,8 @@ def main() -> int:
 
     durs = [c["beats"] for c in chords]
     print(
-        f"done: {len(chords)} chords aligned, beat-durations min={min(durs)} "
-        f"median={int(np.median(durs))} max={max(durs)} -> {out}"
+        f"done: {len(chords)} chords aligned, music starts {result['musicStart']}s, "
+        f"beat-durations min={min(durs)} median={int(np.median(durs))} max={max(durs)} -> {out}"
     )
     return 0
 

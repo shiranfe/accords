@@ -13,6 +13,8 @@ export async function runSyncOnServer(params: {
   youtubeUrl: string;
   source: string;
   meter?: number;
+  /** Music start override in seconds; omitted = auto-detect leading silence */
+  startSec?: number;
 }): Promise<SyncRunResult> {
   try {
     const res = await fetch("/api/sync", {

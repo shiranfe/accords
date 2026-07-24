@@ -28,6 +28,8 @@ export type Song = {
   bpm?: number;
   /** Beats per bar (4 = 4/4, 3 = 3/4, 6 = 6/8). Default 4. */
   meter?: number;
+  /** Manual music-start override (seconds) for the sync pipeline */
+  syncStartSec?: number;
   /** Original negina/Markato source text, kept for round-trip fidelity */
   sourceText?: string;
 };

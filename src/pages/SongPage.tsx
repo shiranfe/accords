@@ -44,6 +44,10 @@ export function SongPage({ songId }: { songId: string }) {
   const [syncTick, setSyncTick] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [syncNotice, setSyncNotice] = useState<string | null>(null);
+  const [startSecInput, setStartSecInput] = useState<string>(() => {
+    const initial = getSong(songId)?.syncStartSec;
+    return initial != null ? String(initial) : "";
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
@@ -276,6 +280,21 @@ export function SongPage({ songId }: { songId: string }) {
     if (isSynced && player) player.seekTo(0, true);
   };
 
+  const parseStartSec = (): number | undefined => {
+    const parsed = Number(startSecInput);
+    return startSecInput.trim() !== "" && Number.isFinite(parsed) && parsed >= 0
+      ? parsed
+      : undefined;
+  };
+
+  const commitStartSec = (raw: string) => {
+    setStartSecInput(raw);
+    const parsed = Number(raw);
+    const value =
+      raw.trim() !== "" && Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+    if (song) saveSong({ ...song, syncStartSec: value });
+  };
+
   // Run the audio-alignment pipeline from the browser via the dev server
   const runSyncNow = async () => {
     if (!song || syncing) return;
@@ -290,6 +309,7 @@ export function SongPage({ songId }: { songId: string }) {
       youtubeUrl: song.youtubeUrl,
       source: song.sourceText ?? songToNegina(song),
       meter,
+      startSec: parseStartSec(),
     });
     setSyncing(false);
     if (result.ok) {
@@ -490,6 +510,22 @@ export function SongPage({ songId }: { songId: string }) {
                 {syncNotice && (
                   <div className="mt-2 text-[11px] font-medium text-slate-500">{syncNotice}</div>
                 )}
+                <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+                  <span>תחילת המוזיקה (שנ׳):</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.5}
+                    value={startSecInput}
+                    placeholder="אוטו"
+                    onChange={(e) => commitStartSec(e.target.value)}
+                    className="w-16 rounded-md border border-slate-200 px-1.5 py-0.5 text-center text-[11px] font-semibold text-slate-600 outline-none focus:border-orange-400"
+                    aria-label="תחילת המוזיקה בשניות"
+                  />
+                  {sync?.musicStart != null && startSecInput.trim() === "" && (
+                    <span>· זוהה אוטומטית: {sync.musicStart}s</span>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-4 gap-2 text-center">

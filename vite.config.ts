@@ -19,6 +19,8 @@ type SyncRequest = {
   youtubeUrl?: string;
   source?: string;
   meter?: number;
+  /** Music start override in seconds; omitted = auto-detect leading silence */
+  startSec?: number;
 };
 
 /**
@@ -55,7 +57,7 @@ function syncPipelinePlugin(): Plugin {
         return;
       }
 
-      const { songId, youtubeUrl, source, meter } = data;
+      const { songId, youtubeUrl, source, meter, startSec } = data;
       if (!songId || !/^[\w-]+$/.test(songId)) {
         res.statusCode = 400;
         res.end(JSON.stringify({ ok: false, error: "invalid songId" }));
@@ -91,6 +93,9 @@ function syncPipelinePlugin(): Plugin {
         "--meter",
         String(meter && Number.isFinite(meter) ? meter : 4),
       ];
+      if (typeof startSec === "number" && Number.isFinite(startSec) && startSec >= 0) {
+        args.push("--start", String(startSec));
+      }
 
       running = true;
       const child = spawn(python, args, { cwd: path.join(root, "pipeline") });

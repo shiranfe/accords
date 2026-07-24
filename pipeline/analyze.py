@@ -104,7 +104,23 @@ def parse_meter(value: str) -> int | str:
     return n
 
 
-def analyze(wav_path: Path, beats_per_bar: int | str = 4) -> dict:
+def detect_music_start(y: "np.ndarray", sr: int) -> float:
+    """First moment the track is actually loud — skips leading silence or a
+    quiet lead-in. Threshold: 10% of peak RMS (~-20 dB), backed off 0.15s."""
+    import librosa
+
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+    peak = float(np.max(rms))
+    if peak <= 0:
+        return 0.0
+    idx = int(np.argmax(rms >= peak * 0.1))
+    t = float(librosa.frames_to_time(idx, sr=sr, hop_length=512))
+    return max(0.0, t - 0.15)
+
+
+def analyze(
+    wav_path: Path, beats_per_bar: int | str = 4, start_time: float | None = None
+) -> dict:
     import librosa
 
     y, sr = librosa.load(str(wav_path), sr=22050, mono=True)
@@ -113,6 +129,15 @@ def analyze(wav_path: Path, beats_per_bar: int | str = 4) -> dict:
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
     tempo, beat_frames = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr, trim=False)
     beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+
+    # Skip leading silence / lead-in: user-provided start wins, otherwise
+    # detect it from the energy envelope.
+    music_start = float(start_time) if start_time is not None else detect_music_start(y, sr)
+    if music_start > 0:
+        keep = beat_times >= music_start
+        beat_frames = beat_frames[keep]
+        beat_times = beat_times[keep]
+        print(f"music starts at {music_start:.2f}s — {int(np.sum(~keep))} early beats dropped", flush=True)
 
     if len(beat_times) < 8:
         raise RuntimeError(f"only {len(beat_times)} beats detected — audio too short or too quiet")
@@ -139,6 +164,8 @@ def analyze(wav_path: Path, beats_per_bar: int | str = 4) -> dict:
     return {
         "beatsPerBar": beats_per_bar,
         "meterAutoDetected": meter_detected,
+        "musicStart": round(music_start, 2),
+        "musicStartProvided": start_time is not None,
         "bpm": round(bpm, 2),
         "bpmGlobalEstimate": round(float(np.atleast_1d(tempo)[0]), 2),
         "duration": round(duration, 2),
@@ -158,6 +185,10 @@ def main() -> int:
     parser.add_argument(
         "--meter", default="4",
         help="Beats per bar (4, 3, 6...) or 'auto' to detect 3/4 vs 4/4. Default 4.",
+    )
+    parser.add_argument(
+        "--start", type=float, default=None,
+        help="Music start time in seconds (overrides automatic silence detection).",
     )
     args = parser.parse_args()
 
@@ -180,7 +211,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        result = analyze(wav, beats_per_bar=meter)
+        result = analyze(wav, beats_per_bar=meter, start_time=args.start)
 
     result = {
         "videoId": youtube_id(args.url) if args.url else None,
