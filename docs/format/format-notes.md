@@ -51,16 +51,22 @@ chord anchor (caret count still equals chord count) — it is a visible performa
 
 ## Chord duration semantics (critical for audio alignment)
 
-- A chord written once nominally means one bar, **but this is a convention, not
-  a guarantee**: measured audio for "החוף של טרפטוני" found 88 real bars vs 132
-  written chords — many written chords actually last half a bar.
-- **A chord held for N bars is written N times** (user-confirmed 2026-07-24).
-  So consecutive duplicate chords in the sheet usually mean one sustained chord
-  — there is NO chord-change boundary in the audio between them.
-- Alignment consequence: align the sheet to audio on **chord-change points**
-  only. Runs of identical consecutive chords contribute a single change
-  boundary; distribute their bar times evenly (or on detected downbeats)
-  within the run. Never assume slot k of the sheet equals bar k of the audio.
+**User-corrected 2026-07-24 (supersedes an earlier wrong note): the notation
+records CHORD CHANGES ONLY.** A chord that lasts 2+ bars is written exactly
+once — nothing at all is written while a chord continues. Therefore:
+
+- **Bar counts and chord durations are NOT derivable from the notation.**
+  A written chord may last half a bar, one bar, or many bars.
+- Measured reality check ("החוף של טרפטוני"): 132 written chord events vs 88
+  real bars in the audio — durations vary in both directions.
+- The numbers we currently display per chord are really **chord ordinals**,
+  not true bar numbers; true bar numbers require audio alignment.
+- Alignment approach: match the known chord-change sequence to detected
+  change points in the audio (beat-synchronized chroma), which yields each
+  written chord's real start time and duration in bars.
+- Planned display feature (user request): once durations are known, bars in
+  which the chord merely continues should show a **grayed-out ghost of the
+  sustained chord**, so it's visually clear nothing changed.
 
 ## References
 
