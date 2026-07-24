@@ -21,6 +21,8 @@ type SyncRequest = {
   meter?: number;
   /** Music start override in seconds; omitted = auto-detect leading silence */
   startSec?: number;
+  /** Tempo hint in BPM; omitted = auto-estimate */
+  bpmHint?: number;
 };
 
 /**
@@ -57,7 +59,7 @@ function syncPipelinePlugin(): Plugin {
         return;
       }
 
-      const { songId, youtubeUrl, source, meter, startSec } = data;
+      const { songId, youtubeUrl, source, meter, startSec, bpmHint } = data;
       if (!songId || !/^[\w-]+$/.test(songId)) {
         res.statusCode = 400;
         res.end(JSON.stringify({ ok: false, error: "invalid songId" }));
@@ -95,6 +97,9 @@ function syncPipelinePlugin(): Plugin {
       ];
       if (typeof startSec === "number" && Number.isFinite(startSec) && startSec >= 0) {
         args.push("--start", String(startSec));
+      }
+      if (typeof bpmHint === "number" && Number.isFinite(bpmHint) && bpmHint >= 30 && bpmHint <= 300) {
+        args.push("--bpm", String(bpmHint));
       }
 
       running = true;

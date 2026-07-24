@@ -177,6 +177,10 @@ def main() -> int:
         "--start", type=float, default=None,
         help="Music start time in seconds (overrides automatic silence detection).",
     )
+    parser.add_argument(
+        "--bpm", type=float, default=None,
+        help="Tempo hint in BPM (overrides automatic tempo estimation).",
+    )
     args = parser.parse_args()
     meter = parse_meter(args.meter)
 
@@ -201,7 +205,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        base = analyze(wav, beats_per_bar=meter, start_time=args.start)
+        base = analyze(wav, beats_per_bar=meter, start_time=args.start, bpm_hint=args.bpm)
 
         print("aligning chords to audio (viterbi over beat chroma)...", flush=True)
         beat_times = np.array(base["beats"])

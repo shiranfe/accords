@@ -48,6 +48,10 @@ export function SongPage({ songId }: { songId: string }) {
     const initial = getSong(songId)?.syncStartSec;
     return initial != null ? String(initial) : "";
   });
+  const [bpmHintInput, setBpmHintInput] = useState<string>(() => {
+    const initial = getSong(songId)?.syncBpmHint;
+    return initial != null ? String(initial) : "";
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
@@ -80,7 +84,12 @@ export function SongPage({ songId }: { songId: string }) {
     void syncTick;
     let cancelled = false;
     void loadSync(songId).then((data) => {
-      if (!cancelled) setSync(data);
+      if (cancelled) return;
+      setSync(data);
+      // When the song has no explicit meter, adopt the analyzed one
+      if (data?.beatsPerBar && getSong(songId)?.meter == null) {
+        setMeter(data.beatsPerBar);
+      }
     });
     return () => {
       cancelled = true;
@@ -295,6 +304,23 @@ export function SongPage({ songId }: { songId: string }) {
     if (song) saveSong({ ...song, syncStartSec: value });
   };
 
+  const parseBpmHint = (): number | undefined => {
+    const parsed = Number(bpmHintInput);
+    return bpmHintInput.trim() !== "" && Number.isFinite(parsed) && parsed >= 30 && parsed <= 300
+      ? parsed
+      : undefined;
+  };
+
+  const commitBpmHint = (raw: string) => {
+    setBpmHintInput(raw);
+    const parsed = Number(raw);
+    const value =
+      raw.trim() !== "" && Number.isFinite(parsed) && parsed >= 30 && parsed <= 300
+        ? parsed
+        : undefined;
+    if (song) saveSong({ ...song, syncBpmHint: value });
+  };
+
   // Run the audio-alignment pipeline from the browser via the dev server
   const runSyncNow = async () => {
     if (!song || syncing) return;
@@ -310,6 +336,7 @@ export function SongPage({ songId }: { songId: string }) {
       source: song.sourceText ?? songToNegina(song),
       meter,
       startSec: parseStartSec(),
+      bpmHint: parseBpmHint(),
     });
     setSyncing(false);
     if (result.ok) {
@@ -510,42 +537,61 @@ export function SongPage({ songId }: { songId: string }) {
                 {syncNotice && (
                   <div className="mt-2 text-[11px] font-medium text-slate-500">{syncNotice}</div>
                 )}
-                <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
-                  <span>תחילת המוזיקה (שנ׳):</span>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.5}
-                    value={startSecInput}
-                    placeholder="אוטו"
-                    onChange={(e) => commitStartSec(e.target.value)}
-                    className="w-16 rounded-md border border-slate-200 px-1.5 py-0.5 text-center text-[11px] font-semibold text-slate-600 outline-none focus:border-orange-400"
-                    aria-label="תחילת המוזיקה בשניות"
-                  />
-                  {sync?.musicStart != null && startSecInput.trim() === "" && (
-                    <span>· זוהה אוטומטית: {sync.musicStart}s</span>
-                  )}
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <span>תחילת המוזיקה (שנ׳):</span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={startSecInput}
+                      placeholder="אוטו"
+                      onChange={(e) => commitStartSec(e.target.value)}
+                      className="w-16 rounded-md border border-slate-200 px-1.5 py-0.5 text-center text-[11px] font-semibold text-slate-600 outline-none focus:border-orange-400"
+                      aria-label="תחילת המוזיקה בשניות"
+                    />
+                    {sync?.musicStart != null && startSecInput.trim() === "" && (
+                      <span>זוהה: {sync.musicStart}s</span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span>קצב (BPM):</span>
+                    <input
+                      type="number"
+                      min={30}
+                      max={300}
+                      step={1}
+                      value={bpmHintInput}
+                      placeholder="אוטו"
+                      onChange={(e) => commitBpmHint(e.target.value)}
+                      className="w-16 rounded-md border border-slate-200 px-1.5 py-0.5 text-center text-[11px] font-semibold text-slate-600 outline-none focus:border-orange-400"
+                      aria-label="קצב ידני לסנכרון"
+                    />
+                    {sync?.bpm != null && bpmHintInput.trim() === "" && (
+                      <span>זוהה: {Math.round(sync.bpm)}</span>
+                    )}
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="rounded-xl bg-slate-50 px-2 py-2.5">
                   <div className="mb-1 text-[10px] font-semibold text-slate-400">משקל</div>
-                  {sync?.beatsPerBar ? (
-                    <div className="text-lg font-bold text-slate-800">
-                      {sync.beatsPerBar === 6 ? "6/8" : `${sync.beatsPerBar}/4`}
+                  <select
+                    value={meter}
+                    onChange={(e) => updateMeter(Number(e.target.value))}
+                    className="w-full border-none bg-transparent text-center text-lg font-bold text-slate-800 focus:outline-none"
+                    aria-label="משקל"
+                    title="שינוי משקל ישפיע בסנכרון הבא"
+                  >
+                    <option value={4}>4/4</option>
+                    <option value={3}>3/4</option>
+                    <option value={6}>6/8</option>
+                  </select>
+                  {sync?.beatsPerBar != null && sync.beatsPerBar !== meter && (
+                    <div className="mt-0.5 text-[10px] font-semibold text-amber-600">
+                      הסנכרון רץ ב-{sync.beatsPerBar === 6 ? "6/8" : `${sync.beatsPerBar}/4`} — הרץ מחדש
                     </div>
-                  ) : (
-                    <select
-                      value={meter}
-                      onChange={(e) => updateMeter(Number(e.target.value))}
-                      className="w-full border-none bg-transparent text-center text-lg font-bold text-slate-800 focus:outline-none"
-                      aria-label="משקל"
-                    >
-                      <option value={4}>4/4</option>
-                      <option value={3}>3/4</option>
-                      <option value={6}>6/8</option>
-                    </select>
                   )}
                 </div>
                 <div className="rounded-xl bg-slate-50 px-2 py-2.5">

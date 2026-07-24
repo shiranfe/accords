@@ -164,7 +164,10 @@ def detect_music_start(y: "np.ndarray", sr: int) -> float:
 
 
 def analyze(
-    wav_path: Path, beats_per_bar: int | str = 4, start_time: float | None = None
+    wav_path: Path,
+    beats_per_bar: int | str = 4,
+    start_time: float | None = None,
+    bpm_hint: float | None = None,
 ) -> dict:
     import librosa
 
@@ -172,7 +175,15 @@ def analyze(
     duration = float(len(y) / sr)
 
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-    tempo, beat_frames = librosa.beat.beat_track(onset_envelope=onset_env, sr=sr, trim=False)
+    if bpm_hint is not None:
+        print(f"using user-provided tempo: {bpm_hint} BPM", flush=True)
+        tempo, beat_frames = librosa.beat.beat_track(
+            onset_envelope=onset_env, sr=sr, trim=False, bpm=float(bpm_hint)
+        )
+    else:
+        tempo, beat_frames = librosa.beat.beat_track(
+            onset_envelope=onset_env, sr=sr, trim=False
+        )
     beat_times = librosa.frames_to_time(beat_frames, sr=sr)
 
     # Skip leading silence / lead-in: user-provided start wins, otherwise
@@ -211,6 +222,7 @@ def analyze(
         "meterAutoDetected": meter_detected,
         "musicStart": round(music_start, 2),
         "musicStartProvided": start_time is not None,
+        "bpmHintProvided": bpm_hint is not None,
         "bpm": round(bpm, 2),
         "bpmGlobalEstimate": round(float(np.atleast_1d(tempo)[0]), 2),
         "duration": round(duration, 2),
@@ -235,6 +247,10 @@ def main() -> int:
         "--start", type=float, default=None,
         help="Music start time in seconds (overrides automatic silence detection).",
     )
+    parser.add_argument(
+        "--bpm", type=float, default=None,
+        help="Tempo hint in BPM (overrides automatic tempo estimation).",
+    )
     args = parser.parse_args()
 
     if not args.url and not args.input:
@@ -256,7 +272,7 @@ def main() -> int:
         wav = to_wav(src, workdir)
 
         print("analyzing beats and bars...", flush=True)
-        result = analyze(wav, beats_per_bar=meter, start_time=args.start)
+        result = analyze(wav, beats_per_bar=meter, start_time=args.start, bpm_hint=args.bpm)
 
     result = {
         "videoId": youtube_id(args.url) if args.url else None,

@@ -30,6 +30,8 @@ export type Song = {
   meter?: number;
   /** Manual music-start override (seconds) for the sync pipeline */
   syncStartSec?: number;
+  /** Manual tempo hint (BPM) for the sync pipeline */
+  syncBpmHint?: number;
   /** Original negina/Markato source text, kept for round-trip fidelity */
   sourceText?: string;
 };

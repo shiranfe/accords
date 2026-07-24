@@ -15,6 +15,8 @@ export async function runSyncOnServer(params: {
   meter?: number;
   /** Music start override in seconds; omitted = auto-detect leading silence */
   startSec?: number;
+  /** Tempo hint in BPM; omitted = auto-estimate */
+  bpmHint?: number;
 }): Promise<SyncRunResult> {
   try {
     const res = await fetch("/api/sync", {
