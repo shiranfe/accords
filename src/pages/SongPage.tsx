@@ -7,6 +7,7 @@ import { barAtTime, chordIndexAtTime, loadSync } from "../lib/sync";
 import type { SyncData } from "../lib/sync";
 import { useYouTubePlayer, YT_STATE } from "../hooks/useYouTubePlayer";
 import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
+import { SourceEditorPanel } from "../components/SourceEditorPanel";
 import { navigate } from "../lib/navigate";
 
 const FONT_SIZE_KEY = "accords:viewer:font-size";
@@ -24,7 +25,13 @@ const loadFontSize = () => {
 };
 
 export function SongPage({ songId }: { songId: string }) {
-  const song = useMemo(() => getSong(songId), [songId]);
+  const [reloadTick, setReloadTick] = useState(0);
+  const song = useMemo(() => {
+    // reloadTick forces a re-read from storage after a source edit is saved
+    void reloadTick;
+    return getSong(songId);
+  }, [songId, reloadTick]);
+  const [showSource, setShowSource] = useState(false);
   const [fontSize, setFontSize] = useState<number>(loadFontSize);
   const [barAlign, setBarAlign] = useState<boolean>(
     () => localStorage.getItem(BAR_ALIGN_KEY) === "true",
@@ -304,6 +311,17 @@ export function SongPage({ songId }: { songId: string }) {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => setShowSource((v) => !v)}
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                showSource
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              {showSource ? "חזרה לתצוגה" : "עריכת מקור"}
+            </button>
+            <button
+              type="button"
               onClick={() => setBarAlign((v) => !v)}
               className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
                 barAlign
@@ -347,18 +365,29 @@ export function SongPage({ songId }: { songId: string }) {
 
         <div className="flex flex-col items-start gap-6 lg:flex-row">
           <main className="w-full min-w-0 flex-1 rounded-[24px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:p-8">
-            <ViewerSongSheet
-              song={song}
-              fontSize={fontSize}
-              barAlign={barAlign}
-              activeLineId={activeLineId}
-              activeChordId={activeEvent?.chordId ?? null}
-              registerLineRef={registerLineRef}
-              barNumbersOverride={barNumbersOverride}
-              ghostBars={ghostBars}
-              chordBars={chordBars}
-              onLineClick={jumpToLine}
-            />
+            {showSource ? (
+              <SourceEditorPanel
+                song={song}
+                onSaved={() => {
+                  setReloadTick((t) => t + 1);
+                  setShowSource(false);
+                }}
+                onClose={() => setShowSource(false)}
+              />
+            ) : (
+              <ViewerSongSheet
+                song={song}
+                fontSize={fontSize}
+                barAlign={barAlign}
+                activeLineId={activeLineId}
+                activeChordId={activeEvent?.chordId ?? null}
+                registerLineRef={registerLineRef}
+                barNumbersOverride={barNumbersOverride}
+                ghostBars={ghostBars}
+                chordBars={chordBars}
+                onLineClick={jumpToLine}
+              />
+            )}
           </main>
 
           <aside className="w-full space-y-4 lg:sticky lg:top-6 lg:w-96">
@@ -396,6 +425,12 @@ export function SongPage({ songId }: { songId: string }) {
                   </span>
                 )}
               </div>
+
+              {sync?.chords && !alignedChords && (
+                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-[11px] font-semibold text-amber-800">
+                  האקורדים השתנו מאז הסנכרון — הרץ יישור מחדש (כפתור ההעתקה בעריכת מקור)
+                </div>
+              )}
 
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="rounded-xl bg-slate-50 px-2 py-2.5">
