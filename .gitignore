@@ -24,3 +24,10 @@ dist-ssr
 *.sln
 *.sw?
 accords-*.png
+negina-*.png
+
+# Junction to the machine-local shared .LLM directory — never commit
+.agent/global/
+
+# Saved reference copy of a third-party site (format research material)
+sample/

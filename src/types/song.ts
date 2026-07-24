@@ -24,6 +24,10 @@ export type Song = {
   title: string;
   artist: string;
   sections: Section[];
+  youtubeUrl?: string;
+  bpm?: number;
+  /** Original negina/Markato source text, kept for round-trip fidelity */
+  sourceText?: string;
 };
 
 export type DragRef = {

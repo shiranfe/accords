@@ -1,0 +1,130 @@
+Markato rendered output of the sample song (chord names appear above the lyric
+fragment that follows them; blank lyric = instrumental chord):
+
+I Wanna Hold Your Hand in
+The Beatles A Hard Day's Night
+
+INTRO
+C
+
+D
+
+C
+
+D
+
+C
+
+D
+
+
+VERSE
+Oh yeah,
+G
+I'll tell you
+D
+something
+Em
+
+I think you'll under
+Bm
+stand
+When
+G
+I'll say that
+D
+something
+Em
+
+I wanna hold your h
+and
+
+CHORUS
+C
+
+I wanna
+D
+hold your
+G
+ha
+Em
+nd
+C
+
+I wanna
+D
+hold your
+G
+hand
+
+VERSE
+Oh
+G
+please, say to
+D
+me
+Em
+
+You'll let me be your
+Bm
+man
+And
+G
+please, say to
+D
+me
+Em
+
+You'll let me hold your h
+B
+and
+
+CHORUS
+(same as above)
+
+BRIDGE
+Dm
+
+And when I
+touch you I feel
+C
+happy in
+Am
+side
+Dm
+
+It's such a
+feeling that my
+C
+love, I can't
+D
+hide
+C
+I can't
+D
+hide
+C
+I can't
+D
+hide
+
+VERSE / CHORUS repeats, ending:
+C
+
+I wanna
+D
+hold your
+hand
+C
+I wanna
+D
+hold your
+C
+ha-a-
+G
+and
+
+Reading of this rendering: the flat sequence alternates [chord] then [lyric
+fragment until the next chord]. A chord followed by a blank line means the
+chord has no lyric under it (instrumental / gap). Lyric text before the first
+chord of a line renders first with no chord above it.

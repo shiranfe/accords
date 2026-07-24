@@ -1,0 +1,6 @@
+﻿---
+description: Project-specific instructions
+alwaysApply: false
+---
+
+Read CLAUDE.md and .agent/project/index.md. Use .agent/project/rules/domain/ and .cursor/rules/index.mdc when the task touches project-specific behavior.
