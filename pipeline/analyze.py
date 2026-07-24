@@ -105,17 +105,62 @@ def parse_meter(value: str) -> int | str:
 
 
 def detect_music_start(y: "np.ndarray", sr: int) -> float:
-    """First moment the track is actually loud — skips leading silence or a
-    quiet lead-in. Threshold: 10% of peak RMS (~-20 dB), backed off 0.15s."""
+    """Where the music actually starts.
+
+    Handles intros that are NOT the song: spoken/ambient noise at the top of
+    a video, followed by real silence, followed by the music. Strategy:
+    1. Find the first *sustained* loud region (music plays continuously;
+       speech and noise are intermittent).
+    2. If a deep-silence gap (>=1.2s) precedes it, the music starts at the
+       end of the LAST such gap — this skips intro junk entirely.
+    3. Otherwise walk back from the sustained region to where it got quiet.
+    """
     import librosa
 
-    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
-    peak = float(np.max(rms))
-    if peak <= 0:
+    hop = 512
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=hop)[0]
+    win = max(1, int(sr / hop))  # ~1s smoothing
+    smooth = np.convolve(rms, np.ones(win) / win, mode="same")
+    ref = float(np.percentile(smooth, 95))
+    if ref <= 0:
         return 0.0
-    idx = int(np.argmax(rms >= peak * 0.1))
-    t = float(librosa.frames_to_time(idx, sr=sr, hop_length=512))
-    return max(0.0, t - 0.15)
+
+    loud_threshold = ref * 0.25
+    silence_floor = ref * 0.03
+    above = smooth >= loud_threshold
+
+    sustain = int(3 * sr / hop)
+    csum = np.cumsum(np.concatenate(([0], above.astype(int))))
+    first_sustained = None
+    for i in range(len(above) - sustain):
+        if above[i] and (csum[i + sustain] - csum[i]) / sustain >= 0.85:
+            first_sustained = i
+            break
+    if first_sustained is None:
+        return 0.0
+
+    min_run = int(1.2 * sr / hop)
+    silent = smooth[:first_sustained] < silence_floor
+    run_end = None
+    run_len = 0
+    for i, is_silent in enumerate(silent):
+        if is_silent:
+            run_len += 1
+            if run_len >= min_run:
+                run_end = i
+        else:
+            run_len = 0
+    if run_end is not None:
+        i = run_end
+        while i + 1 < first_sustained and silent[i + 1]:
+            i += 1
+        return float(librosa.frames_to_time(i + 1, sr=sr, hop_length=hop))
+
+    j = first_sustained
+    walk_floor = loud_threshold * 0.35
+    while j > 0 and smooth[j] > walk_floor:
+        j -= 1
+    return float(librosa.frames_to_time(j, sr=sr, hop_length=hop))
 
 
 def analyze(
