@@ -354,19 +354,22 @@ function ChordBadge({
       >
         {chord.name}
       </span>
-      {showTick && (
-        <span className="flex items-center" style={{ gap: "0.2em", marginTop: "0.1em" }}>
-          <span
-            className={`rounded-full ${active ? "bg-emerald-400" : "bg-slate-300"}`}
-            style={{ width: 2, height: "0.45em" }}
-          />
-          {barNumber !== undefined && (
-            <span className="leading-none text-slate-400" style={{ fontSize: "0.5em" }}>
-              {barNumber}
-            </span>
-          )}
-        </span>
-      )}
+      {/* Always in flow so all chord names sit at the same height; merely
+          invisible for mid-bar chords */}
+      <span
+        className="flex items-center"
+        style={{ gap: "0.2em", marginTop: "0.1em", visibility: showTick ? "visible" : "hidden" }}
+      >
+        <span
+          className={`rounded-full ${active ? "bg-emerald-400" : "bg-slate-300"}`}
+          style={{ width: 2, height: "0.45em" }}
+        />
+        {barNumber !== undefined && (
+          <span className="leading-none text-slate-400" style={{ fontSize: "0.5em" }}>
+            {barNumber}
+          </span>
+        )}
+      </span>
     </span>
   );
 }
