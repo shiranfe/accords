@@ -32,6 +32,7 @@ negina-*.png
 # Saved reference copy of a third-party site (format research material)
 sample/
 
-# Python pipeline virtualenv and downloaded-audio cache
+# Python pipeline virtualenv, bytecode, and downloaded-audio cache
 pipeline/.venv/
 pipeline/cache/
+__pycache__/
