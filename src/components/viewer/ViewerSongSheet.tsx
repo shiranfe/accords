@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { type MouseEvent as ReactMouseEvent, useLayoutEffect, useMemo, useRef } from "react";
 import type { ChordAnchor, Line, Song } from "../../types/song";
 import { buildBarNumbers } from "../../lib/songStats";
 import type { BarNumbers } from "../../lib/songStats";
@@ -25,6 +25,12 @@ type SheetProps = {
   chordBars?: Record<string, number>;
   /** When set, lines become clickable and report their id (jump-to-line) */
   onLineClick?: (lineId: string) => void;
+  /** Chords the audio-validation flagged, keyed by chord id */
+  suspects?: Record<string, { suggested?: string; confidence: number }>;
+  /** Edit mode: when set, every chord is clickable and opens the fix popover */
+  onChordClick?: (chordId: string, rect: DOMRect) => void;
+  /** Chord currently picked for editing — mirrored on the timeline */
+  selectedChordId?: string | null;
 };
 
 /**
@@ -47,6 +53,9 @@ export function ViewerSongSheet({
   ghostBars,
   chordBars,
   onLineClick,
+  suspects,
+  onChordClick,
+  selectedChordId,
 }: SheetProps) {
   const ordinalNumbers = useMemo<BarNumbers>(() => buildBarNumbers(song), [song]);
   const barNumbers = barNumbersOverride ?? ordinalNumbers;
@@ -110,6 +119,9 @@ export function ViewerSongSheet({
                   ghostBars={ghostBars}
                   chordBars={chordBars}
                   tickOnlyOnBarStart={tickOnlyOnBarStart}
+                  suspects={suspects}
+                  onChordClick={onChordClick}
+                  selectedChordId={selectedChordId}
                 />
               </div>
             ))}
@@ -165,6 +177,9 @@ function buildWordChunks(line: Line): WordChunk[] {
   });
 }
 
+type SuspectMap = Record<string, { suggested?: string; confidence: number }>;
+type ChordClick = (chordId: string, rect: DOMRect) => void;
+
 type LineProps = {
   line: Line;
   barNumbers: BarNumbers;
@@ -173,6 +188,9 @@ type LineProps = {
   ghostBars?: Record<string, number>;
   chordBars?: Record<string, number>;
   tickOnlyOnBarStart?: boolean;
+  suspects?: SuspectMap;
+  onChordClick?: ChordClick;
+  selectedChordId?: string | null;
 };
 
 /** Group consecutive same-bar chords together (bar-align + alignment data). */
@@ -208,6 +226,9 @@ function ViewerLine({
   ghostBars,
   chordBars,
   tickOnlyOnBarStart,
+  suspects,
+  onChordClick,
+  selectedChordId,
 }: LineProps) {
   const isInstrumental = line.text.trim().length === 0 && line.chords.length > 0;
   const isEmpty = line.text.trim().length === 0 && line.chords.length === 0;
@@ -243,6 +264,9 @@ function ViewerLine({
                     barNumber={barNumbers[chord.id]}
                     active={activeChordId === chord.id}
                     showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
+                    suspect={suspects?.[chord.id]}
+                    onChordClick={onChordClick}
+                    selected={selectedChordId === chord.id}
                   />
                   {!barAlign &&
                     Array.from({ length: ghostBars?.[chord.id] ?? 0 }, (_, g) => (
@@ -299,6 +323,9 @@ function ViewerLine({
         ghostBars={ghostBars}
         chordBars={chordBars}
         tickOnlyOnBarStart={tickOnlyOnBarStart}
+        suspects={suspects}
+        onChordClick={onChordClick}
+        selectedChordId={selectedChordId}
       />
     );
   }
@@ -369,6 +396,9 @@ function ViewerLine({
                     barNumber={barNumbers[sub.chord.id]}
                     active={activeChordId === sub.chord.id}
                     showTick={!tickOnlyOnBarStart || barNumbers[sub.chord.id] !== undefined}
+                    suspect={suspects?.[sub.chord.id]}
+                    onChordClick={onChordClick}
+                    selected={selectedChordId === sub.chord.id}
                   />
                 )}
                 <span className="block whitespace-pre">{sub.text}</span>
@@ -431,6 +461,9 @@ function ChordSegmentView({
   activeChordId,
   tickOnlyOnBarStart,
   grow,
+  suspects,
+  onChordClick,
+  selectedChordId,
 }: {
   segment: BarSegment;
   barNumbers: BarNumbers;
@@ -438,6 +471,9 @@ function ChordSegmentView({
   tickOnlyOnBarStart?: boolean;
   /** Last segment in its bar cell — stretches so dot leaders reach the edge */
   grow?: boolean;
+  suspects?: SuspectMap;
+  onChordClick?: ChordClick;
+  selectedChordId?: string | null;
 }) {
   const chord = segment.chord!;
   return (
@@ -450,6 +486,9 @@ function ChordSegmentView({
         barNumber={barNumbers[chord.id]}
         active={activeChordId === chord.id}
         showTick={!tickOnlyOnBarStart || barNumbers[chord.id] !== undefined}
+        suspect={suspects?.[chord.id]}
+        onChordClick={onChordClick}
+        selected={selectedChordId === chord.id}
       />
       <span className="flex w-full items-baseline">
         <span className="whitespace-pre">{segment.text}</span>
@@ -466,6 +505,9 @@ function BarAlignedLine({
   ghostBars,
   chordBars,
   tickOnlyOnBarStart,
+  suspects,
+  onChordClick,
+  selectedChordId,
 }: {
   line: Line;
   barNumbers: BarNumbers;
@@ -473,6 +515,9 @@ function BarAlignedLine({
   ghostBars?: Record<string, number>;
   chordBars?: Record<string, number>;
   tickOnlyOnBarStart?: boolean;
+  suspects?: SuspectMap;
+  onChordClick?: ChordClick;
+  selectedChordId?: string | null;
 }) {
   const segments = buildBarSegments(line);
   const pickup = segments.filter((s) => !s.chord);
@@ -514,6 +559,9 @@ function BarAlignedLine({
                 activeChordId={activeChordId}
                 tickOnlyOnBarStart={tickOnlyOnBarStart}
                 grow={segment.chord!.id === lastChordId}
+                suspects={suspects}
+                onChordClick={onChordClick}
+                selectedChordId={selectedChordId}
               />
             ))}
             {uniform &&
@@ -582,21 +630,56 @@ function ChordBadge({
   barNumber,
   active,
   showTick = true,
+  suspect,
+  onChordClick,
+  selected,
 }: {
   chord: ChordAnchor;
   barNumber?: number;
   active?: boolean;
   /** Bar-start chords get a tick + bar number; mid-bar chords show name only */
   showTick?: boolean;
+  /** Set when the audio-validation flagged this chord */
+  suspect?: { suggested?: string; confidence: number };
+  onChordClick?: (chordId: string, rect: DOMRect) => void;
+  /** Picked for editing — highlighted in green here and on the timeline */
+  selected?: boolean;
 }) {
+  // In edit mode every chord is clickable, not just the flagged ones
+  const clickable = onChordClick != null;
+  const handleClick = clickable
+    ? (e: ReactMouseEvent) => {
+        e.stopPropagation();
+        onChordClick!(chord.id, (e.currentTarget as HTMLElement).getBoundingClientRect());
+      }
+    : undefined;
   return (
     <span
       className="inline-flex flex-col items-start whitespace-nowrap"
       style={{ marginBottom: "0.1em" }}
     >
       <span
+        onClick={handleClick}
+        role={clickable ? "button" : undefined}
+        title={
+          suspect
+            ? suspect.suggested
+              ? `אקורד חשוד — האודיו שומע ${suspect.suggested}. לחצו לתיקון`
+              : "אקורד חשוד — לחצו לתיקון"
+            : clickable
+              ? "לחצו לשינוי האקורד או לתיקון התזמון"
+              : undefined
+        }
         className={`font-bold leading-none transition-colors duration-200 ${
           active ? "text-emerald-600" : "text-orange-600"
+        } ${clickable ? "cursor-pointer rounded-[3px]" : ""} ${
+          selected
+            ? "bg-emerald-100 ring-2 ring-emerald-400"
+            : suspect
+              ? "bg-amber-100 decoration-amber-500 decoration-wavy decoration-2 underline-offset-2 hover:bg-amber-200 [text-decoration-line:underline]"
+              : clickable
+                ? "hover:bg-slate-100"
+                : ""
         }`}
         style={{ fontSize: "0.72em", paddingInlineEnd: "0.4em" }}
         dir="ltr"

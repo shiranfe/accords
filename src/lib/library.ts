@@ -1,6 +1,7 @@
 import type { Song } from "../types/song";
 import { parseNegina } from "./neginaParser";
 import { trapetoniMeta, trapetoniSource } from "../data/hachofShelTrapetoni";
+import { samiVeSumoMeta, samiVeSumoSource } from "../data/samiVeSumo";
 
 const KEY = "accords:library:v1";
 
@@ -24,17 +25,26 @@ const readStored = (): Song[] => {
   return [];
 };
 
+const SEEDS: { meta: typeof trapetoniMeta; source: string }[] = [
+  { meta: trapetoniMeta, source: trapetoniSource },
+  { meta: samiVeSumoMeta, source: samiVeSumoSource },
+];
+
 export function loadLibrary(): Song[] {
   let songs = readStored();
-  const seed = songs.find((s) => s.id === trapetoniMeta.id);
-  if (!seed) {
-    const { song } = parseNegina(trapetoniSource, trapetoniMeta);
-    songs = [song, ...songs];
-    persist(songs);
-  } else if (!seed.artist && trapetoniMeta.artist) {
-    seed.artist = trapetoniMeta.artist;
-    persist(songs);
+  let changed = false;
+  for (const { meta, source } of SEEDS) {
+    const existing = songs.find((s) => s.id === meta.id);
+    if (!existing) {
+      const { song } = parseNegina(source, meta);
+      songs = [song, ...songs];
+      changed = true;
+    } else if (!existing.artist && meta.artist) {
+      existing.artist = meta.artist;
+      changed = true;
+    }
   }
+  if (changed) persist(songs);
   return songs;
 }
 

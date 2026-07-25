@@ -1,16 +1,26 @@
 export type SyncChord = {
   i: number;
+  /**
+   * Index of the *written* chord this event plays (sheet order). Sections
+   * repeat in a recording while the sheet writes them once, so one written
+   * chord can produce several events. Absent in sync files generated before
+   * repeat support, where events were 1:1 with the sheet.
+   */
+  sheetIndex?: number;
   name: string;
-  /** Measured start/end time (seconds) of this written chord in the recording */
+  /** Measured start/end time (seconds) of this event in the recording */
   start: number;
   end: number;
   startBeat: number;
   beats: number;
-  /** True bar number (1-based) where this chord starts */
+  /** True bar number (1-based) where this event starts */
   startBar: number;
   /** Real duration in bars */
   bars: number;
 };
+
+/** Which written chord an event plays; older files are positional. */
+export const sheetIndexOf = (chord: SyncChord, i: number): number => chord.sheetIndex ?? i;
 
 export type SyncData = {
   videoId: string | null;
@@ -23,8 +33,16 @@ export type SyncData = {
   beats: number[];
   /** Start time (seconds) of each bar in the recording, from the pipeline */
   bars: number[];
-  /** Aligned written-chord timings (pipeline/align.py), in sheet order */
+  /**
+   * Aligned chord events (pipeline/align.py) in time order. With section
+   * repeats these are performance events, not sheet slots — read `sheetIndex`
+   * to map one back to the written chord.
+   */
   chords?: SyncChord[];
+  /** Number of written chords the alignment was run against */
+  sheetChordCount?: number;
+  /** Section order the alignment heard, one entry per section pass */
+  form?: Array<{ section: number; startBar: number; start: number }>;
 };
 
 /**

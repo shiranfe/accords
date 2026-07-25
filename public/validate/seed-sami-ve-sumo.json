@@ -1,0 +1,444 @@
+{
+  "generatedAt": "2026-07-25T07:19:46+00:00",
+  "confidenceMedian": 0.5923,
+  "confidenceThreshold": 0.5375,
+  "transpositionSuspected": false,
+  "bestShift": 0,
+  "suspectCount": 2,
+  "chords": [
+    {
+      "i": 0,
+      "name": "C",
+      "confidence": 0.602,
+      "suspect": false
+    },
+    {
+      "i": 1,
+      "name": "G",
+      "confidence": 0.5224,
+      "suspect": true,
+      "suggested": "Bmaj7"
+    },
+    {
+      "i": 2,
+      "name": "C",
+      "confidence": 0.6535,
+      "suspect": false
+    },
+    {
+      "i": 3,
+      "name": "G",
+      "confidence": 0.6619,
+      "suspect": false
+    },
+    {
+      "i": 4,
+      "name": "C",
+      "confidence": 0.6524,
+      "suspect": false
+    },
+    {
+      "i": 5,
+      "name": "G",
+      "confidence": 0.6789,
+      "suspect": false
+    },
+    {
+      "i": 6,
+      "name": "C",
+      "confidence": 0.5906,
+      "suspect": false
+    },
+    {
+      "i": 7,
+      "name": "G",
+      "confidence": 0.5043,
+      "suspect": true,
+      "suggested": "Gm7"
+    },
+    {
+      "i": 8,
+      "name": "C",
+      "confidence": 0.5893,
+      "suspect": false
+    },
+    {
+      "i": 9,
+      "name": "G",
+      "confidence": 0.5924,
+      "suspect": false
+    },
+    {
+      "i": 10,
+      "name": "C",
+      "confidence": 0.5864,
+      "suspect": false
+    },
+    {
+      "i": 11,
+      "name": "G",
+      "confidence": 0.5704,
+      "suspect": false
+    },
+    {
+      "i": 12,
+      "name": "C",
+      "confidence": 0.5923,
+      "suspect": false
+    },
+    {
+      "i": 13,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 14,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 15,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 16,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 17,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 18,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 19,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 20,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 21,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 22,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 23,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 24,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 25,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 26,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 27,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 28,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 29,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 30,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 31,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 32,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 33,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 34,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 35,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 36,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 37,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 38,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 39,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 40,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 41,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 42,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 43,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 44,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 45,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 46,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 47,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 48,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 49,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 50,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 51,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 52,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 53,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 54,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 55,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 56,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 57,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 58,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 59,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 60,
+      "name": "C",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 61,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 62,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 63,
+      "name": "F",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 64,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 65,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 66,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 67,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 68,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 69,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 70,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    },
+    {
+      "i": 71,
+      "name": "G",
+      "confidence": 0.0,
+      "suspect": false
+    }
+  ]
+}

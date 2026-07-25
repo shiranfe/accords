@@ -3,10 +3,15 @@ import { ArrowRight, Gauge, LayoutList, ListMusic, Minus, Pause, Play, Plus, Rot
 import { getSong, saveSong } from "../lib/library";
 import { youtubeIdFrom } from "../lib/neginaParser";
 import { buildTimeline, DEFAULT_BPM, flattenChords } from "../lib/songStats";
-import { barAtTime, chordIndexAtTime, loadSync } from "../lib/sync";
+import { barAtTime, chordIndexAtTime, loadSync, sheetIndexOf } from "../lib/sync";
 import type { SyncData } from "../lib/sync";
+import { loadValidation, replaceChordsInSource } from "../lib/validation";
+import type { ValidationData } from "../lib/validation";
 import { useYouTubePlayer, YT_STATE } from "../hooks/useYouTubePlayer";
 import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
+import { ChordFixPopover } from "../components/viewer/ChordFixPopover";
+import type { FixTarget } from "../components/viewer/ChordFixPopover";
+import { ChordTimeline } from "../components/viewer/ChordTimeline";
 import { SourceEditorPanel } from "../components/SourceEditorPanel";
 import { songToNegina } from "../lib/serializeNegina";
 import { runSyncOnServer } from "../lib/syncRunner";
@@ -42,6 +47,13 @@ export function SongPage({ songId }: { songId: string }) {
   const [meter, setMeter] = useState<number>(song?.meter ?? 4);
   const [sync, setSync] = useState<SyncData | null>(null);
   const [syncTick, setSyncTick] = useState(0);
+  const [validation, setValidation] = useState<ValidationData | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [fixTarget, setFixTarget] = useState<FixTarget | null>(null);
+  const [selectedChordId, setSelectedChordId] = useState<string | null>(null);
+  // Chord ids the user has already corrected this session — their suspect
+  // marker clears immediately, without waiting for a re-validation run.
+  const [resolved, setResolved] = useState<Set<string>>(() => new Set());
   const [syncing, setSyncing] = useState(false);
   const [syncNotice, setSyncNotice] = useState<string | null>(null);
   const [startSecInput, setStartSecInput] = useState<string>(() => {
@@ -55,6 +67,8 @@ export function SongPage({ songId }: { songId: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
+  /** Player position in seconds — drives the timeline playhead */
+  const [playheadSec, setPlayheadSec] = useState<number | null>(null);
   // Bumped when a line click seeks the metronome, so the running interval
   // restarts from the new playbackMsRef position.
   const [metronomeSeek, setMetronomeSeek] = useState(0);
@@ -96,6 +110,17 @@ export function SongPage({ songId }: { songId: string }) {
     };
   }, [songId, syncTick]);
 
+  useEffect(() => {
+    void syncTick;
+    let cancelled = false;
+    void loadValidation(songId).then((data) => {
+      if (!cancelled) setValidation(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [songId, syncTick]);
+
   const timeline = useMemo(
     () => (song ? buildTimeline({ ...song, meter }, bpm) : null),
     [song, meter, bpm],
@@ -105,9 +130,201 @@ export function SongPage({ songId }: { songId: string }) {
   // Sheet chords in pipeline order; when align.py produced per-chord timings
   // and the counts match, karaoke maps time -> written chord directly.
   const flatChords = useMemo(() => (song ? flattenChords(song) : []), [song]);
-  const alignedChords = useMemo(
-    () => (sync?.chords && sync.chords.length === flatChords.length ? sync.chords : null),
-    [sync, flatChords],
+
+  // Aligned events are valid while they still describe this sheet: every
+  // event must point at an existing written chord of the same name. That also
+  // catches a sheet edited after the sync ran.
+  const alignedChords = useMemo(() => {
+    const events = sync?.chords;
+    if (!events || events.length === 0 || flatChords.length === 0) return null;
+    let mismatches = 0;
+    for (let i = 0; i < events.length; i++) {
+      const k = sheetIndexOf(events[i], i);
+      if (k >= flatChords.length) return null; // sheet no longer has this chord
+      if (flatChords[k].name !== events[i].name) mismatches += 1;
+    }
+    // Renaming a few chords (the suspect-review fix) leaves their timing
+    // perfectly good, so keep the alignment; only a sheet that no longer
+    // resembles what was analyzed is worth discarding.
+    return mismatches / events.length > 0.2 ? null : events;
+  }, [sync, flatChords]);
+
+  // First occurrence of each written chord — a repeated section replays the
+  // same chords, and the sheet can only show one timing per chord.
+  const firstOccurrence = useMemo(() => {
+    if (!alignedChords) return null;
+    const out: Array<(typeof alignedChords)[number] | undefined> = [];
+    alignedChords.forEach((e, i) => {
+      const k = sheetIndexOf(e, i);
+      if (out[k] === undefined) out[k] = e;
+    });
+    return out;
+  }, [alignedChords]);
+
+  // Manual timing corrections layered over the alignment. They describe the
+  // occurrence the timeline shows (the first one), and the result is forced
+  // strictly increasing so the karaoke's binary search stays valid.
+  const timeOverrides = song?.chordTimeOverrides;
+  const effectiveAligned = useMemo(() => {
+    if (!alignedChords) return null;
+    if (!timeOverrides || Object.keys(timeOverrides).length === 0) return alignedChords;
+    const seen = new Set<number>();
+    const next = alignedChords.map((e, i) => {
+      const k = sheetIndexOf(e, i);
+      const isFirst = !seen.has(k);
+      seen.add(k);
+      const override = isFirst ? timeOverrides[String(k)] : undefined;
+      return override != null ? { ...e, start: override } : e;
+    });
+    for (let i = 1; i < next.length; i++) {
+      if (next[i].start <= next[i - 1].start) {
+        next[i] = { ...next[i], start: next[i - 1].start + 0.001 };
+      }
+    }
+    return next;
+  }, [alignedChords, timeOverrides]);
+
+  const effectiveFirst = useMemo(() => {
+    if (!effectiveAligned) return null;
+    const out: Array<(typeof effectiveAligned)[number] | undefined> = [];
+    effectiveAligned.forEach((e, i) => {
+      const k = sheetIndexOf(e, i);
+      if (out[k] === undefined) out[k] = e;
+    });
+    return out;
+  }, [effectiveAligned]);
+
+  // Map the validation report (by sheet index) onto chord ids, dropping any
+  // the user already fixed this session.
+  const suspects = useMemo(() => {
+    if (!validation || validation.chords.length !== flatChords.length) return undefined;
+    const map: Record<string, { suggested?: string; confidence: number }> = {};
+    flatChords.forEach((flat, i) => {
+      const v = validation.chords[i];
+      if (v?.suspect && !resolved.has(flat.chordId)) {
+        map[flat.chordId] = { suggested: v.suggested, confidence: v.confidence };
+      }
+    });
+    return map;
+  }, [validation, flatChords, resolved]);
+
+  const suspectCount = suspects ? Object.keys(suspects).length : 0;
+
+  // Any chord is editable, whether or not a validation run flagged it — the
+  // report only adds the audio's opinion when it has one.
+  const openChordFix = useCallback(
+    (chordId: string, rect: DOMRect) => {
+      const idx = flatChords.findIndex((f) => f.chordId === chordId);
+      if (idx === -1) return;
+      const v = validation?.chords[idx];
+      const suggested = v?.suspect ? v.suggested : undefined;
+      // Other unresolved suspects with the same written→suggested change
+      const similarCount = suggested
+        ? flatChords.reduce((n, flat, i) => {
+            const o = validation?.chords[i];
+            return flat.chordId !== chordId &&
+              o?.suspect &&
+              !resolved.has(flat.chordId) &&
+              o.name === v!.name &&
+              o.suggested === suggested
+              ? n + 1
+              : n;
+          }, 0)
+        : 0;
+      setSelectedChordId(chordId);
+      setFixTarget({
+        chordId,
+        name: flatChords[idx].name,
+        suggested,
+        confidence: v?.confidence,
+        similarCount,
+        rect,
+        startTime: effectiveFirst?.[idx]?.start,
+      });
+    },
+    [validation, flatChords, resolved, effectiveFirst],
+  );
+
+  // One draggable block per written chord, ordered by time.
+  const timelineChords = useMemo(() => {
+    if (!effectiveFirst) return null;
+    const items = flatChords
+      .map((flat, i) => {
+        const event = effectiveFirst[i];
+        if (!event) return null;
+        return {
+          chordId: flat.chordId,
+          index: i,
+          name: flat.name,
+          start: event.start,
+          end: event.end,
+          suspect: Boolean(suspects?.[flat.chordId]),
+          overridden: timeOverrides?.[String(i)] != null,
+        };
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null);
+    return items.sort((a, b) => a.start - b.start);
+  }, [effectiveFirst, flatChords, suspects, timeOverrides]);
+
+  /** Persist a dragged chord time (or clear it) and refresh the sheet. */
+  const setChordTime = useCallback(
+    (index: number, time: number | null) => {
+      const current = getSong(songId);
+      if (!current) return;
+      const overrides = { ...(current.chordTimeOverrides ?? {}) };
+      if (time == null) delete overrides[String(index)];
+      else overrides[String(index)] = time;
+      saveSong({ ...current, chordTimeOverrides: overrides });
+      setReloadTick((t) => t + 1);
+    },
+    [songId],
+  );
+
+  const applyChordFix = useCallback(
+    (chordId: string, newName: string, applyToSimilar: boolean) => {
+      const current = getSong(songId);
+      if (!current || !validation) return;
+      const clickedIdx = flatChords.findIndex((f) => f.chordId === chordId);
+      const clicked = clickedIdx >= 0 ? validation.chords[clickedIdx] : undefined;
+
+      const targetIds = new Set<string>([chordId]);
+      const byIndex = new Map<number, string>([[clickedIdx, newName]]);
+      if (applyToSimilar && clicked) {
+        flatChords.forEach((flat, i) => {
+          const o = validation.chords[i];
+          if (
+            o?.suspect &&
+            !resolved.has(flat.chordId) &&
+            o.name === clicked.name &&
+            o.suggested === clicked.suggested
+          ) {
+            targetIds.add(flat.chordId);
+            byIndex.set(i, newName);
+          }
+        });
+      }
+
+      const next = {
+        ...current,
+        sections: current.sections.map((section) => ({
+          ...section,
+          lines: section.lines.map((line) => ({
+            ...line,
+            chords: line.chords.map((c) =>
+              targetIds.has(c.id) ? { ...c, name: newName } : c,
+            ),
+          })),
+        })),
+        sourceText: current.sourceText
+          ? replaceChordsInSource(current.sourceText, byIndex)
+          : current.sourceText,
+      };
+      saveSong(next);
+      setResolved((prev) => new Set([...prev, ...targetIds]));
+      setFixTarget(null);
+      setReloadTick((t) => t + 1);
+    },
+    [songId, validation, flatChords, resolved],
   );
 
   // Synced mode: the YouTube player is the clock — poll its position and map
@@ -118,8 +335,9 @@ export function SongPage({ songId }: { songId: string }) {
     player.playVideo();
     const intervalId = window.setInterval(() => {
       const t = player.getCurrentTime();
-      if (alignedChords) {
-        const idx = chordIndexAtTime(alignedChords, t);
+      setPlayheadSec(t);
+      if (effectiveAligned) {
+        const idx = chordIndexAtTime(effectiveAligned, t);
         setSyncedBar(idx == null ? null : idx);
       } else {
         setSyncedBar(barAtTime(sync, t));
@@ -131,7 +349,7 @@ export function SongPage({ songId }: { songId: string }) {
       window.clearInterval(intervalId);
       player.pauseVideo();
     };
-  }, [isPlaying, sync, player, alignedChords]);
+  }, [isPlaying, sync, player, effectiveAligned]);
 
   // Metronome fallback (no sync file): wall-clock interval rather than
   // requestAnimationFrame, which freezes in background tabs.
@@ -158,15 +376,12 @@ export function SongPage({ songId }: { songId: string }) {
   // position (playbackMs) both persist until an explicit restart.
   const activeEvent = useMemo(() => {
     if (!timeline) return null;
-    if (isSynced && alignedChords) {
+    if (isSynced && effectiveAligned) {
       if (syncedBar == null) return null;
-      const flat = flatChords[syncedBar];
+      const event = effectiveAligned[syncedBar];
+      const flat = event ? flatChords[sheetIndexOf(event, syncedBar)] : undefined;
       if (!flat) return null;
-      return {
-        chordId: flat.chordId,
-        lineId: flat.lineId,
-        bar: alignedChords[syncedBar].startBar,
-      };
+      return { chordId: flat.chordId, lineId: flat.lineId, bar: event.startBar };
     }
     if (isSynced) {
       if (syncedBar == null) return null;
@@ -174,44 +389,46 @@ export function SongPage({ songId }: { songId: string }) {
     }
     if (!isPlaying && playbackMs === 0) return null; // never started
     return timeline.events.find((e) => playbackMs >= e.startMs && playbackMs < e.endMs) ?? null;
-  }, [isPlaying, isSynced, alignedChords, flatChords, syncedBar, playbackMs, timeline]);
+  }, [isPlaying, isSynced, effectiveAligned, flatChords, syncedBar, playbackMs, timeline]);
 
   // True bar numbers from the alignment — only for chords that actually land
   // on a bar start; mid-bar chords show no tick and no number.
   const barNumbersOverride = useMemo(() => {
-    if (!alignedChords || !sync) return undefined;
+    if (!firstOccurrence || !sync) return undefined;
     const phase = sync.downbeatPhase ?? 0;
     const beatsPerBar = sync.beatsPerBar ?? 4;
     const map: Record<string, number> = {};
     flatChords.forEach((flat, i) => {
-      const chord = alignedChords[i];
-      if ((chord.startBeat - phase) % beatsPerBar === 0) {
+      const chord = firstOccurrence[i];
+      if (chord && (chord.startBeat - phase) % beatsPerBar === 0) {
         map[flat.chordId] = chord.startBar;
       }
     });
     return map;
-  }, [alignedChords, flatChords, sync]);
+  }, [firstOccurrence, flatChords, sync]);
 
   // Every chord's true bar (including mid-bar chords) — used by the
   // bar-align view to group same-bar chords into one equal-width cell.
   const chordBars = useMemo(() => {
-    if (!alignedChords) return undefined;
+    if (!firstOccurrence) return undefined;
     const map: Record<string, number> = {};
     flatChords.forEach((flat, i) => {
-      map[flat.chordId] = alignedChords[i].startBar;
+      const chord = firstOccurrence[i];
+      if (chord) map[flat.chordId] = chord.startBar;
     });
     return map;
-  }, [alignedChords, flatChords]);
+  }, [firstOccurrence, flatChords]);
 
   const ghostBars = useMemo(() => {
-    if (!alignedChords) return undefined;
+    if (!firstOccurrence) return undefined;
     const map: Record<string, number> = {};
     flatChords.forEach((flat, i) => {
-      const extra = Math.round(alignedChords[i].bars) - 1;
+      const chord = firstOccurrence[i];
+      const extra = chord ? Math.round(chord.bars) - 1 : 0;
       if (extra > 0) map[flat.chordId] = extra;
     });
     return map;
-  }, [alignedChords, flatChords]);
+  }, [firstOccurrence, flatChords]);
 
   const activeLineId = activeEvent?.lineId ?? null;
 
@@ -243,11 +460,17 @@ export function SongPage({ songId }: { songId: string }) {
         return;
       }
 
-      if (sync && player && alignedChords) {
-        const idx = flatChords.findIndex((f) => f.lineId === lineId);
-        if (idx === -1) return;
-        player.seekTo(alignedChords[idx].start, true);
-        setSyncedBar(idx);
+      if (sync && player && effectiveAligned) {
+        // A repeated section plays this line several times — jump to the next
+        // occurrence from where the video is now, wrapping to the first.
+        const now = player.getCurrentTime();
+        const matches = effectiveAligned
+          .map((e, i) => ({ e, i }))
+          .filter(({ e, i }) => flatChords[sheetIndexOf(e, i)]?.lineId === lineId);
+        if (matches.length === 0) return;
+        const next = matches.find(({ e }) => e.start > now + 0.25) ?? matches[0];
+        player.seekTo(next.e.start, true);
+        setSyncedBar(next.i);
         setIsPlaying(true);
         return;
       }
@@ -267,7 +490,18 @@ export function SongPage({ songId }: { songId: string }) {
       setMetronomeSeek((n) => n + 1);
       setIsPlaying(true);
     },
-    [timeline, sync, player, alignedChords, flatChords, activeLineId],
+    [timeline, sync, player, effectiveAligned, flatChords, activeLineId],
+  );
+
+  /** Seek the video to a chord picked on the timeline or in the sheet. */
+  const seekToChord = useCallback(
+    (chordId: string) => {
+      setSelectedChordId(chordId);
+      const index = flatChords.findIndex((f) => f.chordId === chordId);
+      const event = index >= 0 ? effectiveFirst?.[index] : undefined;
+      if (event && player) player.seekTo(event.start, true);
+    },
+    [flatChords, effectiveFirst, player],
   );
 
   const updateBpm = (value: number) => {
@@ -409,6 +643,32 @@ export function SongPage({ songId }: { songId: string }) {
             >
               יישור תיבות
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditMode((v) => !v);
+                setFixTarget(null);
+                setSelectedChordId(null);
+              }}
+              title="לחיצה על כל אקורד משנה אותו; גרירה בציר הזמן מתקנת את התזמון. אקורדים שהאודיו לא תומך בהם מסומנים"
+              className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                editMode
+                  ? "bg-amber-500 text-white hover:bg-amber-600"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              עריכת אקורדים
+              {suspectCount > 0 && (
+                <span
+                  className={`inline-flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+                    editMode ? "bg-white/25 text-white" : "bg-amber-100 text-amber-700"
+                  }`}
+                  title={`${suspectCount} אקורדים חשודים`}
+                >
+                  {suspectCount}
+                </span>
+              )}
+            </button>
             <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5">
               <button
                 type="button"
@@ -464,7 +724,40 @@ export function SongPage({ songId }: { songId: string }) {
                 ghostBars={ghostBars}
                 chordBars={chordBars}
                 onLineClick={jumpToLine}
+                suspects={editMode ? suspects : undefined}
+                onChordClick={editMode ? openChordFix : undefined}
+                selectedChordId={editMode ? selectedChordId : null}
               />
+            )}
+            {editMode && fixTarget && (
+              <ChordFixPopover
+                target={fixTarget}
+                onApply={applyChordFix}
+                onClose={() => setFixTarget(null)}
+              />
+            )}
+
+            {editMode && !showSource && (
+              <div className="mt-5">
+                {timelineChords && timelineChords.length > 0 && sync ? (
+                  <ChordTimeline
+                    chords={timelineChords}
+                    beats={sync.beats}
+                    beatsPerBar={sync.beatsPerBar ?? 4}
+                    downbeatPhase={sync.downbeatPhase ?? 0}
+                    duration={sync.duration}
+                    currentTime={playheadSec}
+                    selectedChordId={selectedChordId}
+                    onSelect={seekToChord}
+                    onRetime={(index, time) => setChordTime(index, time)}
+                    onResetTime={(index) => setChordTime(index, null)}
+                  />
+                ) : (
+                  <div className="rounded-[20px] bg-white p-4 text-center text-[11px] font-medium text-slate-400 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                    ציר הזמן זמין אחרי סנכרון להקלטה — הריצו "צור סנכרון להקלטה"
+                  </div>
+                )}
+              </div>
             )}
           </main>
 

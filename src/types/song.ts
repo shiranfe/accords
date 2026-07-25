@@ -34,6 +34,12 @@ export type Song = {
   syncBpmHint?: number;
   /** Original negina/Markato source text, kept for round-trip fidelity */
   sourceText?: string;
+  /**
+   * Manual chord-start corrections (seconds), keyed by sheet-order chord index
+   * as a string. Keyed by index rather than chord id so the corrections survive
+   * a source re-parse, which mints fresh ids.
+   */
+  chordTimeOverrides?: Record<string, number>;
 };
 
 export type DragRef = {

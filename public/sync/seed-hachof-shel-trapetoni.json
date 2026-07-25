@@ -1,11 +1,12 @@
 {
-  "videoId": "KGk2BOsVpno",
-  "source": "https://youtu.be/KGk2BOsVpno",
-  "generatedAt": "2026-07-24T13:55:52+00:00",
+  "videoId": null,
+  "source": "cache/KGk2BOsVpno.webm",
+  "generatedAt": "2026-07-25T08:39:34+00:00",
   "beatsPerBar": 4,
   "meterAutoDetected": false,
   "musicStart": 0.07,
   "musicStartProvided": false,
+  "bpmHintProvided": false,
   "bpm": 103.36,
   "bpmGlobalEstimate": 103.36,
   "duration": 205.84,
@@ -459,9 +460,70 @@
     203.244,
     205.589
   ],
+  "sheetChordCount": 132,
+  "vocalStart": 21.12,
+  "leadInSkipped": null,
+  "form": [
+    {
+      "section": 0,
+      "startBar": 1,
+      "start": 0.255
+    },
+    {
+      "section": 1,
+      "startBar": 9,
+      "start": 19.691
+    },
+    {
+      "section": 2,
+      "startBar": 16,
+      "start": 37.361
+    },
+    {
+      "section": 3,
+      "startBar": 19,
+      "start": 43.236
+    },
+    {
+      "section": 4,
+      "startBar": 27,
+      "start": 62.044
+    },
+    {
+      "section": 5,
+      "startBar": 34,
+      "start": 79.714
+    },
+    {
+      "section": 6,
+      "startBar": 43,
+      "start": 99.706
+    },
+    {
+      "section": 7,
+      "startBar": 50,
+      "start": 117.354
+    },
+    {
+      "section": 8,
+      "startBar": 53,
+      "start": 123.228
+    },
+    {
+      "section": 9,
+      "startBar": 61,
+      "start": 142.06
+    },
+    {
+      "section": 10,
+      "startBar": 76,
+      "start": 178.538
+    }
+  ],
   "chords": [
     {
       "i": 0,
+      "sheetIndex": 0,
       "name": "Cm",
       "startBeat": 0,
       "beats": 1,
@@ -472,6 +534,7 @@
     },
     {
       "i": 1,
+      "sheetIndex": 1,
       "name": "Gm7",
       "startBeat": 1,
       "beats": 2,
@@ -482,6 +545,7 @@
     },
     {
       "i": 2,
+      "sheetIndex": 2,
       "name": "Fm7",
       "startBeat": 3,
       "beats": 2,
@@ -492,6 +556,7 @@
     },
     {
       "i": 3,
+      "sheetIndex": 3,
       "name": "Cm",
       "startBeat": 5,
       "beats": 2,
@@ -502,6 +567,7 @@
     },
     {
       "i": 4,
+      "sheetIndex": 4,
       "name": "Gm7",
       "startBeat": 7,
       "beats": 2,
@@ -512,6 +578,7 @@
     },
     {
       "i": 5,
+      "sheetIndex": 5,
       "name": "Fm7",
       "startBeat": 9,
       "beats": 4,
@@ -522,26 +589,29 @@
     },
     {
       "i": 6,
+      "sheetIndex": 6,
       "name": "Cm",
       "startBeat": 13,
-      "beats": 2,
+      "beats": 4,
       "start": 7.941,
-      "end": 9.102,
+      "end": 10.286,
       "startBar": 4,
-      "bars": 0.5
+      "bars": 1.0
     },
     {
       "i": 7,
+      "sheetIndex": 7,
       "name": "Gm7",
-      "startBeat": 15,
-      "beats": 6,
-      "start": 9.102,
+      "startBeat": 17,
+      "beats": 4,
+      "start": 10.286,
       "end": 12.655,
-      "startBar": 4,
-      "bars": 1.5
+      "startBar": 5,
+      "bars": 1.0
     },
     {
       "i": 8,
+      "sheetIndex": 8,
       "name": "Fm7",
       "startBeat": 21,
       "beats": 2,
@@ -552,6 +622,7 @@
     },
     {
       "i": 9,
+      "sheetIndex": 9,
       "name": "Ab",
       "startBeat": 23,
       "beats": 2,
@@ -562,6 +633,7 @@
     },
     {
       "i": 10,
+      "sheetIndex": 10,
       "name": "Gm7",
       "startBeat": 25,
       "beats": 4,
@@ -572,6 +644,7 @@
     },
     {
       "i": 11,
+      "sheetIndex": 11,
       "name": "Fm7",
       "startBeat": 29,
       "beats": 4,
@@ -582,6 +655,7 @@
     },
     {
       "i": 12,
+      "sheetIndex": 12,
       "name": "Fm7",
       "startBeat": 33,
       "beats": 2,
@@ -592,6 +666,7 @@
     },
     {
       "i": 13,
+      "sheetIndex": 13,
       "name": "Gm7",
       "startBeat": 35,
       "beats": 2,
@@ -602,6 +677,7 @@
     },
     {
       "i": 14,
+      "sheetIndex": 14,
       "name": "Cm",
       "startBeat": 37,
       "beats": 4,
@@ -612,6 +688,7 @@
     },
     {
       "i": 15,
+      "sheetIndex": 15,
       "name": "Fm7",
       "startBeat": 41,
       "beats": 2,
@@ -622,6 +699,7 @@
     },
     {
       "i": 16,
+      "sheetIndex": 16,
       "name": "Gm7",
       "startBeat": 43,
       "beats": 2,
@@ -632,6 +710,7 @@
     },
     {
       "i": 17,
+      "sheetIndex": 17,
       "name": "Cm",
       "startBeat": 45,
       "beats": 4,
@@ -642,6 +721,7 @@
     },
     {
       "i": 18,
+      "sheetIndex": 18,
       "name": "Fm7",
       "startBeat": 49,
       "beats": 2,
@@ -652,6 +732,7 @@
     },
     {
       "i": 19,
+      "sheetIndex": 19,
       "name": "Gm7",
       "startBeat": 51,
       "beats": 2,
@@ -662,6 +743,7 @@
     },
     {
       "i": 20,
+      "sheetIndex": 20,
       "name": "Cm",
       "startBeat": 53,
       "beats": 4,
@@ -672,6 +754,7 @@
     },
     {
       "i": 21,
+      "sheetIndex": 21,
       "name": "Fm7",
       "startBeat": 57,
       "beats": 2,
@@ -682,6 +765,7 @@
     },
     {
       "i": 22,
+      "sheetIndex": 22,
       "name": "Gm7",
       "startBeat": 59,
       "beats": 2,
@@ -692,6 +776,7 @@
     },
     {
       "i": 23,
+      "sheetIndex": 23,
       "name": "Cm",
       "startBeat": 61,
       "beats": 2,
@@ -702,6 +787,7 @@
     },
     {
       "i": 24,
+      "sheetIndex": 24,
       "name": "Cm",
       "startBeat": 63,
       "beats": 2,
@@ -712,6 +798,7 @@
     },
     {
       "i": 25,
+      "sheetIndex": 25,
       "name": "Gm7",
       "startBeat": 65,
       "beats": 4,
@@ -722,6 +809,7 @@
     },
     {
       "i": 26,
+      "sheetIndex": 26,
       "name": "Fm7",
       "startBeat": 69,
       "beats": 4,
@@ -732,6 +820,7 @@
     },
     {
       "i": 27,
+      "sheetIndex": 27,
       "name": "Fm7",
       "startBeat": 73,
       "beats": 2,
@@ -742,6 +831,7 @@
     },
     {
       "i": 28,
+      "sheetIndex": 28,
       "name": "Bb",
       "startBeat": 75,
       "beats": 2,
@@ -752,6 +842,7 @@
     },
     {
       "i": 29,
+      "sheetIndex": 29,
       "name": "Eb",
       "startBeat": 77,
       "beats": 2,
@@ -762,6 +853,7 @@
     },
     {
       "i": 30,
+      "sheetIndex": 30,
       "name": "Ab",
       "startBeat": 79,
       "beats": 2,
@@ -772,6 +864,7 @@
     },
     {
       "i": 31,
+      "sheetIndex": 31,
       "name": "Fm7",
       "startBeat": 81,
       "beats": 2,
@@ -782,6 +875,7 @@
     },
     {
       "i": 32,
+      "sheetIndex": 32,
       "name": "Bb",
       "startBeat": 83,
       "beats": 2,
@@ -792,6 +886,7 @@
     },
     {
       "i": 33,
+      "sheetIndex": 33,
       "name": "Gm7",
       "startBeat": 85,
       "beats": 2,
@@ -802,6 +897,7 @@
     },
     {
       "i": 34,
+      "sheetIndex": 34,
       "name": "Cm",
       "startBeat": 87,
       "beats": 2,
@@ -812,6 +908,7 @@
     },
     {
       "i": 35,
+      "sheetIndex": 35,
       "name": "Fm7",
       "startBeat": 89,
       "beats": 2,
@@ -822,6 +919,7 @@
     },
     {
       "i": 36,
+      "sheetIndex": 36,
       "name": "Bb",
       "startBeat": 91,
       "beats": 2,
@@ -832,6 +930,7 @@
     },
     {
       "i": 37,
+      "sheetIndex": 37,
       "name": "Eb",
       "startBeat": 93,
       "beats": 2,
@@ -842,6 +941,7 @@
     },
     {
       "i": 38,
+      "sheetIndex": 38,
       "name": "Ab",
       "startBeat": 95,
       "beats": 2,
@@ -852,6 +952,7 @@
     },
     {
       "i": 39,
+      "sheetIndex": 39,
       "name": "Fm7",
       "startBeat": 97,
       "beats": 2,
@@ -862,6 +963,7 @@
     },
     {
       "i": 40,
+      "sheetIndex": 40,
       "name": "Bb",
       "startBeat": 99,
       "beats": 2,
@@ -872,6 +974,7 @@
     },
     {
       "i": 41,
+      "sheetIndex": 41,
       "name": "Gm7",
       "startBeat": 101,
       "beats": 4,
@@ -882,6 +985,7 @@
     },
     {
       "i": 42,
+      "sheetIndex": 42,
       "name": "Fm7",
       "startBeat": 105,
       "beats": 2,
@@ -892,6 +996,7 @@
     },
     {
       "i": 43,
+      "sheetIndex": 43,
       "name": "Gm7",
       "startBeat": 107,
       "beats": 2,
@@ -902,6 +1007,7 @@
     },
     {
       "i": 44,
+      "sheetIndex": 44,
       "name": "Cm",
       "startBeat": 109,
       "beats": 4,
@@ -912,6 +1018,7 @@
     },
     {
       "i": 45,
+      "sheetIndex": 45,
       "name": "Fm7",
       "startBeat": 113,
       "beats": 2,
@@ -922,6 +1029,7 @@
     },
     {
       "i": 46,
+      "sheetIndex": 46,
       "name": "Gm7",
       "startBeat": 115,
       "beats": 2,
@@ -932,6 +1040,7 @@
     },
     {
       "i": 47,
+      "sheetIndex": 47,
       "name": "Ab",
       "startBeat": 117,
       "beats": 4,
@@ -942,6 +1051,7 @@
     },
     {
       "i": 48,
+      "sheetIndex": 48,
       "name": "Fm7",
       "startBeat": 121,
       "beats": 2,
@@ -952,6 +1062,7 @@
     },
     {
       "i": 49,
+      "sheetIndex": 49,
       "name": "Gm7",
       "startBeat": 123,
       "beats": 2,
@@ -962,6 +1073,7 @@
     },
     {
       "i": 50,
+      "sheetIndex": 50,
       "name": "Cm",
       "startBeat": 125,
       "beats": 4,
@@ -972,6 +1084,7 @@
     },
     {
       "i": 51,
+      "sheetIndex": 51,
       "name": "Fm7",
       "startBeat": 129,
       "beats": 2,
@@ -982,6 +1095,7 @@
     },
     {
       "i": 52,
+      "sheetIndex": 52,
       "name": "Gm7",
       "startBeat": 131,
       "beats": 2,
@@ -992,6 +1106,7 @@
     },
     {
       "i": 53,
+      "sheetIndex": 53,
       "name": "Cm",
       "startBeat": 133,
       "beats": 2,
@@ -1002,6 +1117,7 @@
     },
     {
       "i": 54,
+      "sheetIndex": 54,
       "name": "Cm",
       "startBeat": 135,
       "beats": 2,
@@ -1012,6 +1128,7 @@
     },
     {
       "i": 55,
+      "sheetIndex": 55,
       "name": "Gm7",
       "startBeat": 137,
       "beats": 2,
@@ -1022,6 +1139,7 @@
     },
     {
       "i": 56,
+      "sheetIndex": 56,
       "name": "Fm7",
       "startBeat": 139,
       "beats": 2,
@@ -1032,6 +1150,7 @@
     },
     {
       "i": 57,
+      "sheetIndex": 57,
       "name": "Cm",
       "startBeat": 141,
       "beats": 4,
@@ -1042,6 +1161,7 @@
     },
     {
       "i": 58,
+      "sheetIndex": 58,
       "name": "Gm7",
       "startBeat": 145,
       "beats": 2,
@@ -1052,6 +1172,7 @@
     },
     {
       "i": 59,
+      "sheetIndex": 59,
       "name": "Fm7",
       "startBeat": 147,
       "beats": 2,
@@ -1062,6 +1183,7 @@
     },
     {
       "i": 60,
+      "sheetIndex": 60,
       "name": "Cm",
       "startBeat": 149,
       "beats": 2,
@@ -1072,36 +1194,40 @@
     },
     {
       "i": 61,
+      "sheetIndex": 61,
       "name": "Gm7",
       "startBeat": 151,
-      "beats": 6,
+      "beats": 2,
       "start": 89.118,
-      "end": 92.648,
+      "end": 90.302,
       "startBar": 38,
-      "bars": 1.5
+      "bars": 0.5
     },
     {
       "i": 62,
+      "sheetIndex": 62,
       "name": "Fm7",
-      "startBeat": 157,
-      "beats": 2,
-      "start": 92.648,
-      "end": 93.809,
-      "startBar": 40,
-      "bars": 0.5
+      "startBeat": 153,
+      "beats": 4,
+      "start": 90.302,
+      "end": 92.648,
+      "startBar": 39,
+      "bars": 1.0
     },
     {
       "i": 63,
+      "sheetIndex": 63,
       "name": "Ab",
-      "startBeat": 159,
-      "beats": 2,
-      "start": 93.809,
+      "startBeat": 157,
+      "beats": 4,
+      "start": 92.648,
       "end": 94.993,
       "startBar": 40,
-      "bars": 0.5
+      "bars": 1.0
     },
     {
       "i": 64,
+      "sheetIndex": 64,
       "name": "Gm7",
       "startBeat": 161,
       "beats": 4,
@@ -1112,6 +1238,7 @@
     },
     {
       "i": 65,
+      "sheetIndex": 65,
       "name": "Fm7",
       "startBeat": 165,
       "beats": 4,
@@ -1122,6 +1249,7 @@
     },
     {
       "i": 66,
+      "sheetIndex": 66,
       "name": "Fm7",
       "startBeat": 169,
       "beats": 2,
@@ -1132,6 +1260,7 @@
     },
     {
       "i": 67,
+      "sheetIndex": 67,
       "name": "Gm7",
       "startBeat": 171,
       "beats": 2,
@@ -1142,6 +1271,7 @@
     },
     {
       "i": 68,
+      "sheetIndex": 68,
       "name": "Cm",
       "startBeat": 173,
       "beats": 4,
@@ -1152,6 +1282,7 @@
     },
     {
       "i": 69,
+      "sheetIndex": 69,
       "name": "Fm7",
       "startBeat": 177,
       "beats": 2,
@@ -1162,6 +1293,7 @@
     },
     {
       "i": 70,
+      "sheetIndex": 70,
       "name": "Gm7",
       "startBeat": 179,
       "beats": 2,
@@ -1172,6 +1304,7 @@
     },
     {
       "i": 71,
+      "sheetIndex": 71,
       "name": "Cm",
       "startBeat": 181,
       "beats": 4,
@@ -1182,6 +1315,7 @@
     },
     {
       "i": 72,
+      "sheetIndex": 72,
       "name": "Fm7",
       "startBeat": 185,
       "beats": 2,
@@ -1192,6 +1326,7 @@
     },
     {
       "i": 73,
+      "sheetIndex": 73,
       "name": "Gm7",
       "startBeat": 187,
       "beats": 2,
@@ -1202,6 +1337,7 @@
     },
     {
       "i": 74,
+      "sheetIndex": 74,
       "name": "Cm",
       "startBeat": 189,
       "beats": 4,
@@ -1212,6 +1348,7 @@
     },
     {
       "i": 75,
+      "sheetIndex": 75,
       "name": "Fm7",
       "startBeat": 193,
       "beats": 2,
@@ -1222,6 +1359,7 @@
     },
     {
       "i": 76,
+      "sheetIndex": 76,
       "name": "Gm7",
       "startBeat": 195,
       "beats": 2,
@@ -1232,6 +1370,7 @@
     },
     {
       "i": 77,
+      "sheetIndex": 77,
       "name": "Cm",
       "startBeat": 197,
       "beats": 2,
@@ -1242,6 +1381,7 @@
     },
     {
       "i": 78,
+      "sheetIndex": 78,
       "name": "Cm",
       "startBeat": 199,
       "beats": 2,
@@ -1252,6 +1392,7 @@
     },
     {
       "i": 79,
+      "sheetIndex": 79,
       "name": "Gm7",
       "startBeat": 201,
       "beats": 4,
@@ -1262,6 +1403,7 @@
     },
     {
       "i": 80,
+      "sheetIndex": 80,
       "name": "Fm7",
       "startBeat": 205,
       "beats": 4,
@@ -1272,6 +1414,7 @@
     },
     {
       "i": 81,
+      "sheetIndex": 81,
       "name": "Fm7",
       "startBeat": 209,
       "beats": 2,
@@ -1282,6 +1425,7 @@
     },
     {
       "i": 82,
+      "sheetIndex": 82,
       "name": "Bb",
       "startBeat": 211,
       "beats": 2,
@@ -1292,6 +1436,7 @@
     },
     {
       "i": 83,
+      "sheetIndex": 83,
       "name": "Eb",
       "startBeat": 213,
       "beats": 2,
@@ -1302,6 +1447,7 @@
     },
     {
       "i": 84,
+      "sheetIndex": 84,
       "name": "Ab",
       "startBeat": 215,
       "beats": 2,
@@ -1312,6 +1458,7 @@
     },
     {
       "i": 85,
+      "sheetIndex": 85,
       "name": "Fm7",
       "startBeat": 217,
       "beats": 2,
@@ -1322,6 +1469,7 @@
     },
     {
       "i": 86,
+      "sheetIndex": 86,
       "name": "Bb",
       "startBeat": 219,
       "beats": 2,
@@ -1332,6 +1480,7 @@
     },
     {
       "i": 87,
+      "sheetIndex": 87,
       "name": "Gm7",
       "startBeat": 221,
       "beats": 2,
@@ -1342,6 +1491,7 @@
     },
     {
       "i": 88,
+      "sheetIndex": 88,
       "name": "Cm",
       "startBeat": 223,
       "beats": 2,
@@ -1352,6 +1502,7 @@
     },
     {
       "i": 89,
+      "sheetIndex": 89,
       "name": "Fm7",
       "startBeat": 225,
       "beats": 2,
@@ -1362,6 +1513,7 @@
     },
     {
       "i": 90,
+      "sheetIndex": 90,
       "name": "Bb",
       "startBeat": 227,
       "beats": 2,
@@ -1372,6 +1524,7 @@
     },
     {
       "i": 91,
+      "sheetIndex": 91,
       "name": "Eb",
       "startBeat": 229,
       "beats": 2,
@@ -1382,6 +1535,7 @@
     },
     {
       "i": 92,
+      "sheetIndex": 92,
       "name": "Ab",
       "startBeat": 231,
       "beats": 2,
@@ -1392,6 +1546,7 @@
     },
     {
       "i": 93,
+      "sheetIndex": 93,
       "name": "Fm7",
       "startBeat": 233,
       "beats": 2,
@@ -1402,6 +1557,7 @@
     },
     {
       "i": 94,
+      "sheetIndex": 94,
       "name": "Bb",
       "startBeat": 235,
       "beats": 2,
@@ -1412,6 +1568,7 @@
     },
     {
       "i": 95,
+      "sheetIndex": 95,
       "name": "Gm7",
       "startBeat": 237,
       "beats": 4,
@@ -1422,6 +1579,7 @@
     },
     {
       "i": 96,
+      "sheetIndex": 96,
       "name": "Fm7",
       "startBeat": 241,
       "beats": 2,
@@ -1432,6 +1590,7 @@
     },
     {
       "i": 97,
+      "sheetIndex": 97,
       "name": "Gm7",
       "startBeat": 243,
       "beats": 2,
@@ -1442,6 +1601,7 @@
     },
     {
       "i": 98,
+      "sheetIndex": 98,
       "name": "Cm",
       "startBeat": 245,
       "beats": 4,
@@ -1452,6 +1612,7 @@
     },
     {
       "i": 99,
+      "sheetIndex": 99,
       "name": "Fm7",
       "startBeat": 249,
       "beats": 2,
@@ -1462,6 +1623,7 @@
     },
     {
       "i": 100,
+      "sheetIndex": 100,
       "name": "Gm7",
       "startBeat": 251,
       "beats": 2,
@@ -1472,6 +1634,7 @@
     },
     {
       "i": 101,
+      "sheetIndex": 101,
       "name": "Ab",
       "startBeat": 253,
       "beats": 4,
@@ -1482,6 +1645,7 @@
     },
     {
       "i": 102,
+      "sheetIndex": 102,
       "name": "Fm7",
       "startBeat": 257,
       "beats": 2,
@@ -1492,6 +1656,7 @@
     },
     {
       "i": 103,
+      "sheetIndex": 103,
       "name": "Gm7",
       "startBeat": 259,
       "beats": 2,
@@ -1502,6 +1667,7 @@
     },
     {
       "i": 104,
+      "sheetIndex": 104,
       "name": "Cm",
       "startBeat": 261,
       "beats": 4,
@@ -1512,6 +1678,7 @@
     },
     {
       "i": 105,
+      "sheetIndex": 105,
       "name": "Fm7",
       "startBeat": 265,
       "beats": 2,
@@ -1522,6 +1689,7 @@
     },
     {
       "i": 106,
+      "sheetIndex": 106,
       "name": "Gm7",
       "startBeat": 267,
       "beats": 2,
@@ -1532,6 +1700,7 @@
     },
     {
       "i": 107,
+      "sheetIndex": 107,
       "name": "Cm",
       "startBeat": 269,
       "beats": 4,
@@ -1542,6 +1711,7 @@
     },
     {
       "i": 108,
+      "sheetIndex": 108,
       "name": "Fm7",
       "startBeat": 273,
       "beats": 2,
@@ -1552,6 +1722,7 @@
     },
     {
       "i": 109,
+      "sheetIndex": 109,
       "name": "Gm7",
       "startBeat": 275,
       "beats": 2,
@@ -1562,6 +1733,7 @@
     },
     {
       "i": 110,
+      "sheetIndex": 110,
       "name": "Cm",
       "startBeat": 277,
       "beats": 2,
@@ -1572,6 +1744,7 @@
     },
     {
       "i": 111,
+      "sheetIndex": 111,
       "name": "Fm7",
       "startBeat": 279,
       "beats": 2,
@@ -1582,6 +1755,7 @@
     },
     {
       "i": 112,
+      "sheetIndex": 112,
       "name": "Gm7",
       "startBeat": 281,
       "beats": 4,
@@ -1592,6 +1766,7 @@
     },
     {
       "i": 113,
+      "sheetIndex": 113,
       "name": "Ab",
       "startBeat": 285,
       "beats": 4,
@@ -1602,6 +1777,7 @@
     },
     {
       "i": 114,
+      "sheetIndex": 114,
       "name": "Fm7",
       "startBeat": 289,
       "beats": 2,
@@ -1612,6 +1788,7 @@
     },
     {
       "i": 115,
+      "sheetIndex": 115,
       "name": "Gm7",
       "startBeat": 291,
       "beats": 2,
@@ -1622,6 +1799,7 @@
     },
     {
       "i": 116,
+      "sheetIndex": 116,
       "name": "Cm",
       "startBeat": 293,
       "beats": 4,
@@ -1632,6 +1810,7 @@
     },
     {
       "i": 117,
+      "sheetIndex": 117,
       "name": "Fm7",
       "startBeat": 297,
       "beats": 2,
@@ -1642,6 +1821,7 @@
     },
     {
       "i": 118,
+      "sheetIndex": 118,
       "name": "Gm7",
       "startBeat": 299,
       "beats": 2,
@@ -1652,6 +1832,7 @@
     },
     {
       "i": 119,
+      "sheetIndex": 119,
       "name": "Cm",
       "startBeat": 301,
       "beats": 2,
@@ -1662,6 +1843,7 @@
     },
     {
       "i": 120,
+      "sheetIndex": 120,
       "name": "Cm",
       "startBeat": 303,
       "beats": 2,
@@ -1672,6 +1854,7 @@
     },
     {
       "i": 121,
+      "sheetIndex": 121,
       "name": "Gm7",
       "startBeat": 305,
       "beats": 4,
@@ -1682,6 +1865,7 @@
     },
     {
       "i": 122,
+      "sheetIndex": 122,
       "name": "Fm7",
       "startBeat": 309,
       "beats": 2,
@@ -1692,6 +1876,7 @@
     },
     {
       "i": 123,
+      "sheetIndex": 123,
       "name": "Ab",
       "startBeat": 311,
       "beats": 2,
@@ -1702,6 +1887,7 @@
     },
     {
       "i": 124,
+      "sheetIndex": 124,
       "name": "Gm7",
       "startBeat": 313,
       "beats": 4,
@@ -1712,6 +1898,7 @@
     },
     {
       "i": 125,
+      "sheetIndex": 125,
       "name": "Fm7",
       "startBeat": 317,
       "beats": 8,
@@ -1722,56 +1909,62 @@
     },
     {
       "i": 126,
+      "sheetIndex": 126,
       "name": "Cm",
       "startBeat": 325,
-      "beats": 2,
+      "beats": 4,
       "start": 191.472,
-      "end": 192.656,
+      "end": 193.84,
       "startBar": 82,
-      "bars": 0.5
+      "bars": 1.0
     },
     {
       "i": 127,
+      "sheetIndex": 127,
       "name": "Gm7",
-      "startBeat": 327,
-      "beats": 2,
-      "start": 192.656,
-      "end": 193.84,
-      "startBar": 82,
-      "bars": 0.5
+      "startBeat": 329,
+      "beats": 8,
+      "start": 193.84,
+      "end": 198.531,
+      "startBar": 83,
+      "bars": 2.0
     },
     {
       "i": 128,
+      "sheetIndex": 128,
       "name": "Fm7",
-      "startBeat": 329,
+      "startBeat": 337,
       "beats": 4,
-      "start": 193.84,
-      "end": 196.185,
-      "startBar": 83,
+      "start": 198.531,
+      "end": 200.876,
+      "startBar": 85,
       "bars": 1.0
     },
     {
       "i": 129,
+      "sheetIndex": 129,
       "name": "Cm",
-      "startBeat": 333,
+      "startBeat": 341,
       "beats": 2,
-      "start": 196.185,
-      "end": 197.37,
-      "startBar": 84,
+      "start": 200.876,
+      "end": 202.06,
+      "startBar": 86,
       "bars": 0.5
     },
     {
       "i": 130,
+      "sheetIndex": 130,
       "name": "Gm7",
-      "startBeat": 335,
-      "beats": 14,
-      "start": 197.37,
+      "startBeat": 343,
+      "beats": 6,
+      "start": 202.06,
       "end": 205.589,
-      "startBar": 84,
-      "bars": 3.5
+      "startBar": 86,
+      "bars": 1.5
     },
     {
       "i": 131,
+      "sheetIndex": 131,
       "name": "Fm7",
       "startBeat": 349,
       "beats": 1,

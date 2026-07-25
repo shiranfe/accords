@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>accords — מדריך מסירה</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --ink: #1b2430; --muted: #5b6573;
+    --accent: #185FA5; --accent-soft: #e8f1fa; --line: #dfe5ec;
+    --warn-bg: #fff6e8; --warn-line: #e0a33c;
+    --ok-bg: #eaf7ef; --ok-line: #3f9c5e;
+    --mid-bg: #fff9e6; --mid-line: #d9a520;
+    --raw-bg: #fdeeee; --raw-line: #c0504d;
+    --code-bg: #f2f5f8;
+    --mono: ui-monospace, "Cascadia Code", Consolas, "Courier New", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11161d; --card: #1a212b; --ink: #e6ecf3; --muted: #9aa7b6;
+      --accent: #6fb2f0; --accent-soft: #1e2c3b; --line: #2b3543;
+      --warn-bg: #2e2415; --warn-line: #b98328;
+      --ok-bg: #16281d; --ok-line: #4f9c68;
+      --mid-bg: #2b2716; --mid-line: #b39420;
+      --raw-bg: #2d1c1c; --raw-line: #b5615e;
+      --code-bg: #131a22;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { direction: rtl; }
+  body {
+    margin: 0; padding: 2rem 1rem 4rem; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", "Noto Sans Hebrew", "Rubik", Arial, sans-serif;
+    font-size: 16px; line-height: 1.75;
+  }
+  .wrap { max-width: 62rem; margin: 0 auto; }
+
+  /* Isolate Latin runs so they don't scramble the surrounding Hebrew sentence */
+  code, kbd, .ltr, .num { direction: ltr; unicode-bidi: isolate; }
+  pre { direction: ltr; unicode-bidi: isolate; text-align: left; }
+
+  code {
+    font-family: var(--mono); font-size: .88em; background: var(--code-bg);
+    border: 1px solid var(--line); border-radius: 5px; padding: .08em .36em;
+    white-space: nowrap;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1rem 1.15rem; overflow-x: auto; font-family: var(--mono);
+    font-size: .86rem; line-height: 1.6;
+  }
+  pre code { background: none; border: 0; padding: 0; white-space: pre; }
+
+  header.top {
+    background: var(--card); border-radius: 16px; padding: 2rem 2rem 1.6rem;
+    border: 1px solid var(--line); margin-bottom: 1.5rem;
+  }
+  header.top h1 { margin: 0 0 .4rem; font-size: 2rem; letter-spacing: -.01em; }
+  header.top p { margin: 0; color: var(--muted); }
+
+  nav.toc {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.2rem 1.6rem; margin-bottom: 1.5rem;
+  }
+  nav.toc h2 { margin: 0 0 .6rem; font-size: .95rem; color: var(--muted); font-weight: 600; border: 0; padding: 0; }
+  nav.toc ol { margin: 0; padding-inline-start: 1.3rem; columns: 2; column-gap: 2rem; }
+  @media (max-width: 40rem) { nav.toc ol { columns: 1; } }
+  nav.toc li { margin: .18rem 0; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.6rem 1.8rem; margin-bottom: 1.25rem;
+  }
+  h2 {
+    font-size: 1.3rem; margin: 0 0 1rem; color: var(--accent);
+    border-bottom: 2px solid var(--accent-soft); padding-bottom: .5rem;
+  }
+  h3 { font-size: 1.03rem; margin: 1.5rem 0 .5rem; }
+  p { margin: .7rem 0; }
+  ul, ol { padding-inline-start: 1.4rem; }
+  li { margin: .35rem 0; }
+
+  /* --- three tracks --- */
+  .track {
+    border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.1rem 1.3rem; margin: 1.1rem 0;
+    border-inline-start: 5px solid var(--line);
+  }
+  .track.t1 { border-inline-start-color: var(--ok-line);   background: var(--ok-bg); }
+  .track.t2 { border-inline-start-color: var(--mid-line);  background: var(--mid-bg); }
+  .track.t3 { border-inline-start-color: var(--raw-line);  background: var(--raw-bg); }
+  .track h3 { margin-top: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+  .pill {
+    font-size: .74rem; font-weight: 700; padding: .1rem .6rem;
+    border-radius: 999px; color: #fff; white-space: nowrap;
+  }
+  .t1 .pill { background: var(--ok-line); }
+  .t2 .pill { background: var(--mid-line); }
+  .t3 .pill { background: var(--raw-line); }
+  .track dl { margin: .6rem 0 0; display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; }
+  @media (max-width: 34rem) { .track dl { grid-template-columns: 1fr; gap: .1rem; } }
+  .track dt { font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .track dd { margin: 0; }
+
+  .scroll { overflow-x: auto; margin: 1rem 0; }
+  table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+  th, td { border: 1px solid var(--line); padding: .55rem .8rem; text-align: right; vertical-align: top; }
+  th { background: var(--accent-soft); font-weight: 600; }
+  td.n, th.n { text-align: center; }
+  td.n { direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+
+  .note, .warn, .ok {
+    border-inline-start: 4px solid var(--accent); background: var(--accent-soft);
+    border-radius: 0 10px 10px 0; padding: .9rem 1.1rem; margin: 1.1rem 0;
+  }
+  .warn { border-inline-start-color: var(--warn-line); background: var(--warn-bg); }
+  .ok   { border-inline-start-color: var(--ok-line);   background: var(--ok-bg); }
+  .note p:first-child, .warn p:first-child, .ok p:first-child { margin-top: 0; }
+  .note p:last-child,  .warn p:last-child,  .ok p:last-child  { margin-bottom: 0; }
+  .tag {
+    display: inline-block; font-size: .78rem; font-weight: 700;
+    padding: .05rem .5rem; border-radius: 999px;
+    background: var(--accent); color: #fff; margin-inline-end: .4rem;
+  }
+  .warn .tag { background: var(--warn-line); }
+  .ok .tag { background: var(--ok-line); }
+
+  footer { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 2rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>accords — מדריך מסירה</h1>
+  <p>מה המטרה, שלושת המסלולים ומצב הבשלות של כל אחד, אילו אלגוריתמים נבחרו ולמה,
+     מה עובד, מה לא, ומה הצעדים הבאים.</p>
+</header>
+
+<nav class="toc">
+  <h2>תוכן העניינים</h2>
+  <ol>
+    <li><a href="#s1">המטרה והאתגר המרכזי</a></li>
+    <li><a href="#s2">שלושת המסלולים ← התמונה הגדולה</a></li>
+    <li><a href="#s3">מבנה הפרויקט</a></li>
+    <li><a href="#s4">הפייפליין — שלבים</a></li>
+    <li><a href="#s5">האלגוריתם המרכזי — יישור</a></li>
+    <li><a href="#s6">איך מודדים שהיישור נכון</a></li>
+    <li><a href="#s7">מה עובד — מספרים מדודים</a></li>
+    <li><a href="#s8">מגבלות ידועות</a></li>
+    <li><a href="#s9">החלטות כיול — אל תשנו בעיוורון</a></li>
+    <li><a href="#s10">כיווני פיתוח לפי מסלול</a></li>
+    <li><a href="#s11">מלכודות</a></li>
+  </ol>
+</nav>
+
+<section id="s1">
+  <h2>1. המטרה והאתגר המרכזי</h2>
+  <p>להפוך גיליונות אקורדים עבריים לשיר <strong>מנוגן ומסונכרן</strong>: לוחצים play על
+     היוטיוב, והאקורדים והמילים מודגשים בזמן אמת — בסגנון
+     <a href="https://chordify.net/">Chordify</a>, אבל עם יישור מדויק למילים בעברית.</p>
+  <p>היעד ארוך הטווח: <strong>"יוטיוב בפנים ← שיר מנוגן תוך דקות"</strong>.</p>
+
+  <h3>האתגר שמכתיב הכל</h3>
+  <p>בפורמט negina/Markato <strong>רושמים רק שינויי אקורד</strong>. אקורד שנמשך 3 תיבות
+     נכתב <strong>פעם אחת</strong>, ולא נכתב כלום בזמן שהוא ממשיך.</p>
+  <div class="warn">
+    <p><span class="tag">קריטי</span>
+       <strong>אי אפשר לגזור מהכתב את משך האקורדים או את מספר התיבות.</strong>
+       מדידה ב"החוף של טרפטוני": 132 אקורדים כתובים מול 88 תיבות אמיתיות באודיו.
+       המספרים שהאפליקציה מציגה ליד אקורדים הם <strong>סידוריים</strong>, לא מספרי תיבה —
+       מספרי תיבה אמיתיים מגיעים <strong>רק</strong> מיישור לאודיו.</p>
+  </div>
+  <p>זו הסיבה שקיים פייפליין אודיו בכלל, ולא רק פרסר.</p>
+</section>
+
+<section id="s2">
+  <h2>2. שלושת המסלולים ← התמונה הגדולה</h2>
+  <p>יש שלוש דרכים להגיע לשיר מסונכרן, והן <strong>נבדלות בקושי ובבשלות</strong>.
+     חשוב להבין באיזה מסלול נמצאים לפני שניגשים לבעיה — הן חולקות את אותו מנוע יישור,
+     אבל נכשלות בדרכים שונות לגמרי.</p>
+
+  <div class="track t1">
+    <h3>מסלול 1 — המרת קורפוס Markato/negina קיים <span class="pill">בשל</span></h3>
+    <p>לוקחים גיליון שכבר כתוב בפורמט negina ומסנכרנים אותו לאודיו.</p>
+    <dl>
+      <dt>למה קל</dt>
+      <dd>הגיליון <strong>שלם</strong> — החזרות כתובות במפורש, כל בית ופזמון מופיעים
+          כמה פעמים שהם מתנגנים. רצף האקורדים מכסה את כל השיר.</dd>
+      <dt>מה עובד</dt>
+      <dd>פרסור מלא (<code>neginaParser.ts</code>) + סריאליזציה חזרה. יישור:
+          132/132 אקורדים, דלתא <span class="num">−1.43</span> שנ׳ מול תחילת השירה.</dd>
+      <dt>מה חסר</dt>
+      <dd>ייבוא <strong>המוני</strong> של הקורפוס. כרגע כל שיר מתווסף ידנית כקובץ
+          <code>src/data/*.ts</code> ונרשם ב-<code>library.ts</code>. אין כלי batch.</dd>
+    </dl>
+  </div>
+
+  <div class="track t2">
+    <h3>מסלול 2 — המרה מעמוד אקורדים של מתחרים <span class="pill">עובד, לא ממומש ככלי</span></h3>
+    <p>לוקחים עמוד מ-<code>tab4u</code> (ובעתיד Ultimate Guitar) וממירים לפורמט שלנו.</p>
+    <dl>
+      <dt>הקושי הראשון</dt>
+      <dd><strong>bidi.</strong> tab4u מרנדר שורת אקורדים ב-<code>ltr</code> מעל מילים
+          ב-<code>rtl</code>, וממקם לפי עמודות רווחים. ספירת רווחים <strong>נשברת</strong>.
+          הפתרון שעבד: למדוד את <strong>מיקום הפיקסלים המרונדר</strong> של כל אקורד ושל
+          כל אות עברית, ולמפות כל אקורד לאות הקרובה. תופס נכון גם אקורד שנוחת באמצע מילה.</dd>
+      <dt>הקושי השני</dt>
+      <dd><strong>הגיליון חלקי.</strong> כותבים כל חלק <strong>פעם אחת</strong> בעוד
+          ההקלטה חוזרת עליו, ואין פתיח כתוב. זה מה שאילץ את שני התיקונים הגדולים במנוע
+          היישור (חזרות על חלקים + זיהוי פתיח) — ראו פרק 5.</dd>
+      <dt>מה עובד</dt>
+      <dd>"סמי וסומו" יובא במלואו: מילים מדויקות, 72/72 אקורדים מיושרים, דלתא
+          <span class="num">−1.41</span> שנ׳.</dd>
+      <dt>מה חסר</dt>
+      <dd>החילוץ בוצע <strong>ידנית דרך קונסולת הדפדפן</strong> — עדיין לא סקריפט/כלי.
+          אין תמיכה ב-Ultimate Guitar. כיסוי חלקי (<span class="num">171.7</span> מתוך
+          <span class="num">185.2</span> שנ׳) כי לסולו ולאאוטרו אין אקורדים כתובים כלל.</dd>
+    </dl>
+  </div>
+
+  <div class="track t3">
+    <h3>מסלול 3 — אקורדים מאפס: רק אודיו + מילים <span class="pill">ראשוני</span></h3>
+    <p>אין גיליון בכלל. מזהים את האקורדים מהאודיו, ומציבים אותם על המילים.</p>
+    <dl>
+      <dt>למה קשה</dt>
+      <dd>כאן <strong>לא</strong> יודעים את רצף האקורדים מראש, ולכן היתרון הגדול של
+          מסלולים 1–2 נעלם. במקום "מתי כל אקורד מתנגן" צריך גם "אילו אקורדים בכלל".</dd>
+      <dt>מה עובד</dt>
+      <dd>זיהוי עיוור (<code>recognize.py</code>): <strong>76% מדויק</strong> לכל תיבה
+          (מול 40% בסיס נאיבי), ו-73% בשיר held-out. מיקום עוגנים
+          (<code>place_anchors.py</code>) עם אקורדים ידועים: <strong>82% אותה מילה,
+          97% בטווח מילה</strong>; עם אקורדים מזוהים עיוור: 62% / 89%.</dd>
+      <dt>מה חסר</dt>
+      <dd>76% לא מספיק לעבודה ללא פיקוח — זה אומר שגיאה בכל תיבה רביעית. צריך
+          <strong>הפרדת מקורות</strong> (ראו פרק 10) ולולאת תיקון אנושי.</dd>
+    </dl>
+  </div>
+
+  <div class="note">
+    <p><span class="tag">תובנה</span>
+       שלושת המסלולים מתכנסים לאותו קובץ פלט — <code>public/sync/&lt;id&gt;.json</code> —
+       ולכן האפליקציה לא צריכה לדעת מאיפה הגיע השיר. כל שיפור במנוע היישור משרת את שלושתם.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2>3. מבנה הפרויקט</h2>
+<pre><code>src/                      React + TypeScript + Vite + Tailwind
+  types/song.ts           מודל הנתונים (Song / Section / Line / ChordAnchor)
+  lib/neginaParser.ts     פרסור פורמט negina -> מודל          [מסלול 1]
+  lib/serializeNegina.ts  הכיוון ההפוך (מודל -> טקסט מקור)
+  lib/library.ts          ספריית שירים ב-localStorage + שירי seed
+  lib/sync.ts             טיפוסי קובץ הסנכרון + חיפוש אקורד לפי זמן
+  lib/syncRunner.ts       הפעלת הפייפליין מהדפדפן
+  lib/songStats.ts        ציר זמן מטרונום (fallback ללא סנכרון)
+  lib/validation.ts       דוח "אקורדים חשודים"
+  pages/SongPage.tsx      דף השיר — לב לוגיקת הקריוקי
+  components/viewer/      רינדור הגיליון, אקורדי רפאים, תיקון אקורד
+
+pipeline/                 ניתוח אודיו (Python, venv ב-pipeline/.venv)
+public/sync/&lt;id&gt;.json     תוצר היישור — נטען ע"י האפליקציה
+public/validate/&lt;id&gt;.json דוח אקורדים חשודים
+docs/format/              מפרט פורמט negina (חובה לקרוא)</code></pre>
+
+  <p><strong>זרימה:</strong> טקסט negina ← <code>parseNegina</code> ← <code>Song</code>
+     ב-localStorage. במקביל, YouTube ← פייפליין ← <code>public/sync/&lt;id&gt;.json</code>,
+     ושניהם נפגשים ב-<code>SongPage</code>.</p>
+
+  <p><strong>הרצה:</strong> <code>npm run dev</code> לאפליקציה;
+     סנכרון מופעל מכפתור "צור סנכרון להקלטה" בדף השיר (עובר דרך
+     <code>POST /api/sync</code> ב-<code>vite.config.ts</code>, <strong>dev בלבד</strong>).
+     הפייפליין רץ מ-<code>pipeline/.venv</code> לפי <code>requirements.txt</code>.</p>
+</section>
+
+<section id="s4">
+  <h2>4. הפייפליין — שלבים</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th class="n">שלב</th><th>סקריפט</th><th>מה עושה</th><th class="n">מסלול</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td><code>analyze.py</code></td><td>ביטים, תיבות, BPM, זיהוי תחילת מוזיקה</td><td class="n">1·2·3</td></tr>
+      <tr><td class="n">2</td><td><code>align.py</code></td><td><strong>יישור רצף האקורדים הכתוב לאודיו</strong> ← הליבה</td><td class="n">1·2</td></tr>
+      <tr><td class="n">3</td><td><code>validate.py</code></td><td>ציון ביטחון לכל אקורד כתוב + זיהוי טרנספוזיציה</td><td class="n">1·2</td></tr>
+      <tr><td class="n">4</td><td><code>recognize.py</code></td><td>זיהוי אקורדים עיוור (בלי להציץ בגיליון)</td><td class="n">3</td></tr>
+      <tr><td class="n">5a</td><td><code>transcribe_words.py</code></td><td>תמלול עם חותמות זמן ברמת מילה</td><td class="n">2·3</td></tr>
+      <tr><td class="n">5b</td><td><code>place_anchors.py</code></td><td>מיקום אוטומטי של עוגני <code>^</code> בשורות המילים</td><td class="n">3</td></tr>
+      <tr><td class="n">—</td><td><code>extract_source.py</code></td><td>חילוץ מקור negina מקובץ <code>src/data/*.ts</code></td><td class="n">1</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s5">
+  <h2>5. האלגוריתם המרכזי — יישור אקורדים</h2>
+  <p>הרכיב שהכי חשוב להבין. הקובץ: <code>pipeline/align.py</code>.</p>
+
+  <h3>הבסיס</h3>
+  <ol>
+    <li>מחלצים <strong>כרומה</strong> (12 מחלקות גובה) מהאודיו, ומאגדים <strong>לפי ביט</strong> (חציון).</li>
+    <li>לכל אקורד כתוב בונים <strong>תבנית</strong> של 12 ממדים (סופה/שלישית/חמישית/שביעית).</li>
+    <li>דמיון קוסינוס בין תבנית לכרומה של כל ביט ← מטריצה <code>sim</code> בגודל K×B.</li>
+    <li><strong>Viterbi</strong> מוצא את מסלול האקורדים הטוב ביותר על פני הביטים.</li>
+  </ol>
+
+  <h3>למה Viterbi ולא זיהוי חופשי</h3>
+  <p>כי במסלולים 1–2 הרצף הכתוב <strong>ידוע</strong>. לא מנחשים אילו אקורדים יש — רק
+     <strong>מתי</strong> כל אחד מתנגן. זו בעיה קלה בהרבה, ולכן התוצאה מדויקת בהרבה
+     מזיהוי עיוור (מסלול 3).</p>
+
+  <h3>עונש שינוי</h3>
+  <p>שינויי אקורד נוחתים כמעט תמיד על תחילת תיבה, לפעמים באמצע:</p>
+<pre><code>pos == 0                 -&gt; עונש 0      (פעמה חזקה)
+pos == beats_per_bar/2   -&gt; עונש 0.12   (אמצע תיבה)
+אחרת                     -&gt; עונש 0.45</code></pre>
+  <p>מונע מהגבולות לסחוף כשאקורדים סמוכים חולקים צלילים (<code>Cm</code> מול <code>Fm7</code>).</p>
+
+  <h3>הבעיה שהתגלתה במסלול 2</h3>
+  <p>הגרסה המקורית הייתה Viterbi <strong>מונוטוני</strong> — כל אקורד נפרס בדיוק פעם אחת,
+     לפי הסדר. נכון לגיליון שלם (מסלול 1), אבל בגיליון tab4u אין מספיק אקורדים לכסות את
+     האודיו, ו"להישאר על אקורד" עולה <strong>0</strong> — אז ה-DP בלע את העודף במתיחת
+     אקורד בודד.</p>
+  <div class="warn">
+    <p><span class="tag">מדידה</span>
+       ב"סמי וסומו": אקורד <code>C</code> יחיד קיבל <strong>21 תיבות</strong> (כ-40 שניות).</p>
+  </div>
+
+  <h3>הפתרון — שלושה רכיבים</h3>
+  <p><strong>א. חזרות על חלקים.</strong> חלק שהסתיים יכול לקפוץ <strong>אחורה</strong>
+     לתחילת עצמו או לחלק קודם. קדימה מתקדמים רק אקורד-אקורד וחייבים לסיים באחרון — ולכן
+     <strong>כל אקורד כתוב עדיין במסלול</strong>; החזרות רק מכסות את האודיו הנוסף.</p>
+  <div class="note">
+    <p><span class="tag">למה זה חשוב</span>
+       ניסיון ראשון היה לוותר על מונוטוניות לגמרי. זה <strong>שבר</strong> את מסלול 1 —
+       טרפטוני ירד מ-132 ל-36 אקורדים בשימוש. המונוטוניות מקודדת "הגיליון מתאר את כל השיר,
+       נגן את כולו". הפתרון הנכון: לשמר אותה <strong>ולהוסיף</strong> חזרות מעליה.</p>
+  </div>
+  <p><strong>ב. מודל משך</strong> (<code>HOLD_PENALTY = 0.05</code>). סכימת דמיון לכל ביט
+     לא יודעת כלום על <strong>כמה תכופות</strong> אקורדים אמורים להתחלף, ולכן ה-DP העדיף
+     להחזיק אקורד "סביר" על פני חזרה שמתאימה יותר. עכשיו כל ביט מעבר לתיבה הראשונה עולה
+     קצת, ויש תקרה קשיחה (<code>MAX_CHORD_BARS = 4.0</code>).</p>
+  <p><strong>ג. עיגון לשירה.</strong> האקורד המושר הראשון מוצמד לחלון סביב
+     <strong>המילה הראשונה</strong> (מ-Whisper). הכרומה לבדה מאפשרת לפתיח לסחוף כתיבה;
+     הקול הוא עֵד עצמאי.</p>
+
+  <h3>טיפול בפתיח לא-כתוב</h3>
+  <p><code>first_sung_chord()</code> בודק אם הגיליון פותח בשורה <strong>כלית</strong>
+     (<code>^^^</code>) או ישר בשורה <strong>מושרת</strong>:</p>
+  <ul>
+    <li>פותח מושר ← אין פתיח כתוב (טיפוסי למסלול 2) ← היישור מתחיל מהתיבה של המילה
+        הראשונה, והפתיח הכלי לא מכוסה במקום שאקורד יימתח עליו.</li>
+    <li>פותח כלי ← הגיליון כבר מתאר את הפתיח (טיפוסי למסלול 1) ← לא נוגעים.</li>
+  </ul>
+  <p>אוטומטי לחלוטין, בלי הגדרה לכל שיר.</p>
+</section>
+
+<section id="s6">
+  <h2>6. איך מודדים שהיישור נכון</h2>
+  <p>הבדיקה שהכי השתלמה: <strong>להשוות איפה היישור שם את האקורד המושר הראשון מול תחילת
+     השירה בפועל</strong> (מ-Whisper).</p>
+  <p>אקורד תקין נוחת <strong>על המילה או תיבה לפניה</strong> — דלתא שלילית קטנה.
+     דלתא <strong>חיובית</strong> משמעה שהפזמון נכנס אחרי שהזמר כבר התחיל = הפתיח סוחף.</p>
+  <div class="ok">
+    <p><span class="tag">דוגמה</span>
+       כך התגלה באג אמיתי בשיר השלישי: דלתא <span class="num">+1.31</span> שנ׳ (מאוחר מדי).
+       אחרי העיגון: <span class="num">+0.06</span>.</p>
+  </div>
+  <p>מומלץ להפוך לבדיקה קבועה בכל הרצה.</p>
+</section>
+
+<section id="s7">
+  <h2>7. מה עובד — מספרים מדודים</h2>
+
+  <h3>יישור (מסלולים 1–2)</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th>שיר</th><th class="n">מסלול</th><th class="n">אירועים</th>
+      <th class="n">אקורדים בשימוש</th><th class="n">משך חציוני</th>
+      <th class="n">מקס׳</th><th class="n">דלתא מול שירה</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>סמי וסומו (tab4u)</td><td class="n">2</td><td class="n">120</td>
+          <td class="n">72/72</td><td class="n">0.5 תיבה</td><td class="n">4.0</td>
+          <td class="n">−1.41 ✓</td></tr>
+      <tr><td>החוף של טרפטוני</td><td class="n">1</td><td class="n">132</td>
+          <td class="n">132/132</td><td class="n">0.5</td><td class="n">2.0</td>
+          <td class="n">−1.43 ✓</td></tr>
+      <tr><td>שיר שלישי</td><td class="n">1</td><td class="n">135</td>
+          <td class="n">135/135</td><td class="n">1.0</td><td class="n">4.0</td>
+          <td class="n">+0.06 ✓</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>לפני התיקון: אקורד בודד נמתח על <strong>22.75 תיבות</strong>. אחרי: מקסימום 4.</p>
+
+  <h3>מסלול 3 — זיהוי עיוור ומיקום עוגנים</h3>
+  <ul>
+    <li>זיהוי אקורדים לכל תיבה: טרפטוני (88 תיבות) <strong>76% מדויק</strong>,
+        82% מדויק-או-סופה, 10% שגוי. שיר שני (192 תיבות, held-out): 73% / 10% שגוי.
+        בסיס נאיבי: 40%.</li>
+    <li>מיקום עוגנים עם <strong>אקורדים ידועים</strong>: 82% אותה מילה, 97% בטווח מילה —
+        בשני השירים, כולל held-out שלא כויל עליו.</li>
+    <li>מיקום עוגנים <strong>עיוור</strong>: 62% אותה מילה, 89% בטווח מילה, 80% סופת אקורד.</li>
+  </ul>
+</section>
+
+<section id="s8">
+  <h2>8. מגבלות ידועות</h2>
+  <ol>
+    <li><strong>כיסוי חלקי במסלול 2.</strong> קטעים בלי אקורדים כתובים (סולו, אאוטרו)
+        נשארים לא מכוסים. זה <strong>יותר כן</strong> מלהמציא, אבל לא שלם.</li>
+    <li><strong>שחזור מבנה חלקי.</strong> החזרות מוגבלות לקפיצה אחורה. מבנה
+        בית-פזמון-בית-פזמון משוחזר בקירוב. שחזור צורה מלא מהאודיו הוא בעיה ברמת מחקר.</li>
+    <li><strong>אקורדים מורכבים.</strong> <code>Gm7</code> נשמע לפעמים כ-<code>Fm</code>
+        או <code>Abmaj7</code>. אאוטרו-ים מבולגנים.</li>
+    <li><strong><code>HOLD_PENALTY</code> הוא פשרה גלובלית.</strong> נמדד שהוא מקצר אקורד
+        אחד בטרפטוני מ-3.5 ל-2 תיבות. שיר שבנוי על פדל ארוך עלול להיפגע — יש דגל
+        <code>--hold-penalty</code>.</li>
+    <li><strong><code>/api/sync</code> הוא dev בלבד</strong>, ואחסון ב-<strong>localStorage
+        בלבד</strong> — אין backend, משתמשים או סנכרון בין מכשירים.</li>
+    <li><strong>תמלול Whisper בעברית רועש.</strong> הטקסט לא מדויק — אבל
+        <strong>חותמות הזמן</strong> כן, וזה כל מה שצריך. אל תשפטו לפי איכות הטקסט.</li>
+  </ol>
+</section>
+
+<section id="s9">
+  <h2>9. החלטות כיול — אל תשנו בעיוורון</h2>
+  <div class="warn">
+    <p><span class="tag">אזהרה</span> כל אלה נמדדו. שינוי בלי מדידה חוזרת = רגרסיה.</p>
+  </div>
+  <ul>
+    <li><strong>הערכת סולם לפי התאמת שלישיות דיאטוניות</strong>, ולא קורלציית Krumhansl —
+        Krumhansl בחר דו מז'ור לשיר בדו מינור (השירה מטביעה את השלישית המינורית).
+        ה-prior של הסולם (<span class="num">−0.10</span> לאקורד מחוץ לסולם) היה
+        <strong>השיפור הגדול ביותר: +28 נקודות</strong>.</li>
+    <li><strong>כרומה ברגיסטר בס</strong> (C1, 3 אוקטבות) במשקל 0.25 ← <strong>+22 נקודות</strong>.</li>
+    <li><strong>הפרדה הרמונית-פרקוסיבית (HPSS) מזיקה</strong>
+        (<span class="num">−3</span> נקודות) — כבויה כברירת מחדל.</li>
+    <li><strong>Whisper חייב <code>vad_filter=False</code> ו-
+        <code>condition_on_previous_text=False</code></strong> — ה-VAD מכוון לדיבור
+        ומשתיק שירה מעל להקה לחלוטין.</li>
+    <li><code>--fwd-beats 0.5</code> — אופטימום משותף לשני השירים; ערך גבוה יותר עושה
+        overfit לשיר הראשון.</li>
+    <li><strong>מונוטוניות ביישור היא חיונית</strong> — ראו פרק 5.</li>
+  </ul>
+</section>
+
+<section id="s10">
+  <h2>10. כיווני פיתוח לפי מסלול</h2>
+
+  <h3>מסלול 1 — קורפוס קיים</h3>
+  <ul>
+    <li><strong>ייבוא המוני של הקורפוס.</strong> כרגע כל שיר מתווסף ידנית כקובץ
+        <code>.ts</code>. צריך ייבוא batch + אחסון אמיתי (לא localStorage).</li>
+  </ul>
+
+  <h3>מסלול 2 — עמודי מתחרים</h3>
+  <ul>
+    <li><strong>להפוך את החילוץ לכלי.</strong> כרגע רץ ידנית בקונסולת הדפדפן. שיטת
+        מיפוי-הפיקסלים מוכחת — צריך לעטוף אותה בסקריפט.</li>
+    <li><strong>תמיכה ב-Ultimate Guitar</strong> ובמקורות נוספים.</li>
+    <li><strong>השלמת קטעים חסרים</strong> (סולו/אאוטרו) — תלוי בזיהוי מבנה, למטה.</li>
+  </ul>
+
+  <h3>מסלול 3 — מאפס</h3>
+  <ul>
+    <li><strong>הפרדת מקורות (Demucs/Spleeter)</strong> — להוציא את השירה ולחשב כרומה על
+        הליווי בלבד. כנראה הקפיצה הגדולה הבאה: השירה היא מקור הרעש העיקרי, וזה גם ייתן
+        זיהוי תחילת-שירה אמין יותר מ-Whisper. <strong>משרת את שלושת המסלולים.</strong></li>
+    <li><strong>לולאת תיקון-והפצה</strong> — המשתמש מתקן אקורד אחד ← התבנית מסתגלת ←
+        פענוח מחדש. תשתית ה-UI כבר קיימת (<code>ChordFixPopover</code>, "סקירת אקורדים").</li>
+  </ul>
+
+  <h3>חוצה-מסלולים</h3>
+  <ul>
+    <li><strong>זיהוי מבנה מהאודיו</strong> (מטריצת דמיון-עצמי ← סגמנטציה ← אשכול) לשחזור
+        צורת השיר האמיתית במקום קפיצות אחורה. פותר את מגבלות 1 ו-2.</li>
+    <li><strong>Backend אמיתי</strong> — משתמשים, אחסון, והרצת פייפליין כשירות.</li>
+    <li><strong>יישור מילים מלא</strong> — קריוקי ברמת מילה, לא רק ברמת שורה.</li>
+  </ul>
+</section>
+
+<section id="s11">
+  <h2>11. מלכודות</h2>
+  <ul>
+    <li><strong>קידוד בקונסולת Windows:</strong> להריץ Python עם
+        <code>PYTHONIOENCODING=utf-8</code>, אחרת טקסט עברי מפיל את הסקריפט
+        (<code>UnicodeEncodeError</code>).</li>
+    <li><strong>אל תמחקו את <code>pipeline/cache/</code></strong> — הורדה חוזרת מיוטיוב
+        = חסימת 403. בהרצה חוזרת אפשר <code>--input cache/&lt;videoId&gt;.webm</code>.</li>
+    <li><strong>קבצי sync ישנים</strong> (לפני תמיכת החזרות) לא מכילים
+        <code>sheetIndex</code>; האפליקציה מטפלת בהם כ-positional.</li>
+    <li><strong>בדיקת "המקור השתנה"</strong> סובלנית עד 20% אי-התאמת שמות, כדי ששינוי שם
+        של אקורד בודד לא יפסול את כל התזמון. בדיקה לפי אורך בלבד, כפי שהיה,
+        <strong>החמיצה</strong> שינויים אמיתיים.</li>
+    <li><strong>המשקל (meter) חייב להיות נכון.</strong> שיר ב-3/4 שנותח כ-4/4 ייתן תוצאה
+        גרועה. יש <code>--meter auto</code> אבל הוא לא מזהה 6/8.</li>
+  </ul>
+  <p>מסמכים נוספים: <code>docs/format/format-notes.md</code> (מפרט הפורמט המלא — חובה),
+     <code>docs/format/markato-tutorial.md</code>,
+     <code>docs/format/example-song.negina.txt</code>.</p>
+</section>
+
+<footer>accords — מדריך מסירה · 2026-07-25</footer>
+
+</div>
+</body>
+</html>

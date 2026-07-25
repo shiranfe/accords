@@ -1,7 +1,7 @@
 {
-  "videoId": "_Oeh7FpUN6Q",
-  "source": "https://youtu.be/_Oeh7FpUN6Q",
-  "generatedAt": "2026-07-24T14:01:32+00:00",
+  "videoId": null,
+  "source": "cache/_Oeh7FpUN6Q.webm",
+  "generatedAt": "2026-07-25T08:38:39+00:00",
   "beatsPerBar": 3,
   "meterAutoDetected": false,
   "musicStart": 15.16,
@@ -790,9 +790,65 @@
     242.138,
     243.299
   ],
+  "sheetChordCount": 135,
+  "vocalStart": 28.48,
+  "leadInSkipped": null,
+  "form": [
+    {
+      "section": 0,
+      "startBar": 1,
+      "start": 15.279
+    },
+    {
+      "section": 1,
+      "startBar": 11,
+      "start": 28.537
+    },
+    {
+      "section": 2,
+      "startBar": 28,
+      "start": 49.064
+    },
+    {
+      "section": 3,
+      "startBar": 46,
+      "start": 71.007
+    },
+    {
+      "section": 4,
+      "startBar": 75,
+      "start": 105.07
+    },
+    {
+      "section": 5,
+      "startBar": 91,
+      "start": 123.925
+    },
+    {
+      "section": 6,
+      "startBar": 107,
+      "start": 142.756
+    },
+    {
+      "section": 7,
+      "startBar": 135,
+      "start": 175.845
+    },
+    {
+      "section": 8,
+      "startBar": 152,
+      "start": 195.976
+    },
+    {
+      "section": 9,
+      "startBar": 178,
+      "start": 226.441
+    }
+  ],
   "chords": [
     {
       "i": 0,
+      "sheetIndex": 0,
       "name": "Am7",
       "startBeat": 0,
       "beats": 7,
@@ -803,6 +859,7 @@
     },
     {
       "i": 1,
+      "sheetIndex": 1,
       "name": "Bm7",
       "startBeat": 7,
       "beats": 4,
@@ -813,6 +870,7 @@
     },
     {
       "i": 2,
+      "sheetIndex": 2,
       "name": "Am7",
       "startBeat": 11,
       "beats": 1,
@@ -823,6 +881,7 @@
     },
     {
       "i": 3,
+      "sheetIndex": 3,
       "name": "Gmaj9",
       "startBeat": 12,
       "beats": 5,
@@ -833,6 +892,7 @@
     },
     {
       "i": 4,
+      "sheetIndex": 4,
       "name": "D7",
       "startBeat": 17,
       "beats": 1,
@@ -843,6 +903,7 @@
     },
     {
       "i": 5,
+      "sheetIndex": 5,
       "name": "Am7",
       "startBeat": 18,
       "beats": 2,
@@ -853,6 +914,7 @@
     },
     {
       "i": 6,
+      "sheetIndex": 6,
       "name": "Bbm7",
       "startBeat": 20,
       "beats": 1,
@@ -863,6 +925,7 @@
     },
     {
       "i": 7,
+      "sheetIndex": 7,
       "name": "Bm7",
       "startBeat": 21,
       "beats": 2,
@@ -873,6 +936,7 @@
     },
     {
       "i": 8,
+      "sheetIndex": 8,
       "name": "Am7",
       "startBeat": 23,
       "beats": 6,
@@ -883,26 +947,29 @@
     },
     {
       "i": 9,
+      "sheetIndex": 9,
       "name": "Gmaj9",
       "startBeat": 29,
-      "beats": 6,
-      "start": 27.283,
-      "end": 29.791,
-      "startBar": 10,
-      "bars": 2.0
-    },
-    {
-      "i": 10,
-      "name": "Gmaj9",
-      "startBeat": 35,
       "beats": 3,
-      "start": 29.791,
-      "end": 30.975,
-      "startBar": 12,
+      "start": 27.283,
+      "end": 28.537,
+      "startBar": 10,
       "bars": 1.0
     },
     {
+      "i": 10,
+      "sheetIndex": 10,
+      "name": "Gmaj9",
+      "startBeat": 32,
+      "beats": 6,
+      "start": 28.537,
+      "end": 30.975,
+      "startBar": 11,
+      "bars": 2.0
+    },
+    {
       "i": 11,
+      "sheetIndex": 11,
       "name": "Am7",
       "startBeat": 38,
       "beats": 3,
@@ -913,6 +980,7 @@
     },
     {
       "i": 12,
+      "sheetIndex": 12,
       "name": "Bm7",
       "startBeat": 41,
       "beats": 3,
@@ -923,6 +991,7 @@
     },
     {
       "i": 13,
+      "sheetIndex": 13,
       "name": "Am7",
       "startBeat": 44,
       "beats": 3,
@@ -933,6 +1002,7 @@
     },
     {
       "i": 14,
+      "sheetIndex": 14,
       "name": "Gmaj9",
       "startBeat": 47,
       "beats": 3,
@@ -943,6 +1013,7 @@
     },
     {
       "i": 15,
+      "sheetIndex": 15,
       "name": "Am7",
       "startBeat": 50,
       "beats": 3,
@@ -953,6 +1024,7 @@
     },
     {
       "i": 16,
+      "sheetIndex": 16,
       "name": "Bm7",
       "startBeat": 53,
       "beats": 3,
@@ -963,6 +1035,7 @@
     },
     {
       "i": 17,
+      "sheetIndex": 17,
       "name": "Gadd2",
       "startBeat": 56,
       "beats": 3,
@@ -973,6 +1046,7 @@
     },
     {
       "i": 18,
+      "sheetIndex": 18,
       "name": "Cmaj7",
       "startBeat": 59,
       "beats": 3,
@@ -983,6 +1057,7 @@
     },
     {
       "i": 19,
+      "sheetIndex": 19,
       "name": "Cmmaj7",
       "startBeat": 62,
       "beats": 3,
@@ -993,6 +1068,7 @@
     },
     {
       "i": 20,
+      "sheetIndex": 20,
       "name": "Bm7",
       "startBeat": 65,
       "beats": 3,
@@ -1003,6 +1079,7 @@
     },
     {
       "i": 21,
+      "sheetIndex": 21,
       "name": "Bbdim",
       "startBeat": 68,
       "beats": 3,
@@ -1013,6 +1090,7 @@
     },
     {
       "i": 22,
+      "sheetIndex": 22,
       "name": "Am7b5",
       "startBeat": 71,
       "beats": 6,
@@ -1023,6 +1101,7 @@
     },
     {
       "i": 23,
+      "sheetIndex": 23,
       "name": "Dadd2",
       "startBeat": 77,
       "beats": 6,
@@ -1033,6 +1112,7 @@
     },
     {
       "i": 24,
+      "sheetIndex": 24,
       "name": "Gmaj9",
       "startBeat": 83,
       "beats": 3,
@@ -1043,6 +1123,7 @@
     },
     {
       "i": 25,
+      "sheetIndex": 25,
       "name": "Am7",
       "startBeat": 86,
       "beats": 6,
@@ -1053,6 +1134,7 @@
     },
     {
       "i": 26,
+      "sheetIndex": 26,
       "name": "Bm7",
       "startBeat": 92,
       "beats": 2,
@@ -1063,6 +1145,7 @@
     },
     {
       "i": 27,
+      "sheetIndex": 27,
       "name": "Am7",
       "startBeat": 94,
       "beats": 1,
@@ -1073,6 +1156,7 @@
     },
     {
       "i": 28,
+      "sheetIndex": 28,
       "name": "Gmaj9",
       "startBeat": 95,
       "beats": 3,
@@ -1083,36 +1167,40 @@
     },
     {
       "i": 29,
+      "sheetIndex": 29,
       "name": "Am7",
       "startBeat": 98,
-      "beats": 6,
+      "beats": 3,
       "start": 55.31,
-      "end": 57.771,
+      "end": 56.494,
       "startBar": 33,
-      "bars": 2.0
+      "bars": 1.0
     },
     {
       "i": 30,
+      "sheetIndex": 30,
       "name": "Bm7b5",
-      "startBeat": 104,
-      "beats": 1,
-      "start": 57.771,
-      "end": 58.189,
-      "startBar": 35,
-      "bars": 0.33
+      "startBeat": 101,
+      "beats": 3,
+      "start": 56.494,
+      "end": 57.771,
+      "startBar": 34,
+      "bars": 1.0
     },
     {
       "i": 31,
+      "sheetIndex": 31,
       "name": "E7",
-      "startBeat": 105,
-      "beats": 2,
-      "start": 58.189,
+      "startBeat": 104,
+      "beats": 3,
+      "start": 57.771,
       "end": 59.025,
       "startBar": 35,
-      "bars": 0.67
+      "bars": 1.0
     },
     {
       "i": 32,
+      "sheetIndex": 32,
       "name": "Am7",
       "startBeat": 107,
       "beats": 3,
@@ -1123,6 +1211,7 @@
     },
     {
       "i": 33,
+      "sheetIndex": 33,
       "name": "Cm6",
       "startBeat": 110,
       "beats": 3,
@@ -1133,36 +1222,40 @@
     },
     {
       "i": 34,
+      "sheetIndex": 34,
       "name": "Bm7",
       "startBeat": 113,
-      "beats": 3,
-      "start": 61.463,
-      "end": 62.694,
-      "startBar": 38,
-      "bars": 1.0
-    },
-    {
-      "i": 35,
-      "name": "Bbdim",
-      "startBeat": 116,
-      "beats": 3,
-      "start": 62.694,
-      "end": 63.901,
-      "startBar": 39,
-      "bars": 1.0
-    },
-    {
-      "i": 36,
-      "name": "Am7b5",
-      "startBeat": 119,
       "beats": 6,
-      "start": 63.901,
-      "end": 66.339,
-      "startBar": 40,
+      "start": 61.463,
+      "end": 63.901,
+      "startBar": 38,
       "bars": 2.0
     },
     {
+      "i": 35,
+      "sheetIndex": 35,
+      "name": "Bbdim",
+      "startBeat": 119,
+      "beats": 1,
+      "start": 63.901,
+      "end": 64.342,
+      "startBar": 40,
+      "bars": 0.33
+    },
+    {
+      "i": 36,
+      "sheetIndex": 36,
+      "name": "Am7b5",
+      "startBeat": 120,
+      "beats": 5,
+      "start": 64.342,
+      "end": 66.339,
+      "startBar": 40,
+      "bars": 1.67
+    },
+    {
       "i": 37,
+      "sheetIndex": 37,
       "name": "D7",
       "startBeat": 125,
       "beats": 12,
@@ -1173,6 +1266,7 @@
     },
     {
       "i": 38,
+      "sheetIndex": 38,
       "name": "G",
       "startBeat": 137,
       "beats": 6,
@@ -1183,6 +1277,7 @@
     },
     {
       "i": 39,
+      "sheetIndex": 39,
       "name": "B7",
       "startBeat": 143,
       "beats": 6,
@@ -1193,6 +1288,7 @@
     },
     {
       "i": 40,
+      "sheetIndex": 40,
       "name": "Em",
       "startBeat": 149,
       "beats": 6,
@@ -1203,6 +1299,7 @@
     },
     {
       "i": 41,
+      "sheetIndex": 41,
       "name": "Dm7",
       "startBeat": 155,
       "beats": 3,
@@ -1213,6 +1310,7 @@
     },
     {
       "i": 42,
+      "sheetIndex": 42,
       "name": "G7",
       "startBeat": 158,
       "beats": 3,
@@ -1223,6 +1321,7 @@
     },
     {
       "i": 43,
+      "sheetIndex": 43,
       "name": "Cmaj7",
       "startBeat": 161,
       "beats": 6,
@@ -1233,6 +1332,7 @@
     },
     {
       "i": 44,
+      "sheetIndex": 44,
       "name": "Bm7",
       "startBeat": 167,
       "beats": 6,
@@ -1243,6 +1343,7 @@
     },
     {
       "i": 45,
+      "sheetIndex": 45,
       "name": "Am7",
       "startBeat": 173,
       "beats": 6,
@@ -1253,6 +1354,7 @@
     },
     {
       "i": 46,
+      "sheetIndex": 46,
       "name": "Cm7",
       "startBeat": 179,
       "beats": 3,
@@ -1263,6 +1365,7 @@
     },
     {
       "i": 47,
+      "sheetIndex": 47,
       "name": "Cm6",
       "startBeat": 182,
       "beats": 3,
@@ -1273,6 +1376,7 @@
     },
     {
       "i": 48,
+      "sheetIndex": 48,
       "name": "G",
       "startBeat": 185,
       "beats": 6,
@@ -1283,6 +1387,7 @@
     },
     {
       "i": 49,
+      "sheetIndex": 49,
       "name": "B7sus4",
       "startBeat": 191,
       "beats": 6,
@@ -1293,6 +1398,7 @@
     },
     {
       "i": 50,
+      "sheetIndex": 50,
       "name": "Em",
       "startBeat": 197,
       "beats": 6,
@@ -1303,6 +1409,7 @@
     },
     {
       "i": 51,
+      "sheetIndex": 51,
       "name": "Dm7",
       "startBeat": 203,
       "beats": 3,
@@ -1313,6 +1420,7 @@
     },
     {
       "i": 52,
+      "sheetIndex": 52,
       "name": "G7",
       "startBeat": 206,
       "beats": 3,
@@ -1323,6 +1431,7 @@
     },
     {
       "i": 53,
+      "sheetIndex": 53,
       "name": "Cmaj7",
       "startBeat": 209,
       "beats": 6,
@@ -1333,6 +1442,7 @@
     },
     {
       "i": 54,
+      "sheetIndex": 54,
       "name": "Cm6",
       "startBeat": 215,
       "beats": 9,
@@ -1343,6 +1453,7 @@
     },
     {
       "i": 55,
+      "sheetIndex": 55,
       "name": "Gmaj9",
       "startBeat": 224,
       "beats": 3,
@@ -1353,6 +1464,7 @@
     },
     {
       "i": 56,
+      "sheetIndex": 56,
       "name": "Am7",
       "startBeat": 227,
       "beats": 3,
@@ -1363,6 +1475,7 @@
     },
     {
       "i": 57,
+      "sheetIndex": 57,
       "name": "Bm7",
       "startBeat": 230,
       "beats": 3,
@@ -1373,6 +1486,7 @@
     },
     {
       "i": 58,
+      "sheetIndex": 58,
       "name": "Am7",
       "startBeat": 233,
       "beats": 3,
@@ -1383,6 +1497,7 @@
     },
     {
       "i": 59,
+      "sheetIndex": 59,
       "name": "Gmaj9",
       "startBeat": 236,
       "beats": 3,
@@ -1393,6 +1508,7 @@
     },
     {
       "i": 60,
+      "sheetIndex": 60,
       "name": "Am7",
       "startBeat": 239,
       "beats": 3,
@@ -1403,6 +1519,7 @@
     },
     {
       "i": 61,
+      "sheetIndex": 61,
       "name": "Bm7",
       "startBeat": 242,
       "beats": 3,
@@ -1413,6 +1530,7 @@
     },
     {
       "i": 62,
+      "sheetIndex": 62,
       "name": "Gadd2",
       "startBeat": 245,
       "beats": 3,
@@ -1423,6 +1541,7 @@
     },
     {
       "i": 63,
+      "sheetIndex": 63,
       "name": "Cmaj7",
       "startBeat": 248,
       "beats": 3,
@@ -1433,6 +1552,7 @@
     },
     {
       "i": 64,
+      "sheetIndex": 64,
       "name": "Cmmaj7",
       "startBeat": 251,
       "beats": 3,
@@ -1443,26 +1563,29 @@
     },
     {
       "i": 65,
+      "sheetIndex": 65,
       "name": "Bm7",
       "startBeat": 254,
-      "beats": 3,
+      "beats": 4,
       "start": 116.889,
-      "end": 118.05,
+      "end": 118.445,
       "startBar": 85,
-      "bars": 1.0
+      "bars": 1.33
     },
     {
       "i": 66,
+      "sheetIndex": 66,
       "name": "Bbdim",
-      "startBeat": 257,
-      "beats": 3,
-      "start": 118.05,
+      "startBeat": 258,
+      "beats": 2,
+      "start": 118.445,
       "end": 119.234,
       "startBar": 86,
-      "bars": 1.0
+      "bars": 0.67
     },
     {
       "i": 67,
+      "sheetIndex": 67,
       "name": "Am7b5",
       "startBeat": 260,
       "beats": 6,
@@ -1473,6 +1596,7 @@
     },
     {
       "i": 68,
+      "sheetIndex": 68,
       "name": "Dadd2",
       "startBeat": 266,
       "beats": 6,
@@ -1483,6 +1607,7 @@
     },
     {
       "i": 69,
+      "sheetIndex": 69,
       "name": "Gmaj9",
       "startBeat": 272,
       "beats": 3,
@@ -1493,6 +1618,7 @@
     },
     {
       "i": 70,
+      "sheetIndex": 70,
       "name": "Am7",
       "startBeat": 275,
       "beats": 3,
@@ -1503,6 +1629,7 @@
     },
     {
       "i": 71,
+      "sheetIndex": 71,
       "name": "Bm7",
       "startBeat": 278,
       "beats": 3,
@@ -1513,6 +1640,7 @@
     },
     {
       "i": 72,
+      "sheetIndex": 72,
       "name": "Am7",
       "startBeat": 281,
       "beats": 3,
@@ -1523,6 +1651,7 @@
     },
     {
       "i": 73,
+      "sheetIndex": 73,
       "name": "Gmaj9",
       "startBeat": 284,
       "beats": 3,
@@ -1533,6 +1662,7 @@
     },
     {
       "i": 74,
+      "sheetIndex": 74,
       "name": "Am7",
       "startBeat": 287,
       "beats": 3,
@@ -1543,6 +1673,7 @@
     },
     {
       "i": 75,
+      "sheetIndex": 75,
       "name": "Bm7b5",
       "startBeat": 290,
       "beats": 3,
@@ -1553,6 +1684,7 @@
     },
     {
       "i": 76,
+      "sheetIndex": 76,
       "name": "E7",
       "startBeat": 293,
       "beats": 3,
@@ -1563,6 +1695,7 @@
     },
     {
       "i": 77,
+      "sheetIndex": 77,
       "name": "Am7",
       "startBeat": 296,
       "beats": 3,
@@ -1573,6 +1706,7 @@
     },
     {
       "i": 78,
+      "sheetIndex": 78,
       "name": "Cm6",
       "startBeat": 299,
       "beats": 3,
@@ -1583,26 +1717,29 @@
     },
     {
       "i": 79,
+      "sheetIndex": 79,
       "name": "Bm7",
       "startBeat": 302,
-      "beats": 3,
+      "beats": 4,
       "start": 135.697,
-      "end": 136.882,
+      "end": 137.253,
       "startBar": 101,
-      "bars": 1.0
+      "bars": 1.33
     },
     {
       "i": 80,
+      "sheetIndex": 80,
       "name": "Bbdim",
-      "startBeat": 305,
-      "beats": 3,
-      "start": 136.882,
+      "startBeat": 306,
+      "beats": 2,
+      "start": 137.253,
       "end": 138.066,
       "startBar": 102,
-      "bars": 1.0
+      "bars": 0.67
     },
     {
       "i": 81,
+      "sheetIndex": 81,
       "name": "Am7b5",
       "startBeat": 308,
       "beats": 6,
@@ -1613,6 +1750,7 @@
     },
     {
       "i": 82,
+      "sheetIndex": 82,
       "name": "D7",
       "startBeat": 314,
       "beats": 6,
@@ -1623,6 +1761,7 @@
     },
     {
       "i": 83,
+      "sheetIndex": 83,
       "name": "G",
       "startBeat": 320,
       "beats": 6,
@@ -1633,6 +1772,7 @@
     },
     {
       "i": 84,
+      "sheetIndex": 84,
       "name": "B7",
       "startBeat": 326,
       "beats": 6,
@@ -1643,6 +1783,7 @@
     },
     {
       "i": 85,
+      "sheetIndex": 85,
       "name": "Em",
       "startBeat": 332,
       "beats": 6,
@@ -1653,6 +1794,7 @@
     },
     {
       "i": 86,
+      "sheetIndex": 86,
       "name": "Dm7",
       "startBeat": 338,
       "beats": 3,
@@ -1663,6 +1805,7 @@
     },
     {
       "i": 87,
+      "sheetIndex": 87,
       "name": "G7",
       "startBeat": 341,
       "beats": 3,
@@ -1673,6 +1816,7 @@
     },
     {
       "i": 88,
+      "sheetIndex": 88,
       "name": "Cmaj7",
       "startBeat": 344,
       "beats": 6,
@@ -1683,6 +1827,7 @@
     },
     {
       "i": 89,
+      "sheetIndex": 89,
       "name": "Bm7",
       "startBeat": 350,
       "beats": 6,
@@ -1693,6 +1838,7 @@
     },
     {
       "i": 90,
+      "sheetIndex": 90,
       "name": "Am7",
       "startBeat": 356,
       "beats": 9,
@@ -1703,6 +1849,7 @@
     },
     {
       "i": 91,
+      "sheetIndex": 91,
       "name": "Cm7",
       "startBeat": 365,
       "beats": 3,
@@ -1713,6 +1860,7 @@
     },
     {
       "i": 92,
+      "sheetIndex": 92,
       "name": "Cm6",
       "startBeat": 368,
       "beats": 3,
@@ -1723,6 +1871,7 @@
     },
     {
       "i": 93,
+      "sheetIndex": 93,
       "name": "G",
       "startBeat": 371,
       "beats": 6,
@@ -1733,6 +1882,7 @@
     },
     {
       "i": 94,
+      "sheetIndex": 94,
       "name": "B7sus4",
       "startBeat": 377,
       "beats": 6,
@@ -1743,6 +1893,7 @@
     },
     {
       "i": 95,
+      "sheetIndex": 95,
       "name": "Em",
       "startBeat": 383,
       "beats": 5,
@@ -1753,6 +1904,7 @@
     },
     {
       "i": 96,
+      "sheetIndex": 96,
       "name": "Dm7",
       "startBeat": 388,
       "beats": 1,
@@ -1763,6 +1915,7 @@
     },
     {
       "i": 97,
+      "sheetIndex": 97,
       "name": "G7",
       "startBeat": 389,
       "beats": 6,
@@ -1773,6 +1926,7 @@
     },
     {
       "i": 98,
+      "sheetIndex": 98,
       "name": "Cmaj7",
       "startBeat": 395,
       "beats": 6,
@@ -1783,6 +1937,7 @@
     },
     {
       "i": 99,
+      "sheetIndex": 99,
       "name": "Cm6",
       "startBeat": 401,
       "beats": 3,
@@ -1793,6 +1948,7 @@
     },
     {
       "i": 100,
+      "sheetIndex": 100,
       "name": "Gmaj9",
       "startBeat": 404,
       "beats": 9,
@@ -1803,6 +1959,7 @@
     },
     {
       "i": 101,
+      "sheetIndex": 101,
       "name": "B7",
       "startBeat": 413,
       "beats": 3,
@@ -1813,6 +1970,7 @@
     },
     {
       "i": 102,
+      "sheetIndex": 102,
       "name": "Em7",
       "startBeat": 416,
       "beats": 8,
@@ -1823,6 +1981,7 @@
     },
     {
       "i": 103,
+      "sheetIndex": 103,
       "name": "Dm7",
       "startBeat": 424,
       "beats": 1,
@@ -1833,6 +1992,7 @@
     },
     {
       "i": 104,
+      "sheetIndex": 104,
       "name": "G7",
       "startBeat": 425,
       "beats": 3,
@@ -1843,6 +2003,7 @@
     },
     {
       "i": 105,
+      "sheetIndex": 105,
       "name": "Cmaj7",
       "startBeat": 428,
       "beats": 9,
@@ -1853,6 +2014,7 @@
     },
     {
       "i": 106,
+      "sheetIndex": 106,
       "name": "Bm7",
       "startBeat": 437,
       "beats": 3,
@@ -1863,6 +2025,7 @@
     },
     {
       "i": 107,
+      "sheetIndex": 107,
       "name": "Bbm7",
       "startBeat": 440,
       "beats": 3,
@@ -1873,6 +2036,7 @@
     },
     {
       "i": 108,
+      "sheetIndex": 108,
       "name": "Am7",
       "startBeat": 443,
       "beats": 6,
@@ -1883,6 +2047,7 @@
     },
     {
       "i": 109,
+      "sheetIndex": 109,
       "name": "Cm7",
       "startBeat": 449,
       "beats": 3,
@@ -1893,6 +2058,7 @@
     },
     {
       "i": 110,
+      "sheetIndex": 110,
       "name": "Cm6",
       "startBeat": 452,
       "beats": 3,
@@ -1903,6 +2069,7 @@
     },
     {
       "i": 111,
+      "sheetIndex": 111,
       "name": "Gmaj9",
       "startBeat": 455,
       "beats": 6,
@@ -1913,6 +2080,7 @@
     },
     {
       "i": 112,
+      "sheetIndex": 112,
       "name": "B7#9",
       "startBeat": 461,
       "beats": 6,
@@ -1923,6 +2091,7 @@
     },
     {
       "i": 113,
+      "sheetIndex": 113,
       "name": "Em7",
       "startBeat": 467,
       "beats": 3,
@@ -1933,6 +2102,7 @@
     },
     {
       "i": 114,
+      "sheetIndex": 114,
       "name": "Em7",
       "startBeat": 470,
       "beats": 3,
@@ -1943,6 +2113,7 @@
     },
     {
       "i": 115,
+      "sheetIndex": 115,
       "name": "Ebm7",
       "startBeat": 473,
       "beats": 1,
@@ -1953,6 +2124,7 @@
     },
     {
       "i": 116,
+      "sheetIndex": 116,
       "name": "Dm7",
       "startBeat": 474,
       "beats": 2,
@@ -1963,6 +2135,7 @@
     },
     {
       "i": 117,
+      "sheetIndex": 117,
       "name": "G7",
       "startBeat": 476,
       "beats": 3,
@@ -1973,6 +2146,7 @@
     },
     {
       "i": 118,
+      "sheetIndex": 118,
       "name": "Cmaj7",
       "startBeat": 479,
       "beats": 6,
@@ -1983,6 +2157,7 @@
     },
     {
       "i": 119,
+      "sheetIndex": 119,
       "name": "Cm6",
       "startBeat": 485,
       "beats": 6,
@@ -1993,26 +2168,29 @@
     },
     {
       "i": 120,
+      "sheetIndex": 120,
       "name": "Bm7",
       "startBeat": 491,
-      "beats": 9,
+      "beats": 12,
       "start": 210.117,
-      "end": 213.786,
+      "end": 214.97,
       "startBar": 164,
-      "bars": 3.0
+      "bars": 4.0
     },
     {
       "i": 121,
+      "sheetIndex": 121,
       "name": "Eadd9",
-      "startBeat": 500,
-      "beats": 15,
-      "start": 213.786,
+      "startBeat": 503,
+      "beats": 12,
+      "start": 214.97,
       "end": 219.521,
-      "startBar": 167,
-      "bars": 5.0
+      "startBar": 168,
+      "bars": 4.0
     },
     {
       "i": 122,
+      "sheetIndex": 122,
       "name": "Am7",
       "startBeat": 515,
       "beats": 3,
@@ -2023,6 +2201,7 @@
     },
     {
       "i": 123,
+      "sheetIndex": 123,
       "name": "Cm6",
       "startBeat": 518,
       "beats": 12,
@@ -2033,6 +2212,7 @@
     },
     {
       "i": 124,
+      "sheetIndex": 124,
       "name": "Gmaj9",
       "startBeat": 530,
       "beats": 3,
@@ -2043,6 +2223,7 @@
     },
     {
       "i": 125,
+      "sheetIndex": 125,
       "name": "Am7",
       "startBeat": 533,
       "beats": 4,
@@ -2053,6 +2234,7 @@
     },
     {
       "i": 126,
+      "sheetIndex": 126,
       "name": "Bm7",
       "startBeat": 537,
       "beats": 11,
@@ -2063,6 +2245,7 @@
     },
     {
       "i": 127,
+      "sheetIndex": 127,
       "name": "Am7",
       "startBeat": 548,
       "beats": 2,
@@ -2073,6 +2256,7 @@
     },
     {
       "i": 128,
+      "sheetIndex": 128,
       "name": "Gmaj9",
       "startBeat": 550,
       "beats": 1,
@@ -2083,6 +2267,7 @@
     },
     {
       "i": 129,
+      "sheetIndex": 129,
       "name": "Cm9b5",
       "startBeat": 551,
       "beats": 3,
@@ -2093,6 +2278,7 @@
     },
     {
       "i": 130,
+      "sheetIndex": 130,
       "name": "Cm6",
       "startBeat": 554,
       "beats": 3,
@@ -2103,6 +2289,7 @@
     },
     {
       "i": 131,
+      "sheetIndex": 131,
       "name": "Bm7",
       "startBeat": 557,
       "beats": 3,
@@ -2113,6 +2300,7 @@
     },
     {
       "i": 132,
+      "sheetIndex": 132,
       "name": "Am7",
       "startBeat": 560,
       "beats": 1,
@@ -2123,23 +2311,25 @@
     },
     {
       "i": 133,
+      "sheetIndex": 133,
       "name": "Gmaj9",
       "startBeat": 561,
-      "beats": 14,
+      "beats": 11,
       "start": 237.749,
-      "end": 243.299,
+      "end": 242.138,
       "startBar": 187,
-      "bars": 4.67
+      "bars": 3.67
     },
     {
       "i": 134,
+      "sheetIndex": 134,
       "name": "G",
-      "startBeat": 575,
-      "beats": 2,
-      "start": 243.299,
+      "startBeat": 572,
+      "beats": 5,
+      "start": 242.138,
       "end": 243.693,
-      "startBar": 192,
-      "bars": 0.67
+      "startBar": 191,
+      "bars": 1.67
     }
   ]
 }
