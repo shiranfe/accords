@@ -12,6 +12,8 @@ export type ChordShape = {
   /** Bars to draw across `from`..`to` (string indices, low E = 0). Some
    *  voicings need two — an index bar plus a pinky bar higher up the neck. */
   barres?: { finger: number; from: number; to: number }[];
+  /** Shown when a chord offers more than one way to play it. */
+  label?: string;
 };
 
 export type ChordEntry = {

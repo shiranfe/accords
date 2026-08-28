@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChordDiagram } from "../ChordDiagram";
 import { findChordShape } from "../../data/chordShapes";
 import { prettyChord } from "../../lib/chordName";
@@ -68,7 +69,7 @@ export function ChordPanel({ names, activeName }: Props) {
             }`}
           >
             <div className="mb-1 text-center text-xs font-bold text-slate-900">{prettyChord(name)}</div>
-            <Voicing name={name} width={130} />
+            <Voicing name={name} width={130} alternates />
           </div>
         ))}
       </div>
@@ -82,8 +83,22 @@ export function ChordPanel({ names, activeName }: Props) {
   );
 }
 
-function Voicing({ name, width }: { name: string; width: number }) {
+/** "ג'אז · שורש במיתר 6" -> "ג'אז", so the chip stays readable on a small tile. */
+const chipLabel = (label: string) => label.split("·")[0].trim();
+
+function Voicing({
+  name,
+  width,
+  alternates = false,
+}: {
+  name: string;
+  width: number;
+  /** Offer the chord's other voicings underneath, with what each one is. */
+  alternates?: boolean;
+}) {
+  const [pick, setPick] = useState(0);
   const entry = findChordShape(name);
+
   if (!entry) {
     return (
       <div
@@ -94,5 +109,39 @@ function Voicing({ name, width }: { name: string; width: number }) {
       </div>
     );
   }
-  return <ChordDiagram shape={entry.shapes[0]} width={width} className="mx-auto block" />;
+
+  const shape = entry.shapes[Math.min(pick, entry.shapes.length - 1)];
+  const showPicker = alternates && entry.shapes.length > 1;
+
+  return (
+    <>
+      <ChordDiagram shape={shape} width={width} className="mx-auto block" />
+      {showPicker && (
+        <>
+          <div className="mt-1 flex flex-wrap justify-center gap-1">
+            {entry.shapes.map((option, i) => (
+              <button
+                key={option.label ?? i}
+                type="button"
+                title={option.label}
+                onClick={() => setPick(i)}
+                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                  i === Math.min(pick, entry.shapes.length - 1)
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                }`}
+              >
+                {option.label ? chipLabel(option.label) : i + 1}
+              </button>
+            ))}
+          </div>
+          {shape.label?.includes("·") && (
+            <div className="mt-1 text-[10px] leading-tight text-slate-400">
+              {shape.label.split("·")[1].trim()}
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
 }

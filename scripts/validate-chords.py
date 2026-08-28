@@ -56,7 +56,7 @@ def notes(frets, base):
 def main():
     src = open("src/data/chordShapes.ts", encoding="utf-8").read()
     entries = re.findall(
-        r'name:\s*"([^"]+)",\s*(?:alias:\s*"([^"]*)",\s*)?shapes:\s*\[(.*?)\]\s*\}',
+        r'name:\s*"([^"]+)",\s*(?:alias:\s*"([^"]*)",\s*)?shapes:\s*\[(.*?)\]\s*,?\s*\}',
         src, re.S)
     problems, warnings, checked = [], [], 0
     for name, alias, body in entries:

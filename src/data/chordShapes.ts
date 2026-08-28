@@ -22,12 +22,29 @@ const sh = (
     : {}),
 });
 
+/** Tag a voicing so a chord with several of them can say which is which. */
+const labeled = (label: string, shape: ChordShape): ChordShape => ({ ...shape, label });
+
+const FULL = "מלא";
+/**
+ * Three-note jazz voicings: root, third and seventh, no fifth. A bass player
+ * covers the root anyway, and the third and seventh are what make the chord
+ * what it is - so these are quieter, and moving between them is a finger or
+ * two rather than a jump across the neck. Labelled by which string the root
+ * sits on, which is the thing worth learning.
+ */
+const E6 = "ג'אז · שורש במיתר 6";
+const A5 = "ג'אז · שורש במיתר 5";
+
 export const CHORD_SHAPES: ChordEntry[] = [
   // ---- C ----
   { name: "C", shapes: [sh("x32010", "032010")] },
   { name: "C5", shapes: [sh("x133xx", "013400", 3)] },
   { name: "C6", shapes: [sh("x32210", "042310")] },
-  { name: "C7", shapes: [sh("x32310", "032410")] },
+  {
+    name: "C7",
+    shapes: [labeled(FULL, sh("x32310", "032410")), labeled(A5, sh("x212xx", "021300", 2))],
+  },
   { name: "C9", shapes: [sh("xx2122", "002134", 7)] },
   { name: "Cmaj7", shapes: [sh("x32000", "032000")] },
   { name: "Cdim", shapes: [sh("xxx431", "000431", 2)] },
@@ -67,7 +84,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // chord that is only meant to be root and fifth. Muted instead.
   { name: "D5", shapes: [sh("x13xxx", "014000", 5)] },
   { name: "D6", shapes: [sh("xx0202", "000102")] },
-  { name: "D7", shapes: [sh("xx0212", "000213")] },
+  {
+    name: "D7",
+    shapes: [labeled(FULL, sh("xx0212", "000213")), labeled(A5, sh("x212xx", "021300", 4))],
+  },
   { name: "D9", shapes: [sh("xx0210", "000210")] },
   { name: "Dmaj7", shapes: [sh("xx0222", "000123")] },
   { name: "Ddim", shapes: [sh("xx0131", "000141", 1, [1, 3, 5])] },
@@ -87,7 +107,14 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "D#6", alias: "Eb6", shapes: [sh("xx1313", "001314", 1, [1, 2, 4])] },
   { name: "D#7", alias: "Eb7", shapes: [sh("x13131", "013141", 6, [1, 1, 5])] },
   { name: "D#9", alias: "Eb9", shapes: [sh("xx1021", "001023")] },
-  { name: "D#maj7", alias: "Ebmaj7", shapes: [sh("x13231", "013241", 6, [1, 1, 5])] },
+  {
+    name: "D#maj7",
+    alias: "Ebmaj7",
+    shapes: [
+      labeled(FULL, sh("x13231", "013241", 6, [1, 1, 5])),
+      labeled(A5, sh("x213xx", "021400", 5)),
+    ],
+  },
   { name: "D#dim", alias: "Ebdim", shapes: [sh("xxx431", "000431", 5)] },
   { name: "D#aug", alias: "Ebaug", shapes: [sh("xx1003", "001004")] },
   { name: "D#sus4", alias: "Ebsus4", shapes: [sh("x13341", "012341", 6, [1, 1, 5])] },
@@ -102,7 +129,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "E", shapes: [sh("022100", "023100")] },
   { name: "E5", shapes: [sh("022400", "012400")] },
   { name: "E6", shapes: [sh("022120", "023140")] },
-  { name: "E7", shapes: [sh("020100", "020100")] },
+  {
+    name: "E7",
+    shapes: [labeled(FULL, sh("020100", "020100")), labeled(A5, sh("x212xx", "021300", 6))],
+  },
   { name: "E9", shapes: [sh("020102", "020104")] },
   { name: "Emaj7", shapes: [sh("021100", "031200")] },
   { name: "Edim", shapes: [sh("xxx431", "000431", 6)] },
@@ -114,7 +144,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // The dictionary leaves the D string open here, which sounds a D against a
   // chord that has no seventh. Fretted at the second fret, the usual shape.
   { name: "Em6", shapes: [sh("022020", "023010")] },
-  { name: "Em7", shapes: [sh("020000", "020000")] },
+  {
+    name: "Em7",
+    shapes: [labeled(FULL, sh("020000", "020000")), labeled(A5, sh("x313xx", "031400", 5))],
+  },
   { name: "Em9", shapes: [sh("022032", "012043")] },
 
   // ---- F ----
@@ -123,7 +156,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "F6", shapes: [sh("xx1313", "001314", 3, [1, 2, 5])] },
   { name: "F7", shapes: [sh("131211", "132211", 1, [1, 0, 5])] },
   { name: "F9", shapes: [sh("xx2132", "002143", 2)] },
-  { name: "Fmaj7", shapes: [sh("xx3210", "003210")] },
+  {
+    name: "Fmaj7",
+    shapes: [labeled(FULL, sh("xx3210", "003210")), labeled(E6, sh("1x22xx", "103400"))],
+  },
   { name: "Fdim", shapes: [sh("xx3404", "003204")] },
   { name: "Faug", shapes: [sh("xxx221", "000231")] },
   { name: "Fsus4", shapes: [sh("113311", "113411", 1, [1, 0, 5])] },
@@ -131,7 +167,13 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "F7b5", shapes: [sh("xx1223", "001234", 3)] },
   { name: "Fm", shapes: [sh("133111", "134111", 1, [1, 0, 5])] },
   { name: "Fm6", shapes: [sh("xx1312", "001312", 3, [1, 2, 5])] },
-  { name: "Fm7", shapes: [sh("131111", "131111", 1, [1, 0, 5])] },
+  {
+    name: "Fm7",
+    shapes: [
+      labeled(FULL, sh("131111", "131111", 1, [1, 0, 5])),
+      labeled(E6, sh("1x11xx", "102300")),
+    ],
+  },
   // Rootless, the way the dictionary draws it - the F is implied.
   { name: "Fm9", shapes: [sh("xx1113", "001114", 1, [1, 2, 5])] },
 
@@ -156,10 +198,22 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // ---- G ----
   { name: "G", shapes: [sh("320003", "210003")] },
   { name: "G5", shapes: [sh("355xxx", "134000")] },
-  { name: "G6", shapes: [sh("xx1313", "001314", 5, [1, 2, 5])] },
+  {
+    name: "G6",
+    shapes: [
+      labeled(FULL, sh("xx1313", "001314", 5, [1, 2, 5])),
+      labeled("ג'אז · שלושה קולות", sh("xx212x", "002130", 4)),
+    ],
+  },
   { name: "G7", shapes: [sh("320001", "320001")] },
   { name: "G9", shapes: [sh("xx2122", "002134", 2)] },
-  { name: "Gmaj7", shapes: [sh("354433", "142311", 1, [1, 0, 5])] },
+  {
+    name: "Gmaj7",
+    shapes: [
+      labeled(FULL, sh("354433", "142311", 1, [1, 0, 5])),
+      labeled(E6, sh("1x22xx", "103400", 3)),
+    ],
+  },
   { name: "Gdim", shapes: [sh("xxx431", "000431", 9)] },
   { name: "Gaug", shapes: [sh("xxx221", "000231", 3)] },
   { name: "Gsus4", shapes: [sh("133311", "123411", 3, [1, 0, 5])] },
@@ -167,7 +221,13 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "G7b5", shapes: [sh("xx1223", "001234", 5)] },
   { name: "Gm", shapes: [sh("133111", "134111", 3, [1, 0, 5])] },
   { name: "Gm6", shapes: [sh("xx1222", "001234", 2)] },
-  { name: "Gm7", shapes: [sh("131111", "131111", 3, [1, 0, 5])] },
+  {
+    name: "Gm7",
+    shapes: [
+      labeled(FULL, sh("131111", "131111", 3, [1, 0, 5])),
+      labeled(E6, sh("1x11xx", "102300", 3)),
+    ],
+  },
   { name: "Gm9", shapes: [sh("xx4021", "004021", 5)] },
 
   // ---- G# / Ab ----
@@ -203,14 +263,24 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // Same open-string slip as Em6: the dictionary leaves the G string ringing,
   // which sounds a seventh the chord does not have. Fretted at the second.
   { name: "Am6", shapes: [sh("x02212", "002314")] },
-  { name: "Am7", shapes: [sh("x02010", "002010")] },
+  {
+    name: "Am7",
+    shapes: [labeled(FULL, sh("x02010", "002010")), labeled(E6, sh("1x11xx", "102300", 5))],
+  },
   { name: "Am9", shapes: [sh("x03100", "003100", 5)] },
 
   // ---- A# / Bb ----
   { name: "A#", alias: "Bb", shapes: [sh("x13331", "012341", 1, [1, 1, 5])] },
   { name: "A#5", alias: "Bb5", shapes: [sh("133xxx", "134000", 6)] },
   { name: "A#6", alias: "Bb6", shapes: [sh("xx1313", "001314", 8, [1, 2, 5])] },
-  { name: "A#7", alias: "Bb7", shapes: [sh("x13131", "013141", 1, [1, 1, 5])] },
+  {
+    name: "A#7",
+    alias: "Bb7",
+    shapes: [
+      labeled(FULL, sh("x13131", "013141", 1, [1, 1, 5])),
+      labeled(E6, sh("1x12xx", "102300", 6)),
+    ],
+  },
   { name: "A#9", alias: "Bb9", shapes: [sh("x10111", "010234")] },
   { name: "A#maj7", alias: "Bbmaj7", shapes: [sh("132211", "142311", 6, [1, 0, 5])] },
   { name: "A#dim", alias: "Bbdim", shapes: [sh("x12320", "012430")] },
@@ -244,7 +314,13 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "B7b5", shapes: [sh("xx1223", "001234", 3)] },
   { name: "Bm", shapes: [sh("x24432", "013421", 1, [1, 1, 5])] },
   { name: "Bm6", shapes: [sh("xx2212", "002314", 3)] },
-  { name: "Bm7", shapes: [sh("x24232", "013121", 1, [1, 1, 5])] },
+  {
+    name: "Bm7",
+    shapes: [
+      labeled(FULL, sh("x24232", "013121", 1, [1, 1, 5])),
+      labeled(E6, sh("1x11xx", "102300", 7)),
+    ],
+  },
   // The open top string adds an E the chord does not have; muted instead.
   { name: "Bm9", shapes: [sh("x2022x", "010230")] },
 
@@ -253,7 +329,13 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // of them - it is a pop dictionary, not a jazz one. Both are standard
   // voicings, worked out from the chord tones rather than read off a diagram.
   // Am7b5: A open is the root, Eb the flat fifth, G the seventh, C the third.
-  { name: "Am7b5", shapes: [sh("x0101x", "002010")] },
+  {
+    name: "Am7b5",
+    shapes: [
+      labeled("פתוח", sh("x0101x", "002010")),
+      labeled(E6, sh("2x221x", "203410", 4)),
+    ],
+  },
   // D7b9: the usual root-on-the-A-string shape, fifth left out.
   { name: "D7b9", shapes: [sh("x2121x", "021430", 4)] },
 ];
