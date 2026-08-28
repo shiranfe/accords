@@ -34,13 +34,35 @@ const highestFret = (shape: ChordShape) =>
 
 const keyOf = (shape: ChordShape) => `${shape.baseFret}:${shape.frets.join(",")}`;
 
-type Template = { shape: ChordShape; rootString: number; rootPitch: number };
+type Template = {
+  shape: ChordShape;
+  rootString: number;
+  rootPitch: number;
+  /** Semitones from the root to whatever sits in the bass. */
+  bassDegree: number;
+};
+
+/** Which chord tone is lowest, in the words a player would use. */
+const DEGREE = [
+  "שורש", "נונה מוקטנת", "נונה", "טרצה מינורית", "טרצה", "קווארטה",
+  "קווינטה מוקטנת", "קווינטה", "קווינטה מוגדלת", "סקסטה", "שביעית",
+  "שביעית גדולה",
+];
+
+/** Root position, or which inversion the bass note makes it. */
+const inversionOf = (degree: number) => {
+  if (degree === 0) return null;
+  if (degree === 3 || degree === 4) return "היפוך ראשון";
+  if (degree >= 6 && degree <= 8) return "היפוך שני";
+  if (degree === 10 || degree === 11) return "היפוך שלישי";
+  return null;
+};
 
 /**
- * Movable shapes whose lowest sounded string is the root, gathered per chord
- * type. Every one of them is a shape already transcribed and checked, so a
- * position derived from it is right by construction — only its place on the
- * neck changes.
+ * Movable shapes gathered per chord type, whatever chord tone sits in the
+ * bass. Every one is a shape already transcribed and checked, so a position
+ * derived from it is right by construction: shifting the whole shape keeps
+ * every interval, and only its place on the neck changes.
  */
 const TEMPLATES: Map<string, Template[]> = (() => {
   const map = new Map<string, Template[]>();
@@ -50,12 +72,13 @@ const TEMPLATES: Map<string, Template[]> = (() => {
     for (const shape of entry.shapes) {
       if (!isMovable(shape)) continue;
       const rootString = lowestSounded(shape);
-      if (rootString < 0 || pitchAt(shape, rootString) !== rootPitch) continue;
+      const bass = rootString < 0 ? null : pitchAt(shape, rootString);
+      if (bass === null) continue;
+      const bassDegree = (bass - rootPitch + 12) % 12;
       const suffix = suffixOf(entry.name);
       const list = map.get(suffix) ?? [];
-      // one template per root string is enough; the rest are the same position
-      if (!list.some((t) => t.rootString === rootString && keyOf(t.shape) === keyOf(shape))) {
-        list.push({ shape, rootString, rootPitch });
+      if (!list.some((t) => keyOf(t.shape) === keyOf(shape))) {
+        list.push({ shape, rootString, rootPitch, bassDegree });
       }
       map.set(suffix, list);
     }
@@ -79,10 +102,13 @@ export function allVoicings(entry: ChordEntry): ChordShape[] {
   for (const template of TEMPLATES.get(suffixOf(entry.name)) ?? []) {
     let baseFret = template.shape.baseFret + ((target - template.rootPitch + 12) % 12);
     if (baseFret > 12) baseFret -= 12;
+    const inversion = inversionOf(template.bassDegree);
     const moved: ChordShape = {
       ...template.shape,
       baseFret,
-      label: `שורש במיתר ${STRING_LABEL[template.rootString]}`,
+      label: inversion
+        ? `${inversion} · ${DEGREE[template.bassDegree]} בבס`
+        : `שורש במיתר ${STRING_LABEL[template.rootString]}`,
     };
     if (baseFret < 1 || highestFret(moved) > 15) continue;
     const key = keyOf(moved);
