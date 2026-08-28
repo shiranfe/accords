@@ -8,6 +8,7 @@ import {
 import { CHORD_SHAPES } from "../data/chordShapes";
 import type { ChordEntry } from "../types/chord";
 import { navigate } from "../lib/navigate";
+import { prettyChord } from "../lib/chordName";
 
 /** Roots in playing order, sharps only — flats are folded onto their sharp. */
 const ROOT_ORDER = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
@@ -22,11 +23,11 @@ const FLAT_TO_SHARP: Record<string, string> = {
 
 /** Both spellings in the heading, the way the dictionary writes them. */
 const ROOT_LABEL: Record<string, string> = {
-  "A#": "A# / Bb",
-  "C#": "C# / Db",
-  "D#": "D# / Eb",
-  "F#": "F# / Gb",
-  "G#": "G# / Ab",
+  "A#": "A♯ / B♭",
+  "C#": "C♯ / D♭",
+  "D#": "D♯ / E♭",
+  "F#": "F♯ / G♭",
+  "G#": "G♯ / A♭",
 };
 
 const rootOf = (name: string) => {
@@ -36,8 +37,82 @@ const rootOf = (name: string) => {
   return FLAT_TO_SHARP[raw] ?? raw;
 };
 
-const ALL_ROOTS = ROOT_ORDER.filter((root) =>
-  CHORD_SHAPES.some((entry) => rootOf(entry.name) === root),
+/** Engraved accidentals back to the spelling the data uses. */
+const plain = (text: string) => text.replace(/♯/g, "#").replace(/♭/g, "b").toLowerCase();
+
+/** "D♭m7" and "Dbm7" both have to find the C#m7 the dictionary stores. */
+const needleOf = (query: string) => {
+  const text = plain(query.trim());
+  const match = text.match(/^([a-g])b(.*)$/);
+  const sharp = match && FLAT_TO_SHARP[match[1].toUpperCase() + "b"];
+  return sharp ? (sharp + match[2]).toLowerCase() : text;
+};
+
+/** Everything after the root: "", "m7", "sus4", "7b5"… */
+const suffixOf = (name: string) => name.replace(/^[A-G][#b]?/, "");
+
+type Quality = "major" | "minor" | "dom" | "sus" | "sym" | "power";
+
+const QUALITY_BY_SUFFIX: Record<string, Quality> = {
+  "": "major",
+  "6": "major",
+  maj7: "major",
+  m: "minor",
+  m6: "minor",
+  m7: "minor",
+  m9: "minor",
+  "7": "dom",
+  "9": "dom",
+  "7b5": "dom",
+  sus2: "sus",
+  sus4: "sus",
+  dim: "sym",
+  aug: "sym",
+  "5": "power",
+};
+
+/** Map falls back to a guess so a newly transcribed suffix still shows up. */
+const qualityOf = (name: string): Quality => {
+  const suffix = suffixOf(name);
+  const known = QUALITY_BY_SUFFIX[suffix];
+  if (known) return known;
+  if (suffix.includes("sus")) return "sus";
+  if (suffix.startsWith("dim") || suffix.startsWith("aug")) return "sym";
+  if (suffix.startsWith("m") && !suffix.startsWith("maj")) return "minor";
+  if (/^\d/.test(suffix)) return "dom";
+  return "major";
+};
+
+const QUALITIES: ReadonlyArray<readonly [Quality, string]> = [
+  ["major", "מז'ור"],
+  ["minor", "מינור"],
+  ["dom", "דומיננטי"],
+  ["sus", "sus"],
+  ["sym", "dim / aug"],
+  ["power", "פאוור"],
+];
+
+/** The root is picked as a letter plus a sign, the way it is written. */
+type Sign = "" | "#" | "b";
+
+const SIGNS: ReadonlyArray<readonly [Sign, string]> = [
+  ["", "טבעי"],
+  ["#", "♯"],
+  ["b", "♭"],
+];
+
+const LETTERS = ["A", "B", "C", "D", "E", "F", "G"];
+
+/** "D" + "b" is spelled C# in the dictionary — resolve before comparing. */
+const rootFor = (letter: string, sign: Sign) => {
+  const raw = letter + sign;
+  return FLAT_TO_SHARP[raw] ?? raw;
+};
+
+const EXISTING_ROOTS = new Set(CHORD_SHAPES.map((entry) => rootOf(entry.name)));
+
+const ALL_LETTERS = LETTERS.filter((letter) =>
+  SIGNS.some(([sign]) => EXISTING_ROOTS.has(rootFor(letter, sign))),
 );
 
 /**
@@ -47,7 +122,9 @@ const ALL_ROOTS = ROOT_ORDER.filter((root) =>
 export function ChordPreviewPage() {
   const [selected, setSelected] = useState(CHORD_SHAPES[0].name);
   const [query, setQuery] = useState("");
-  const [rootFilter, setRootFilter] = useState<string | null>(null);
+  const [letterFilter, setLetterFilter] = useState<string | null>(null);
+  const [signFilter, setSignFilter] = useState<Sign | null>(null);
+  const [qualityFilter, setQualityFilter] = useState<Quality | null>(null);
   const [orientation, setOrientation] = useState<ChordOrientation>("player-rtl");
   const [reverseStrings, setReverseStrings] = useState(false);
   const [theme, setTheme] = useState<ChordTheme>("wood");
@@ -57,13 +134,22 @@ export function ChordPreviewPage() {
   const next = CHORD_SHAPES[(index + 1) % CHORD_SHAPES.length];
 
   const groups = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const needle = needleOf(query);
     const byRoot = new Map<string, ChordEntry[]>();
+
+    /** Letter and sign narrow the same axis, so they are answered together. */
+    const rootMatches = (root: string) => {
+      if (letterFilter === null && signFilter === null) return true;
+      if (signFilter === null) return root[0] === letterFilter;
+      if (letterFilter === null) return signFilter === "" ? root.length === 1 : root.length > 1;
+      return root === rootFor(letterFilter, signFilter);
+    };
 
     for (const entry of CHORD_SHAPES) {
       const root = rootOf(entry.name);
-      if (rootFilter && root !== rootFilter) continue;
-      if (needle && !entry.name.toLowerCase().includes(needle)) continue;
+      if (!rootMatches(root)) continue;
+      if (qualityFilter && qualityOf(entry.name) !== qualityFilter) continue;
+      if (needle && !plain(entry.name).includes(needle)) continue;
       const bucket = byRoot.get(root);
       if (bucket) bucket.push(entry);
       else byRoot.set(root, [entry]);
@@ -73,9 +159,17 @@ export function ChordPreviewPage() {
       root,
       entries: byRoot.get(root) as ChordEntry[],
     }));
-  }, [query, rootFilter]);
+  }, [query, letterFilter, signFilter, qualityFilter]);
 
   const total = groups.reduce((sum, group) => sum + group.entries.length, 0);
+  const filtered = Boolean(query || letterFilter || signFilter !== null || qualityFilter);
+
+  const clearFilters = () => {
+    setQuery("");
+    setLetterFilter(null);
+    setSignFilter(null);
+    setQualityFilter(null);
+  };
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-50 px-4 py-8 text-right md:px-8">
@@ -134,7 +228,7 @@ export function ChordPreviewPage() {
               עכשיו
             </div>
             <div className="mb-3 text-4xl font-bold tracking-tight text-slate-900">
-              {current.name}
+              {prettyChord(current.name)}
             </div>
             <ChordDiagram shape={current.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={230} className="mx-auto block" />
 
@@ -142,7 +236,7 @@ export function ChordPreviewPage() {
               <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 הבא
               </div>
-              <div className="mb-2 text-xl font-bold text-slate-700">{next.name}</div>
+              <div className="mb-2 text-xl font-bold text-slate-700">{prettyChord(next.name)}</div>
               <ChordDiagram shape={next.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={140} className="mx-auto block" />
             </div>
           </aside>
@@ -150,9 +244,20 @@ export function ChordPreviewPage() {
           {/* the dictionary, grouped by root */}
           <section className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-slate-500">
-                מילון האקורדים · {total} אקורדים
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-semibold text-slate-500">
+                  מילון האקורדים · {total} אקורדים
+                </h2>
+                {filtered && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200"
+                  >
+                    ניקוי סינון
+                  </button>
+                )}
+              </div>
               <div className="relative w-full sm:w-64">
                 <Search
                   size={15}
@@ -162,7 +267,7 @@ export function ChordPreviewPage() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="חיפוש אקורד — Cmaj7, Am…"
+                  placeholder="חיפוש אקורד — Cmaj7, C#m, Db…"
                   dir="ltr"
                   className="w-full rounded-full border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none"
                 />
@@ -179,19 +284,51 @@ export function ChordPreviewPage() {
               </div>
             </div>
 
-            <div className="mb-6 flex flex-wrap gap-1">
-              <RootChip active={rootFilter === null} onClick={() => setRootFilter(null)}>
-                הכל
-              </RootChip>
-              {ALL_ROOTS.map((root) => (
-                <RootChip
-                  key={root}
-                  active={rootFilter === root}
-                  onClick={() => setRootFilter(rootFilter === root ? null : root)}
-                >
-                  {root}
-                </RootChip>
-              ))}
+            <div className="mb-6 space-y-2 rounded-xl bg-slate-50 p-3">
+              <FilterRow label="שורש">
+                <FilterChip active={letterFilter === null} onClick={() => setLetterFilter(null)}>
+                  הכל
+                </FilterChip>
+                {ALL_LETTERS.map((letter) => (
+                  <FilterChip
+                    key={letter}
+                    active={letterFilter === letter}
+                    onClick={() => setLetterFilter(letterFilter === letter ? null : letter)}
+                  >
+                    {letter}
+                  </FilterChip>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="סוג">
+                <FilterChip active={qualityFilter === null} onClick={() => setQualityFilter(null)}>
+                  הכל
+                </FilterChip>
+                {QUALITIES.map(([key, label]) => (
+                  <FilterChip
+                    key={key}
+                    active={qualityFilter === key}
+                    onClick={() => setQualityFilter(qualityFilter === key ? null : key)}
+                  >
+                    {label}
+                  </FilterChip>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="סימן">
+                <FilterChip active={signFilter === null} onClick={() => setSignFilter(null)}>
+                  הכל
+                </FilterChip>
+                {SIGNS.map(([key, label]) => (
+                  <FilterChip
+                    key={key || "natural"}
+                    active={signFilter === key}
+                    onClick={() => setSignFilter(signFilter === key ? null : key)}
+                  >
+                    {label}
+                  </FilterChip>
+                ))}
+              </FilterRow>
             </div>
 
             {total === 0 ? (
@@ -220,7 +357,7 @@ export function ChordPreviewPage() {
                               : "border-slate-200 hover:bg-slate-50"
                           }`}
                         >
-                          <div className="mb-1 text-center text-sm font-bold text-slate-900">{entry.name}</div>
+                          <div className="mb-1 text-center text-sm font-bold text-slate-900">{prettyChord(entry.name)}</div>
                           <ChordDiagram shape={entry.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={130} className="mx-auto block" />
                         </button>
                       ))}
@@ -261,20 +398,29 @@ function Segmented<T extends string | boolean>({ value, onChange, options }: Seg
   );
 }
 
-type RootChipProps = {
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-10 shrink-0 text-xs font-semibold text-slate-400">{label}</span>
+      <div className="flex flex-wrap gap-1">{children}</div>
+    </div>
+  );
+}
+
+type FilterChipProps = {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
 };
 
-function RootChip({ active, onClick, children }: RootChipProps) {
+function FilterChip({ active, onClick, children }: FilterChipProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
       className={`min-w-9 rounded-lg px-2.5 py-1 text-sm font-bold transition-colors ${
-        active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+        active ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-200"
       }`}
     >
       {children}
