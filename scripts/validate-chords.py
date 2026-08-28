@@ -54,13 +54,19 @@ def notes(frets, base):
 
 def main():
     src = open("src/data/chordShapes.ts", encoding="utf-8").read()
-    entries = re.findall(r'name:\s*"([^"]+)",\s*shapes:\s*\[(.*?)\]\s*\}', src, re.S)
+    entries = re.findall(
+        r'name:\s*"([^"]+)",\s*(?:alias:\s*"([^"]*)",\s*)?shapes:\s*\[(.*?)\]\s*\}',
+        src, re.S)
     problems, warnings, checked = [], [], 0
-    for name, body in entries:
+    for name, alias, body in entries:
         root, kind = split_name(name)
         if root is None:
             problems.append(f"{name}: unknown chord name")
             continue
+        if alias:
+            aroot, akind = split_name(alias)
+            if aroot != root or akind != kind:
+                problems.append(f"{name}: alias {alias} is a different chord")
         ivals, third = TYPES[kind]
         allowed = {(root + i) % 12 for i in ivals}
         for frets, fingers, base in re.findall(
