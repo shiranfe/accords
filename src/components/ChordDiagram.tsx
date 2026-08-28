@@ -14,14 +14,14 @@ export type ChordOrientation = "book" | "player" | "player-rtl";
 export type ChordTheme = "paper" | "wood";
 
 const STRINGS = 6;
-const FRETS = 5; // fret cells the shape itself occupies
+const FRETS = 5; // fret cells the diagram shows; TAIL adds half a cell more
 
 // Geometry in viewBox units. `across` runs over the strings, `along` runs up
 // the neck; which one is x and which is y is what the orientation decides.
 const GAP_ACROSS = 10;
 const GAP_ALONG = 12;
 const SPAN_ACROSS = GAP_ACROSS * (STRINGS - 1);
-const MARK = 9; // room before the first fret for the x / o markers
+const MARK = 11; // room before the first fret, for the nut and the x / o markers
 // The neck runs off the frame past the last fret rather than stopping at it,
 // so the diagram reads as a section of a guitar and not a floating grid.
 const TAIL = 6;
@@ -111,11 +111,11 @@ export function ChordDiagram({
   // shape is read against where it actually sits on the neck rather than
   // floating on its own.
   const leadIn = atNut ? 0 : 1;
-  // Always one column more than the shape needs. A diagram that sits at the
-  // nut would otherwise be a column narrower, and at a fixed pixel width that
-  // makes it render taller than the rest - the sizes stopped matching in a
-  // grid. The spare column just shows more neck.
-  const cols = FRETS + 1;
+  // Fixed whether or not there is a lead-in: no shape spans more than four
+  // fret cells, so both cases fit in five. Letting it follow the shape made a
+  // nut diagram a column narrower, and at a fixed pixel width that rendered it
+  // taller than the rest - the sizes stopped matching in a grid.
+  const cols = FRETS;
   const firstFret = baseFret - leadIn;
 
   const padAcross = player ? 16 : 22;
@@ -149,9 +149,12 @@ export function ChordDiagram({
     };
   };
 
+  // The nut sits outside the first fret cell, the way it does on a real neck:
+  // it is where the board ends, not a wire laid inside it. Drawing it inside
+  // ate a slice off the first column and made that fret read short.
   // Away from the nut the near end is cut mid-column too, so the neck reads as
   // a section of a longer one from both ends rather than starting at a wall.
-  const neckStart = atNut ? along(0) : along(1) - GAP_ALONG * 0.75;
+  const neckStart = atNut ? along(0) - c.nutW : along(1) - GAP_ALONG * 0.75;
   const neckEnd = along(cols) + TAIL;
   // On wood the frets run the full width of the neck, edge to edge, the way
   // real fret wire does. The printed look keeps them string-to-string.
@@ -231,12 +234,12 @@ export function ChordDiagram({
       {/* the neck's rounded edges, over the frets so they catch the light too */}
       {c.board && <rect {...board} fill={`url(#${bevelId})`} />}
 
-      {/* The nut goes on after the bevel, and sits its full width inside the
-          board — under the bevel it read as two lines, lit on the half that
+      {/* The nut goes on after the bevel, and sits its full width on the board's
+          own strip — under the bevel it read as two lines, lit on the half that
           overlapped the board and flat on the half that hung off it. */}
       {atNut &&
         (() => {
-          const l = along(0) + (c.board ? c.nutW / 2 : 0);
+          const l = along(0) - c.nutW / 2;
           const a = pt(fretFrom, l);
           const b = pt(fretTo, l);
           return (
@@ -291,7 +294,7 @@ export function ChordDiagram({
       {/* muted / open markers, sitting before the first fret */}
       {frets.map((fret, s) => {
         if (fret > 0) return null;
-        const p = pt(across(s), MARK / 2 - 0.5);
+        const p = pt(across(s), neckStart / 2);
         if (fret === 0) {
           return (
             <circle
