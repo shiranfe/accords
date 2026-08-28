@@ -13,7 +13,7 @@ const LINKS: NavLink[] = [
   { path: "/", label: "ספרייה", icon: Library, owns: (p) => p === "/" || p.startsWith("/song/") },
   { path: "/import", label: "ייבוא שיר", icon: FilePlus2 },
   { path: "/editor", label: "העורך", icon: PencilRuler },
-  { path: "/chords", label: "מילון אקורדים", icon: Guitar },
+  { path: "/chords", label: "אקורדים", icon: Guitar },
 ];
 
 export function TopNav({ path }: { path: string }) {
@@ -24,18 +24,18 @@ export function TopNav({ path }: { path: string }) {
       aria-label="ניווט ראשי"
     >
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 md:px-8">
+        {/* Icon only — a worded logo read as a fifth link and swallowed the
+            clicks meant for the dictionary. */}
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="flex shrink-0 items-center gap-2 text-slate-900 transition-opacity hover:opacity-70"
+          aria-label="דף הבית"
+          className="shrink-0 rounded-lg bg-orange-100 p-1.5 text-orange-600 transition-opacity hover:opacity-70"
         >
-          <span className="rounded-lg bg-orange-100 p-1.5 text-orange-600">
-            <Music size={16} />
-          </span>
-          <span className="text-sm font-black tracking-tight">אקורדים</span>
+          <Music size={16} />
         </button>
 
-        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
           {LINKS.map(({ path: to, label, icon: Icon, owns }) => {
             const active = owns ? owns(path) : path === to;
             return (
