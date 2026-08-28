@@ -2,50 +2,64 @@ import { ChordDiagram } from "../ChordDiagram";
 import { findChordShape } from "../../data/chordShapes";
 import { prettyChord } from "../../lib/chordName";
 
+type UpNextProps = {
+  /** The chord to play next — the one the player needs their hand ready for. */
+  nextName: string | null;
+  /** The one after that, as a heads-up. */
+  afterName: string | null;
+};
+
+/**
+ * The chord coming up, at the size you can read from across the room, with
+ * the one after it held smaller underneath.
+ */
+export function UpNextPanel({ nextName, afterName }: UpNextProps) {
+  return (
+    <div className="rounded-[24px] bg-white p-4 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+      <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-600">
+        הבא
+      </div>
+      {nextName ? (
+        <>
+          <div className="mb-2 text-5xl font-black tracking-tight text-slate-900">
+            {prettyChord(nextName)}
+          </div>
+          <Voicing name={nextName} width={210} />
+        </>
+      ) : (
+        <div className="py-10 text-sm font-medium text-slate-300">אין אקורד קרוב</div>
+      )}
+
+      {afterName && (
+        <div className="mt-4 border-t border-slate-100 pt-3 opacity-60">
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            ואחריו
+          </div>
+          <div className="mb-1 text-xl font-bold text-slate-700">{prettyChord(afterName)}</div>
+          <Voicing name={afterName} width={120} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 type Props = {
   /** Distinct chord names, in the order they first appear in the song. */
   names: string[];
   /** The chord sounding right now, while the karaoke runs. */
   activeName: string | null;
-  /** The next chord that differs from the active one. */
-  nextName: string | null;
 };
 
-/**
- * The song's chords as fretboard diagrams: everything it uses, plus the one
- * playing now and the one coming, called out while the karaoke runs.
- */
-export function ChordPanel({ names, activeName, nextName }: Props) {
+/** Every chord the song uses, two to a row, scrolling once the list is long. */
+export function ChordPanel({ names, activeName }: Props) {
   if (names.length === 0) return null;
 
   const missing = names.filter((n) => !findChordShape(n));
 
   return (
     <div className="rounded-[24px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-      {activeName && (
-        <div className="mb-4 rounded-2xl border border-orange-100 bg-orange-50/60 p-3 text-center">
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-600">
-            עכשיו
-          </div>
-          <div className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
-            {prettyChord(activeName)}
-          </div>
-          <Voicing name={activeName} width={230} />
-
-          {nextName && (
-            <div className="mt-4 border-t border-orange-100 pt-3 opacity-70">
-              <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                הבא
-              </div>
-              <div className="mb-1 text-lg font-bold text-slate-700">{prettyChord(nextName)}</div>
-              <Voicing name={nextName} width={140} />
-            </div>
-          )}
-        </div>
-      )}
-
       <h2 className="mb-3 text-xs font-semibold text-slate-500">אקורדי השיר ({names.length})</h2>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid max-h-[420px] grid-cols-2 gap-3 overflow-y-auto pl-1">
         {names.map((name) => (
           <div
             key={name}
@@ -54,7 +68,7 @@ export function ChordPanel({ names, activeName, nextName }: Props) {
             }`}
           >
             <div className="mb-1 text-center text-xs font-bold text-slate-900">{prettyChord(name)}</div>
-            <Voicing name={name} width={150} />
+            <Voicing name={name} width={130} />
           </div>
         ))}
       </div>

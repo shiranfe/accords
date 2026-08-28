@@ -12,7 +12,7 @@ import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
 import { ChordFixPopover } from "../components/viewer/ChordFixPopover";
 import type { FixTarget } from "../components/viewer/ChordFixPopover";
 import { ChordTimeline } from "../components/viewer/ChordTimeline";
-import { ChordPanel } from "../components/viewer/ChordPanel";
+import { ChordPanel, UpNextPanel } from "../components/viewer/ChordPanel";
 import { SourceEditorPanel } from "../components/SourceEditorPanel";
 import { songToNegina } from "../lib/serializeNegina";
 import { runSyncOnServer } from "../lib/syncRunner";
@@ -444,15 +444,29 @@ export function SongPage({ songId }: { songId: string }) {
     return out;
   }, [flatChords]);
 
-  // What is sounding now, and the next chord that is actually a change.
-  const { activeChordName, nextChordName } = useMemo(() => {
+  // What is sounding now, and the next two chords that are actually a change.
+  // Before playback starts the walk begins at the top, so the panel already
+  // shows what the song opens on.
+  const { activeChordName, nextChordName, afterNextChordName } = useMemo(() => {
     const at = activeEvent
       ? flatChords.findIndex((c) => c.chordId === activeEvent.chordId)
       : -1;
-    if (at < 0) return { activeChordName: null, nextChordName: null };
-    const current = flatChords[at].name;
-    const upcoming = flatChords.slice(at + 1).find((c) => c.name !== current);
-    return { activeChordName: current, nextChordName: upcoming?.name ?? null };
+    const current = at >= 0 ? flatChords[at].name : null;
+
+    const upcoming: string[] = [];
+    let previous = current;
+    for (let i = at + 1; i < flatChords.length && upcoming.length < 2; i += 1) {
+      const { name } = flatChords[i];
+      if (name === previous) continue;
+      upcoming.push(name);
+      previous = name;
+    }
+
+    return {
+      activeChordName: current,
+      nextChordName: upcoming[0] ?? null,
+      afterNextChordName: upcoming[1] ?? null,
+    };
   }, [activeEvent, flatChords]);
 
   const activeLineId = activeEvent?.lineId ?? null;
@@ -628,7 +642,7 @@ export function SongPage({ songId }: { songId: string }) {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-50 px-4 py-6 text-right md:px-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[1600px]">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
@@ -727,6 +741,11 @@ export function SongPage({ songId }: { songId: string }) {
         </header>
 
         <div className="flex flex-col items-start gap-6 lg:flex-row">
+          {/* 1 — the chord to get your hand ready for */}
+          <aside className="w-full shrink-0 lg:sticky lg:top-16 lg:w-64">
+            <UpNextPanel nextName={nextChordName} afterName={afterNextChordName} />
+          </aside>
+
           <main className="w-full min-w-0 flex-1 rounded-[24px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:p-8">
             {showSource ? (
               <SourceEditorPanel
@@ -786,14 +805,18 @@ export function SongPage({ songId }: { songId: string }) {
             )}
           </main>
 
-          <aside className="w-full space-y-4 lg:sticky lg:top-16 lg:w-96">
-            <ChordPanel
-              names={songChordNames}
-              activeName={activeChordName}
-              nextName={nextChordName}
-            />
+          {/* 3 — watch it, play it, look the chords up, then re-sync */}
+          <aside className="w-full space-y-4 lg:sticky lg:top-16 lg:w-[352px]">
+            {videoId && (
+              <div className="overflow-hidden rounded-[24px] bg-white p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <div className="aspect-video w-full overflow-hidden rounded-2xl bg-slate-900">
+                  <div ref={containerRef} className="h-full w-full" />
+                </div>
+              </div>
+            )}
+
             <div className="rounded-[24px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-              <div className="mb-3 flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsPlaying((p) => !p)}
@@ -814,7 +837,11 @@ export function SongPage({ songId }: { songId: string }) {
                   <RotateCcw size={16} />
                 </button>
               </div>
+            </div>
 
+            <ChordPanel names={songChordNames} activeName={activeChordName} />
+
+            <div className="rounded-[24px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
               <div className="mb-3 text-center">
                 {isSynced ? (
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
@@ -967,14 +994,6 @@ export function SongPage({ songId }: { songId: string }) {
                 </div>
               </div>
             </div>
-
-            {videoId && (
-              <div className="overflow-hidden rounded-[24px] bg-white p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-                <div className="aspect-video w-full overflow-hidden rounded-2xl bg-slate-900">
-                  <div ref={containerRef} className="h-full w-full" />
-                </div>
-              </div>
-            )}
           </aside>
         </div>
       </div>
