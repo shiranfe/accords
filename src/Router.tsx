@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import { LibraryPage } from "./pages/LibraryPage.tsx";
 import { SongPage } from "./pages/SongPage.tsx";
 import { ImportPage } from "./pages/ImportPage.tsx";
+import { ChordPreviewPage } from "./pages/ChordPreviewPage.tsx";
 
 function useHashPath() {
   const [path, setPath] = useState(() => window.location.hash.replace(/^#/, "") || "/");
@@ -25,6 +26,7 @@ export function Router() {
 
   if (path === "/editor") return <App />;
   if (path === "/import") return <ImportPage />;
+  if (path === "/chords") return <ChordPreviewPage />;
 
   const songMatch = path.match(/^\/song\/(.+)$/);
   if (songMatch) return <SongPage songId={songMatch[1]} />;

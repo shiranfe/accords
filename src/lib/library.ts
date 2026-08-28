@@ -2,6 +2,7 @@ import type { Song } from "../types/song";
 import { parseNegina } from "./neginaParser";
 import { trapetoniMeta, trapetoniSource } from "../data/hachofShelTrapetoni";
 import { samiVeSumoMeta, samiVeSumoSource } from "../data/samiVeSumo";
+import { howHighTheMoonMeta, howHighTheMoonSource } from "../data/howHighTheMoon";
 
 const KEY = "accords:library:v1";
 
@@ -28,6 +29,7 @@ const readStored = (): Song[] => {
 const SEEDS: { meta: typeof trapetoniMeta; source: string }[] = [
   { meta: trapetoniMeta, source: trapetoniSource },
   { meta: samiVeSumoMeta, source: samiVeSumoSource },
+  { meta: howHighTheMoonMeta, source: howHighTheMoonSource },
 ];
 
 export function loadLibrary(): Song[] {
