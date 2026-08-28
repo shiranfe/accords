@@ -12,6 +12,7 @@ import { ViewerSongSheet } from "../components/viewer/ViewerSongSheet";
 import { ChordFixPopover } from "../components/viewer/ChordFixPopover";
 import type { FixTarget } from "../components/viewer/ChordFixPopover";
 import { ChordTimeline } from "../components/viewer/ChordTimeline";
+import { ChordPanel } from "../components/viewer/ChordPanel";
 import { SourceEditorPanel } from "../components/SourceEditorPanel";
 import { songToNegina } from "../lib/serializeNegina";
 import { runSyncOnServer } from "../lib/syncRunner";
@@ -430,6 +431,30 @@ export function SongPage({ songId }: { songId: string }) {
     return map;
   }, [firstOccurrence, flatChords]);
 
+  // Every chord the song uses, once each, in the order they first appear.
+  const songChordNames = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const { name } of flatChords) {
+      if (!seen.has(name)) {
+        seen.add(name);
+        out.push(name);
+      }
+    }
+    return out;
+  }, [flatChords]);
+
+  // What is sounding now, and the next chord that is actually a change.
+  const { activeChordName, nextChordName } = useMemo(() => {
+    const at = activeEvent
+      ? flatChords.findIndex((c) => c.chordId === activeEvent.chordId)
+      : -1;
+    if (at < 0) return { activeChordName: null, nextChordName: null };
+    const current = flatChords[at].name;
+    const upcoming = flatChords.slice(at + 1).find((c) => c.name !== current);
+    return { activeChordName: current, nextChordName: upcoming?.name ?? null };
+  }, [activeEvent, flatChords]);
+
   const activeLineId = activeEvent?.lineId ?? null;
 
   // Smoother follow: only scroll when the active line leaves the comfortable
@@ -762,6 +787,11 @@ export function SongPage({ songId }: { songId: string }) {
           </main>
 
           <aside className="w-full space-y-4 lg:sticky lg:top-6 lg:w-96">
+            <ChordPanel
+              names={songChordNames}
+              activeName={activeChordName}
+              nextName={nextChordName}
+            />
             <div className="rounded-[24px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
               <div className="mb-3 flex items-center justify-center gap-2">
                 <button

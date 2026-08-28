@@ -91,8 +91,9 @@ type Props = {
 
 export function ChordDiagram({
   shape,
-  orientation = "book",
-  theme = "paper",
+  // The app's chosen look: the neck as the player sees it, nut on the right.
+  orientation = "player-rtl",
+  theme = "wood",
   reverseStrings = false,
   width = 160,
   className,
@@ -110,7 +111,11 @@ export function ChordDiagram({
   // shape is read against where it actually sits on the neck rather than
   // floating on its own.
   const leadIn = atNut ? 0 : 1;
-  const cols = FRETS + leadIn;
+  // Always one column more than the shape needs. A diagram that sits at the
+  // nut would otherwise be a column narrower, and at a fixed pixel width that
+  // makes it render taller than the rest - the sizes stopped matching in a
+  // grid. The spare column just shows more neck.
+  const cols = FRETS + 1;
   const firstFret = baseFret - leadIn;
 
   const padAcross = player ? 16 : 22;
