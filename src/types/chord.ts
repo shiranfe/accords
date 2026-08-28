@@ -9,8 +9,9 @@ export type ChordShape = {
   fingers: number[];
   /** Absolute fret the diagram's top row represents. 1 = at the nut. */
   baseFret: number;
-  /** A bar to draw across `from`..`to` (string indices, low E = 0). */
-  barre?: { finger: number; from: number; to: number };
+  /** Bars to draw across `from`..`to` (string indices, low E = 0). Some
+   *  voicings need two — an index bar plus a pinky bar higher up the neck. */
+  barres?: { finger: number; from: number; to: number }[];
 };
 
 export type ChordEntry = {
@@ -18,5 +19,6 @@ export type ChordEntry = {
   name: string;
   /** Enharmonic spelling that shares this shape, e.g. "Dbm7" for "C#m7". */
   alias?: string;
-  shape: ChordShape;
+  /** Playable voicings, easiest first. */
+  shapes: ChordShape[];
 };

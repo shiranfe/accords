@@ -26,6 +26,9 @@ const MARK = 9; // room before the first fret for the x / o markers
 // so the diagram reads as a section of a guitar and not a floating grid.
 const TAIL = 6;
 const DOT_R = 4;
+/** The bar is drawn a little slimmer than the dots, so it reads as a finger
+ *  laid across the strings rather than a slab. */
+const BARRE_R = 3.2;
 // How far the fretboard runs past the outer strings. Derived from the dot
 // radius rather than fixed: a finger on the top or bottom string has to land
 // on wood, and hard-coding this is what let it hang off the neck once already.
@@ -97,7 +100,7 @@ export function ChordDiagram({
   const gradientId = useId();
   const grainId = useId();
   const bevelId = useId();
-  const { frets, fingers, baseFret, barre } = shape;
+  const { frets, fingers, baseFret, barres } = shape;
   const c = PALETTE[theme];
   const atNut = baseFret === 1;
   const player = orientation !== "book";
@@ -305,41 +308,43 @@ export function ChordDiagram({
         );
       })}
 
-      {barre &&
-        (() => {
-          const a = dot(barre.from, frets[barre.from]);
-          const b = dot(barre.to, frets[barre.to]);
-          return (
-            <g>
-              <rect
-                x={Math.min(a.x, b.x) - DOT_R}
-                y={Math.min(a.y, b.y) - DOT_R}
-                width={Math.abs(b.x - a.x) + DOT_R * 2}
-                height={Math.abs(b.y - a.y) + DOT_R * 2}
-                rx={DOT_R}
-                fill={c.dot}
-                stroke={c.dotRing ?? "none"}
-                strokeWidth={0.7}
-              />
-              <text
-                x={(a.x + b.x) / 2}
-                y={(a.y + b.y) / 2}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize={6.2}
-                fontWeight={600}
-                fill="#fff"
-              >
-                {barre.finger}
-              </text>
-            </g>
-          );
-        })()}
+      {barres?.map((barre, i) => {
+        const a = dot(barre.from, frets[barre.from]);
+        const b = dot(barre.to, frets[barre.to]);
+        return (
+          <g key={`b${i}`}>
+            <rect
+              x={Math.min(a.x, b.x) - BARRE_R}
+              y={Math.min(a.y, b.y) - BARRE_R}
+              width={Math.abs(b.x - a.x) + BARRE_R * 2}
+              height={Math.abs(b.y - a.y) + BARRE_R * 2}
+              rx={BARRE_R}
+              fill={c.dot}
+              stroke={c.dotRing ?? "none"}
+              strokeWidth={0.7}
+            />
+            <text
+              x={(a.x + b.x) / 2}
+              y={(a.y + b.y) / 2}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={6.2}
+              fontWeight={600}
+              fill="#fff"
+            >
+              {barre.finger}
+            </text>
+          </g>
+        );
+      })}
 
       {/* fingered notes; strings already covered by the bar are skipped */}
       {frets.map((fret, s) => {
         if (fret <= 0) return null;
-        if (barre && s >= barre.from && s <= barre.to && fret === frets[barre.from]) return null;
+        const barred = barres?.some(
+          (b) => s >= b.from && s <= b.to && fret === frets[b.from],
+        );
+        if (barred) return null;
         const p = dot(s, fret);
         return (
           <g key={`d${s}`}>

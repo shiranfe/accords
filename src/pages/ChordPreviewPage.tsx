@@ -79,14 +79,14 @@ export function ChordPreviewPage() {
             <div className="mb-3 text-4xl font-bold tracking-tight text-slate-900">
               {current.name}
             </div>
-            <ChordDiagram shape={current.shape} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={230} className="mx-auto block" />
+            <ChordDiagram shape={current.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={230} className="mx-auto block" />
 
             <div className="mt-6 border-t border-slate-100 pt-4 opacity-60">
               <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 הבא
               </div>
               <div className="mb-2 text-xl font-bold text-slate-700">{next.name}</div>
-              <ChordDiagram shape={next.shape} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={140} className="mx-auto block" />
+              <ChordDiagram shape={next.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={140} className="mx-auto block" />
             </div>
           </aside>
 
@@ -106,7 +106,7 @@ export function ChordPreviewPage() {
                   }`}
                 >
                   <div className="mb-1 text-center text-sm font-bold text-slate-900">{entry.name}</div>
-                  <ChordDiagram shape={entry.shape} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={130} className="mx-auto block" />
+                  <ChordDiagram shape={entry.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={130} className="mx-auto block" />
                 </button>
               ))}
             </div>
