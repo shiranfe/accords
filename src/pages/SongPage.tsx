@@ -742,11 +742,11 @@ export function SongPage({ songId }: { songId: string }) {
 
         <div className="flex flex-col items-start gap-6 lg:flex-row">
           {/* 1 — the chord to get your hand ready for */}
-          <aside className="w-full shrink-0 lg:sticky lg:top-16 lg:w-64">
+          <aside className="order-1 w-full shrink-0 lg:order-none lg:sticky lg:top-16 lg:w-64">
             <UpNextPanel nextName={nextChordName} afterName={afterNextChordName} />
           </aside>
 
-          <main className="w-full min-w-0 flex-1 rounded-[24px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:p-8">
+          <main className="order-3 w-full min-w-0 flex-1 rounded-[24px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:order-none md:p-8">
             {showSource ? (
               <SourceEditorPanel
                 song={song}
@@ -805,8 +805,12 @@ export function SongPage({ songId }: { songId: string }) {
             )}
           </main>
 
-          {/* 3 — watch it, play it, look the chords up, then re-sync */}
-          <aside className="w-full space-y-4 lg:sticky lg:top-16 lg:w-[352px]">
+          {/* 3 — watch it, play it, look the chords up, then re-sync.
+              One column on desktop; on a phone `contents` lets the two halves
+              split around the sheet, so play sits above it and the reference
+              material below. */}
+          <div className="contents lg:sticky lg:top-16 lg:flex lg:w-[352px] lg:shrink-0 lg:flex-col lg:gap-4">
+            <aside className="order-2 w-full space-y-4 lg:order-none">
             {videoId && (
               <div className="overflow-hidden rounded-[24px] bg-white p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
                 <div className="aspect-video w-full overflow-hidden rounded-2xl bg-slate-900">
@@ -838,7 +842,9 @@ export function SongPage({ songId }: { songId: string }) {
                 </button>
               </div>
             </div>
+            </aside>
 
+            <aside className="order-4 w-full space-y-4 lg:order-none">
             <ChordPanel names={songChordNames} activeName={activeChordName} />
 
             <div className="rounded-[24px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
@@ -994,7 +1000,8 @@ export function SongPage({ songId }: { songId: string }) {
                 </div>
               </div>
             </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </div>
     </div>
