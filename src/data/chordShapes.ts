@@ -279,6 +279,8 @@ export const CHORD_SHAPES: ChordEntry[] = [
     alias: "Bb7",
     shapes: [
       labeled(FULL, sh("x13131", "013141", 1, [1, 1, 5])),
+      // Down at the nut with an open D, so the hand stays put coming from Fm7.
+      labeled(A5, sh("x101xx", "020100")),
       labeled(E6, sh("1x12xx", "102300", 6)),
     ],
   },
