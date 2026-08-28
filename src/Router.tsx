@@ -4,32 +4,57 @@ import { LibraryPage } from "./pages/LibraryPage.tsx";
 import { SongPage } from "./pages/SongPage.tsx";
 import { ImportPage } from "./pages/ImportPage.tsx";
 import { ChordPreviewPage } from "./pages/ChordPreviewPage.tsx";
+import { navigate } from "./lib/navigate";
 
-function useHashPath() {
-  const [path, setPath] = useState(() => window.location.hash.replace(/^#/, "") || "/");
+/** Vite base, always with a trailing slash ("/" in dev). */
+const BASE = import.meta.env.BASE_URL || "/";
+
+const readPath = () => {
+  const { pathname } = window.location;
+  const rest = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname.replace(/^\//, "");
+  return `/${rest}`.replace(/\/+$/, "") || "/";
+};
+
+/** Old bookmarks still carry `#/song/<id>` — fold them back into the pathname. */
+function dropLegacyHash() {
+  const { hash, search } = window.location;
+  if (!hash.startsWith("#/")) return;
+  window.history.replaceState(null, "", `${BASE}${hash.slice(2)}${search}`);
+}
+
+function useRoutePath() {
+  const [path, setPath] = useState(() => {
+    dropLegacyHash();
+    return readPath();
+  });
 
   useEffect(() => {
-    const onHashChange = () => setPath(window.location.hash.replace(/^#/, "") || "/");
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    const onPopState = () => setPath(readPath());
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   return path;
 }
 
 export function Router() {
-  const path = useHashPath();
+  const path = useRoutePath();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [path]);
 
+  const songMatch = path.match(/^\/song\/(.+)$/);
+
+  useEffect(() => {
+    const known = path === "/" || path === "/editor" || path === "/import" || path === "/chords";
+    if (!known && !songMatch) navigate("/", true);
+  }, [path, songMatch]);
+
   if (path === "/editor") return <App />;
   if (path === "/import") return <ImportPage />;
   if (path === "/chords") return <ChordPreviewPage />;
-
-  const songMatch = path.match(/^\/song\/(.+)$/);
-  if (songMatch) return <SongPage songId={songMatch[1]} />;
+  if (songMatch) return <SongPage songId={decodeURIComponent(songMatch[1])} />;
 
   return <LibraryPage />;
 }
