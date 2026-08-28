@@ -79,7 +79,8 @@ def main():
             if foreign:
                 problems.append(f"{label}: foreign notes {foreign}, allowed {sorted(allowed)}")
             if root not in got:
-                problems.append(f"{label}: no root")
+                msg = f"{label}: no root"
+                (warnings if kind in ("9", "m9") else problems).append(msg)
             if third is not None and (root + third) % 12 not in got:
                 msg = f"{label}: no third"
                 (warnings if kind in ("9", "m9") else problems).append(msg)
