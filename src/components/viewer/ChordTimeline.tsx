@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { prettyChord } from "../../lib/chordName";
 
 export type TimelineChord = {
   chordId: string;
@@ -161,7 +162,7 @@ export function ChordTimeline({
           {selected && (
             <>
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                <span dir="ltr">{selected.name}</span> · {selected.start.toFixed(2)}s
+                <span dir="ltr">{prettyChord(selected.name)}</span> · {selected.start.toFixed(2)}s
               </span>
               {selected.overridden && (
                 <button
@@ -242,7 +243,7 @@ export function ChordTimeline({
                 style={{ left: start * pxPerSec, width: blockWidth }}
               >
                 <span dir="ltr" className="px-1">
-                  {chord.name}
+                  {prettyChord(chord.name)}
                 </span>
                 {chord.overridden && (
                   <span

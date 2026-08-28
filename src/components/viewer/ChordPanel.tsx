@@ -1,5 +1,6 @@
 import { ChordDiagram } from "../ChordDiagram";
 import { findChordShape } from "../../data/chordShapes";
+import { prettyChord } from "../../lib/chordName";
 
 type Props = {
   /** Distinct chord names, in the order they first appear in the song. */
@@ -26,7 +27,9 @@ export function ChordPanel({ names, activeName, nextName }: Props) {
           <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-600">
             עכשיו
           </div>
-          <div className="mb-2 text-3xl font-bold tracking-tight text-slate-900">{activeName}</div>
+          <div className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
+            {prettyChord(activeName)}
+          </div>
           <Voicing name={activeName} width={230} />
 
           {nextName && (
@@ -34,7 +37,7 @@ export function ChordPanel({ names, activeName, nextName }: Props) {
               <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                 הבא
               </div>
-              <div className="mb-1 text-lg font-bold text-slate-700">{nextName}</div>
+              <div className="mb-1 text-lg font-bold text-slate-700">{prettyChord(nextName)}</div>
               <Voicing name={nextName} width={140} />
             </div>
           )}
@@ -50,7 +53,7 @@ export function ChordPanel({ names, activeName, nextName }: Props) {
               name === activeName ? "border-orange-400 bg-orange-50" : "border-slate-200"
             }`}
           >
-            <div className="mb-1 text-center text-xs font-bold text-slate-900">{name}</div>
+            <div className="mb-1 text-center text-xs font-bold text-slate-900">{prettyChord(name)}</div>
             <Voicing name={name} width={150} />
           </div>
         ))}
@@ -58,7 +61,7 @@ export function ChordPanel({ names, activeName, nextName }: Props) {
 
       {missing.length > 0 && (
         <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
-          עדיין אין דיאגרמה ל־{missing.join(", ")} — המילון בהשלמה.
+          עדיין אין דיאגרמה ל־{missing.map(prettyChord).join(", ")} — המילון בהשלמה.
         </p>
       )}
     </div>

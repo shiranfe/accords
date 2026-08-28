@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, Sparkles, X } from "lucide-react";
+import { prettyChord } from "../../lib/chordName";
 
 export type FixTarget = {
   chordId: string;
@@ -85,7 +86,7 @@ export function ChordFixPopover({ target, onApply, onClose }: Props) {
       </div>
 
       <div className="mb-3 flex items-center justify-center gap-2 text-slate-800" dir="ltr">
-        <span className="text-lg font-bold text-orange-600">{target.name}</span>
+        <span className="text-lg font-bold text-orange-600">{prettyChord(target.name)}</span>
         {confidencePct != null && (
           <span className="text-[11px] text-slate-400">{confidencePct}% match</span>
         )}
