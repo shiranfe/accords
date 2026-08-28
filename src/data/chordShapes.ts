@@ -247,6 +247,15 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "Bm7", shapes: [sh("x24232", "013121", 1, [1, 1, 5])] },
   // The open top string adds an E the chord does not have; muted instead.
   { name: "Bm9", shapes: [sh("x2022x", "010230")] },
+
+  // ---- Beyond the dictionary ----
+  // The book covers fifteen chord types per root, and neither of these is one
+  // of them - it is a pop dictionary, not a jazz one. Both are standard
+  // voicings, worked out from the chord tones rather than read off a diagram.
+  // Am7b5: A open is the root, Eb the flat fifth, G the seventh, C the third.
+  { name: "Am7b5", shapes: [sh("x0101x", "002010")] },
+  // D7b9: the usual root-on-the-A-string shape, fifth left out.
+  { name: "D7b9", shapes: [sh("x2121x", "021430", 4)] },
 ];
 
 export const findChordShape = (name: string): ChordEntry | undefined =>

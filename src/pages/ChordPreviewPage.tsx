@@ -51,46 +51,24 @@ const needleOf = (query: string) => {
 /** Everything after the root: "", "m7", "sus4", "7b5"… */
 const suffixOf = (name: string) => name.replace(/^[A-G][#b]?/, "");
 
-type Quality = "major" | "minor" | "dom" | "sus" | "sym" | "power";
-
-const QUALITY_BY_SUFFIX: Record<string, Quality> = {
-  "": "major",
-  "6": "major",
-  maj7: "major",
-  m: "minor",
-  m6: "minor",
-  m7: "minor",
-  m9: "minor",
-  "7": "dom",
-  "9": "dom",
-  "7b5": "dom",
-  sus2: "sus",
-  sus4: "sus",
-  dim: "sym",
-  aug: "sym",
-  "5": "power",
-};
-
-/** Map falls back to a guess so a newly transcribed suffix still shows up. */
-const qualityOf = (name: string): Quality => {
-  const suffix = suffixOf(name);
-  const known = QUALITY_BY_SUFFIX[suffix];
-  if (known) return known;
-  if (suffix.includes("sus")) return "sus";
-  if (suffix.startsWith("dim") || suffix.startsWith("aug")) return "sym";
-  if (suffix.startsWith("m") && !suffix.startsWith("maj")) return "minor";
-  if (/^\d/.test(suffix)) return "dom";
-  return "major";
-};
-
-const QUALITIES: ReadonlyArray<readonly [Quality, string]> = [
-  ["major", "מז'ור"],
-  ["minor", "מינור"],
-  ["dom", "דומיננטי"],
-  ["sus", "sus"],
-  ["sym", "dim / aug"],
-  ["power", "פאוור"],
+/**
+ * The type filter lists the suffix exactly as it is written on the chord, so
+ * it needs no theory to read: pick "7" and you get every seventh. Anything
+ * transcribed later that is not in this order still shows up, at the end.
+ */
+const SUFFIX_ORDER = [
+  "", "m", "5", "6", "7", "9", "maj7",
+  "m6", "m7", "m9", "sus2", "sus4", "dim", "aug", "7b5",
 ];
+
+const ALL_SUFFIXES = (() => {
+  const present = new Set(CHORD_SHAPES.map((entry) => suffixOf(entry.name)));
+  const known = SUFFIX_ORDER.filter((suffix) => present.has(suffix));
+  const rest = [...present].filter((suffix) => !SUFFIX_ORDER.includes(suffix)).sort();
+  return [...known, ...rest];
+})();
+
+const labelOfSuffix = (suffix: string) => (suffix === "" ? "בסיסי" : prettyChord(suffix));
 
 /** The root is picked as a letter plus a sign, the way it is written. */
 type Sign = "" | "#" | "b";
@@ -124,7 +102,7 @@ export function ChordPreviewPage() {
   const [query, setQuery] = useState("");
   const [letterFilter, setLetterFilter] = useState<string | null>(null);
   const [signFilter, setSignFilter] = useState<Sign | null>(null);
-  const [qualityFilter, setQualityFilter] = useState<Quality | null>(null);
+  const [suffixFilter, setSuffixFilter] = useState<string | null>(null);
   const [orientation, setOrientation] = useState<ChordOrientation>("player-rtl");
   const [reverseStrings, setReverseStrings] = useState(false);
   const [theme, setTheme] = useState<ChordTheme>("wood");
@@ -148,7 +126,7 @@ export function ChordPreviewPage() {
     for (const entry of CHORD_SHAPES) {
       const root = rootOf(entry.name);
       if (!rootMatches(root)) continue;
-      if (qualityFilter && qualityOf(entry.name) !== qualityFilter) continue;
+      if (suffixFilter !== null && suffixOf(entry.name) !== suffixFilter) continue;
       if (needle && !plain(entry.name).includes(needle)) continue;
       const bucket = byRoot.get(root);
       if (bucket) bucket.push(entry);
@@ -159,16 +137,18 @@ export function ChordPreviewPage() {
       root,
       entries: byRoot.get(root) as ChordEntry[],
     }));
-  }, [query, letterFilter, signFilter, qualityFilter]);
+  }, [query, letterFilter, signFilter, suffixFilter]);
 
   const total = groups.reduce((sum, group) => sum + group.entries.length, 0);
-  const filtered = Boolean(query || letterFilter || signFilter !== null || qualityFilter);
+  const filtered = Boolean(
+    query || letterFilter || signFilter !== null || suffixFilter !== null,
+  );
 
   const clearFilters = () => {
     setQuery("");
     setLetterFilter(null);
     setSignFilter(null);
-    setQualityFilter(null);
+    setSuffixFilter(null);
   };
 
   return (
@@ -301,16 +281,16 @@ export function ChordPreviewPage() {
               </FilterRow>
 
               <FilterRow label="סוג">
-                <FilterChip active={qualityFilter === null} onClick={() => setQualityFilter(null)}>
+                <FilterChip active={suffixFilter === null} onClick={() => setSuffixFilter(null)}>
                   הכל
                 </FilterChip>
-                {QUALITIES.map(([key, label]) => (
+                {ALL_SUFFIXES.map((suffix) => (
                   <FilterChip
-                    key={key}
-                    active={qualityFilter === key}
-                    onClick={() => setQualityFilter(qualityFilter === key ? null : key)}
+                    key={suffix || "basic"}
+                    active={suffixFilter === suffix}
+                    onClick={() => setSuffixFilter(suffixFilter === suffix ? null : suffix)}
                   >
-                    {label}
+                    {labelOfSuffix(suffix)}
                   </FilterChip>
                 ))}
               </FilterRow>
