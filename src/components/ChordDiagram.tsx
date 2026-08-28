@@ -314,8 +314,13 @@ export function ChordDiagram({
       })}
 
       {barres?.map((barre, i) => {
-        const a = dot(barre.from, frets[barre.from]);
-        const b = dot(barre.to, frets[barre.to]);
+        // Both ends sit at the bar's own fret. Reading the far string's fret
+        // instead lets the rect span two frets and it renders as a slab —
+        // which is what a shape like C#6 does, where the pinky bars the same
+        // strings higher up the neck.
+        const fret = frets[barre.from];
+        const a = dot(barre.from, fret);
+        const b = dot(barre.to, fret);
         return (
           <g key={`b${i}`}>
             <rect
