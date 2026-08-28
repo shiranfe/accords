@@ -1,4 +1,4 @@
-import type { ChordAnchor, Line, Section, Song } from "../types/song";
+import type { ChordAnchor, Line, Section, Song, TickKind } from "../types/song";
 import { makeId } from "../types/song";
 
 export type ParseWarning = { lineNumber: number; message: string };
@@ -18,12 +18,35 @@ export type ParseResult = {
 const SECTION_RE = /^%(.+)%$/;
 const COL_MARKER_RE = /^#COL\d#$/;
 
-const makeAnchor = (name: string, charIndex: number): ChordAnchor => ({
+const makeAnchor = (name: string, charIndex: number, kind: TickKind = "bar"): ChordAnchor => ({
   id: makeId(),
   charIndex,
   name,
-  kind: "bar",
+  kind,
 });
+
+type PendingChord = { name: string; kind: TickKind };
+
+/**
+ * A chord line may mark its bars with "|", the way a chart does:
+ *
+ *   :Ebmaj7 | Am7b5 D7b9 | Gm7
+ *
+ * Chords inside one bar split it evenly. Without any "|" the line keeps the
+ * older reading, one chord per bar, so every song written before this stays
+ * as it was.
+ */
+const readChordLine = (body: string): PendingChord[] => {
+  const bars = body.includes("|")
+    ? body.split("|").map((bar) => bar.trim()).filter(Boolean)
+    : body.trim().split(/\s+/).filter(Boolean);
+
+  return bars.flatMap((bar) => {
+    const names = bar.split(/\s+/).filter(Boolean);
+    const kind: TickKind = names.length === 1 ? "bar" : names.length === 2 ? "half" : "quarter";
+    return names.map((name) => ({ name, kind }));
+  });
+};
 
 /**
  * Parse the negina.co.il Markato dialect (see docs/format/format-notes.md).
@@ -47,7 +70,7 @@ export function parseNegina(source: string, meta: ParseMeta): ParseResult {
   const warnings: ParseWarning[] = [];
   const sections: Section[] = [];
   let current: Section | null = null;
-  let pendingChords: string[] | null = null;
+  let pendingChords: PendingChord[] | null = null;
   let title = meta.title;
   let artist = meta.artist ?? "";
 
@@ -59,11 +82,11 @@ export function parseNegina(source: string, meta: ParseMeta): ParseResult {
     return current;
   };
 
-  const pushInstrumental = (chords: string[]) => {
+  const pushInstrumental = (chords: PendingChord[]) => {
     const line: Line = {
       id: makeId(),
       text: "",
-      chords: chords.map((name) => makeAnchor(name, 0)),
+      chords: chords.map((chord) => makeAnchor(chord.name, 0, chord.kind)),
     };
     ensureSection().lines.push(line);
   };
@@ -94,7 +117,9 @@ export function parseNegina(source: string, meta: ParseMeta): ParseResult {
     const count = Math.min(chords.length, caretIndexes.length);
     const anchors: ChordAnchor[] = [];
     for (let i = 0; i < count; i++) {
-      anchors.push(makeAnchor(chords[i], isInstrumental ? 0 : caretIndexes[i]));
+      anchors.push(
+        makeAnchor(chords[i].name, isInstrumental ? 0 : caretIndexes[i], chords[i].kind),
+      );
     }
 
     const line: Line = {
@@ -146,7 +171,7 @@ export function parseNegina(source: string, meta: ParseMeta): ParseResult {
 
     if (trimmed.startsWith(":")) {
       flushPending();
-      pendingChords = trimmed.slice(1).trim().split(/\s+/).filter(Boolean);
+      pendingChords = readChordLine(trimmed.slice(1));
       if (pendingChords.length === 0) {
         warnings.push({ lineNumber, message: "שורת אקורדים ריקה" });
         pendingChords = null;

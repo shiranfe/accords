@@ -22,17 +22,28 @@ export const DEFAULT_BPM = 96;
 const beatsFor = (kind: TickKind, beatsPerBar: number): number =>
   kind === "bar" ? beatsPerBar : kind === "half" ? Math.max(1, Math.round(beatsPerBar / 2)) : 1;
 
-/** Sequential bar numbers for every full-bar chord, across the whole song. */
+/** How much of a bar a chord takes up, counted in quarters of a bar. */
+const QUARTERS: Record<TickKind, number> = { bar: 4, half: 2, quarter: 1 };
+
+/**
+ * Bar numbers, given only to the chord that starts each bar — chords sharing a
+ * bar with the one before them carry no number and no tick. Counting by how
+ * much of a bar each chord occupies is what makes a line like
+ * "Am7b5 D7b9" one bar rather than two.
+ */
 export function buildBarNumbers(song: Song): BarNumbers {
   const numbers: BarNumbers = {};
   let bar = 0;
+  let filled = 0; // quarters of the current bar already used
   for (const section of song.sections) {
     for (const line of section.lines) {
       const ordered = [...line.chords].sort((a, b) => a.charIndex - b.charIndex);
       for (const chord of ordered) {
-        if (chord.kind !== "bar") continue;
-        bar += 1;
-        numbers[chord.id] = bar;
+        if (filled === 0) {
+          bar += 1;
+          numbers[chord.id] = bar;
+        }
+        filled = (filled + QUARTERS[chord.kind]) % 4;
       }
     }
   }

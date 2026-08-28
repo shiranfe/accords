@@ -13,6 +13,7 @@ The negina format is a Markato dialect with local extensions.
 |---|---|---|
 | `%שם%` | Section header (e.g. `%בית%`, `%פזמון%`). Negina uses `%...%` where vanilla Markato uses `#NAME`. Rendered as a bold `<h3>` | rendered HTML |
 | `:C D G` | Chord line for the lyric line that follows. Chords separated by spaces, typed LTR. **First chord in the list pairs with the first caret in reading order** (in Hebrew: the rightmost text position) | rendered pairing of chords to fragments |
+| `:C \| Am7 D7 \| G` | **Our extension, not negina's.** `\|` marks the bar lines. Chords inside one bar split it evenly — two chords are half a bar each, four are a quarter. A chord line without any `\|` keeps the older reading of one chord per bar, so every song written before this parses unchanged | round-trip test: `How High The Moon` reports 32 bars where the same chart without markers reported 39 |
 | lyric line with `^` | Each `^` marks where the corresponding chord falls. Caret count == chord count. Caret can be at word start, mid-word, between words, or trailing (chord lands at end of line) | example + tutorial |
 | `^^^` (carets only, no text) | Instrumental line: chords with no lyrics. Rendered as a chords-only row (`phrase noLyric noText`) | rendered HTML |
 | `*` alone on a line | Section spacer / separator. Rendered literally as a gutter asterisk row (`<span class="gutter">*</span>`) | rendered HTML |
@@ -55,8 +56,12 @@ chord anchor (caret count still equals chord count) — it is a visible performa
 records CHORD CHANGES ONLY.** A chord that lasts 2+ bars is written exactly
 once — nothing at all is written while a chord continues. Therefore:
 
-- **Bar counts and chord durations are NOT derivable from the notation.**
-  A written chord may last half a bar, one bar, or many bars.
+- **Bar counts and chord durations are NOT derivable from the notation**, in
+  the negina corpus. A written chord may last half a bar, one bar, or many.
+- **Updated 2026-08-29:** a source that marks its bar lines with `|` *is*
+  derivable, because the marker says where each bar ends and how many chords
+  share it. Songs imported from negina still have no markers and still are
+  not. `ChordAnchor.kind` carries the result — `bar`, `half` or `quarter`.
 - Measured reality check ("החוף של טרפטוני"): 132 written chord events vs 88
   real bars in the audio — durations vary in both directions.
 - The numbers we currently display per chord are really **chord ordinals**,
