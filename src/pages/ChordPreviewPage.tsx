@@ -9,6 +9,7 @@ import { CHORD_SHAPES } from "../data/chordShapes";
 import type { ChordEntry } from "../types/chord";
 import { navigate } from "../lib/navigate";
 import { prettyChord } from "../lib/chordName";
+import { allVoicings } from "../lib/voicings";
 
 /** Roots in playing order, sharps only — flats are folded onto their sharp. */
 const ROOT_ORDER = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
@@ -99,6 +100,7 @@ const ALL_LETTERS = LETTERS.filter((letter) =>
  */
 export function ChordPreviewPage() {
   const [selected, setSelected] = useState(CHORD_SHAPES[0].name);
+  const [position, setPosition] = useState(0);
   const [query, setQuery] = useState("");
   const [letterFilter, setLetterFilter] = useState<string | null>(null);
   const [signFilter, setSignFilter] = useState<Sign | null>(null);
@@ -108,8 +110,10 @@ export function ChordPreviewPage() {
   const [theme, setTheme] = useState<ChordTheme>("wood");
 
   const index = Math.max(0, CHORD_SHAPES.findIndex((entry) => entry.name === selected));
+  /** Everything written down for this chord, plus the movable shapes slid here. */
+  const voicings = useMemo(() => allVoicings(CHORD_SHAPES[index]), [index]);
+  const pick = Math.min(position, voicings.length - 1);
   const current = CHORD_SHAPES[index];
-  const next = CHORD_SHAPES[(index + 1) % CHORD_SHAPES.length];
 
   const groups = useMemo(() => {
     const needle = needleOf(query);
@@ -205,20 +209,58 @@ export function ChordPreviewPage() {
           {/* the big "now playing" panel that would sit on the side */}
           <aside className="w-full rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:w-80 lg:shrink-0">
             <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-orange-600">
-              עכשיו
+              {voicings.length > 1 ? `${voicings.length} דרכים לנגן` : "ניגון"}
             </div>
             <div className="mb-3 text-4xl font-bold tracking-tight text-slate-900">
               {prettyChord(current.name)}
             </div>
-            <ChordDiagram shape={current.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={230} className="mx-auto block" />
-
-            <div className="mt-6 border-t border-slate-100 pt-4 opacity-60">
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                הבא
-              </div>
-              <div className="mb-2 text-xl font-bold text-slate-700">{prettyChord(next.name)}</div>
-              <ChordDiagram shape={next.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={140} className="mx-auto block" />
+            <ChordDiagram
+              shape={voicings[pick]}
+              orientation={orientation}
+              theme={theme}
+              reverseStrings={reverseStrings}
+              width={230}
+              className="mx-auto block"
+            />
+            <div className="mt-2 text-xs font-medium text-slate-500">
+              {voicings[pick].label ?? "מהמילון"}
+              {voicings[pick].baseFret > 1 && ` · מסף ${voicings[pick].baseFret}`}
             </div>
+
+            {voicings.length > 1 && (
+              <div className="mt-5 border-t border-slate-100 pt-4">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  פוזיציות על הצוואר
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {voicings.map((shape, i) => (
+                    <button
+                      key={`${shape.baseFret}:${shape.frets.join(",")}`}
+                      type="button"
+                      onClick={() => setPosition(i)}
+                      title={shape.label}
+                      className={`rounded-xl border p-1.5 transition-colors ${
+                        i === pick
+                          ? "border-orange-400 bg-orange-50"
+                          : "border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <ChordDiagram
+                        shape={shape}
+                        orientation={orientation}
+                        theme={theme}
+                        reverseStrings={reverseStrings}
+                        width={96}
+                        className="mx-auto block"
+                      />
+                      <div className="mt-0.5 text-[10px] font-semibold text-slate-500">
+                        {shape.baseFret > 1 ? `סף ${shape.baseFret}` : "פתוח"}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </aside>
 
           {/* the dictionary, grouped by root */}
@@ -330,7 +372,10 @@ export function ChordPreviewPage() {
                         <button
                           key={entry.name}
                           type="button"
-                          onClick={() => setSelected(entry.name)}
+                          onClick={() => {
+                            setSelected(entry.name);
+                            setPosition(0);
+                          }}
                           className={`rounded-xl border p-3 transition-colors ${
                             entry.name === selected
                               ? "border-orange-400 bg-orange-50"
