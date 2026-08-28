@@ -1231,7 +1231,7 @@ function ChordPreviewPanel({
   };
 
   return (
-    <aside className="w-full lg:sticky lg:top-6 lg:w-80">
+    <aside className="w-full lg:sticky lg:top-16 lg:w-80">
       <div className="space-y-4 rounded-[28px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
         {renderCard("אקורד נוכחי", currentChord, "בחר אקורד")}
         {renderCard("האקורד הבא", isPlaying ? nextChord : null, isPlaying ? "—" : "הפעל נגינה")}

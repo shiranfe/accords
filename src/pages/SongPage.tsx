@@ -786,7 +786,7 @@ export function SongPage({ songId }: { songId: string }) {
             )}
           </main>
 
-          <aside className="w-full space-y-4 lg:sticky lg:top-6 lg:w-96">
+          <aside className="w-full space-y-4 lg:sticky lg:top-16 lg:w-96">
             <ChordPanel
               names={songChordNames}
               activeName={activeChordName}

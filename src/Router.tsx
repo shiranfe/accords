@@ -5,6 +5,7 @@ import { SongPage } from "./pages/SongPage.tsx";
 import { ImportPage } from "./pages/ImportPage.tsx";
 import { ChordPreviewPage } from "./pages/ChordPreviewPage.tsx";
 import { navigate } from "./lib/navigate";
+import { TopNav } from "./components/TopNav.tsx";
 
 /** Vite base, always with a trailing slash ("/" in dev). */
 const BASE = import.meta.env.BASE_URL || "/";
@@ -51,10 +52,18 @@ export function Router() {
     if (!known && !songMatch) navigate("/", true);
   }, [path, songMatch]);
 
-  if (path === "/editor") return <App />;
-  if (path === "/import") return <ImportPage />;
-  if (path === "/chords") return <ChordPreviewPage />;
-  if (songMatch) return <SongPage songId={decodeURIComponent(songMatch[1])} />;
+  const page = (() => {
+    if (path === "/editor") return <App />;
+    if (path === "/import") return <ImportPage />;
+    if (path === "/chords") return <ChordPreviewPage />;
+    if (songMatch) return <SongPage songId={decodeURIComponent(songMatch[1])} />;
+    return <LibraryPage />;
+  })();
 
-  return <LibraryPage />;
+  return (
+    <>
+      <TopNav path={path} />
+      {page}
+    </>
+  );
 }

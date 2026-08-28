@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FilePlus2, Music, PencilRuler, Trash2, Video } from "lucide-react";
+import { FilePlus2, Music, Trash2, Video } from "lucide-react";
 import type { Song } from "../types/song";
 import { deleteSong, loadLibrary } from "../lib/library";
 import { navigate } from "../lib/navigate";
@@ -29,14 +29,6 @@ export function LibraryPage() {
             >
               <FilePlus2 size={16} />
               ייבוא שיר
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/editor")}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
-            >
-              <PencilRuler size={16} />
-              העורך
             </button>
           </div>
         </header>
