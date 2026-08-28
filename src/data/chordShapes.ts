@@ -33,8 +33,9 @@ const FULL = "מלא";
  * two rather than a jump across the neck. Labelled by which string the root
  * sits on, which is the thing worth learning.
  */
-const E6 = "ג'אז · שורש במיתר 6";
-const A5 = "ג'אז · שורש במיתר 5";
+const JAZZ = "ג'אז";
+const E6 = `${JAZZ} · שורש במיתר 6`;
+const A5 = `${JAZZ} · שורש במיתר 5`;
 
 export const CHORD_SHAPES: ChordEntry[] = [
   // ---- C ----
@@ -202,7 +203,7 @@ export const CHORD_SHAPES: ChordEntry[] = [
     name: "G6",
     shapes: [
       labeled(FULL, sh("xx1313", "001314", 5, [1, 2, 5])),
-      labeled("ג'אז · שלושה קולות", sh("xx212x", "002130", 4)),
+      labeled(`${JAZZ} · שלושה קולות`, sh("xx212x", "002130", 4)),
     ],
   },
   { name: "G7", shapes: [sh("320001", "320001")] },
@@ -339,6 +340,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // D7b9: the usual root-on-the-A-string shape, fifth left out.
   { name: "D7b9", shapes: [sh("x2121x", "021430", 4)] },
 ];
+
+/** The three-note voicing, for chords that carry one. */
+export const jazzVoicing = (entry: ChordEntry): ChordShape | undefined =>
+  entry.shapes.find((shape) => shape.label?.startsWith(JAZZ));
 
 export const findChordShape = (name: string): ChordEntry | undefined =>
   CHORD_SHAPES.find((c) => c.name === name || c.alias === name);

@@ -66,6 +66,8 @@ export function SongPage({ songId }: { songId: string }) {
     return initial != null ? String(initial) : "";
   });
   const [isPlaying, setIsPlaying] = useState(false);
+  // One switch for the whole song: the printed shapes, or the three-note ones.
+  const [jazzMode, setJazzMode] = useState(false);
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
   /** Player position in seconds — drives the timeline playhead */
@@ -743,7 +745,7 @@ export function SongPage({ songId }: { songId: string }) {
         <div className="flex flex-col items-start gap-6 lg:flex-row">
           {/* 1 — the chord to get your hand ready for */}
           <aside className="order-1 w-full shrink-0 lg:order-none lg:sticky lg:top-16 lg:w-64">
-            <UpNextPanel nextName={nextChordName} afterName={afterNextChordName} />
+            <UpNextPanel nextName={nextChordName} afterName={afterNextChordName} jazz={jazzMode} />
           </aside>
 
           <main className="order-3 w-full min-w-0 flex-1 rounded-[24px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:order-none md:p-8">
@@ -845,7 +847,12 @@ export function SongPage({ songId }: { songId: string }) {
             </aside>
 
             <aside className="order-4 w-full space-y-4 lg:order-none">
-            <ChordPanel names={songChordNames} activeName={activeChordName} />
+            <ChordPanel
+              names={songChordNames}
+              activeName={activeChordName}
+              jazz={jazzMode}
+              onJazzChange={setJazzMode}
+            />
 
             <div className="rounded-[24px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
               <div className="mb-3 text-center">
