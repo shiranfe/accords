@@ -143,6 +143,16 @@ function syncPipelinePlugin(): Plugin {
 }
 
 export default defineConfig({
+  // Fixed dev port: the app always answers on http://localhost:5173.
+  // strictPort makes vite fail loudly instead of silently hopping to 5174.
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
+  },
   plugins: [
     react(),
     syncPipelinePlugin(),
