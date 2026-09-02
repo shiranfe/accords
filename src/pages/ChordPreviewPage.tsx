@@ -66,24 +66,35 @@ const needleOf = (query: string) => {
 /** Everything after the root: "", "m7", "sus4", "7b5"… */
 const suffixOf = (name: string) => name.replace(/^[A-G][#b]?/, "");
 
-/**
- * The type filter lists the suffix exactly as it is written on the chord, so
- * it needs no theory to read: pick "7" and you get every seventh. Anything
- * transcribed later that is not in this order still shows up, at the end.
- */
-const SUFFIX_ORDER = [
-  "", "m", "5", "6", "7", "9", "maj7",
-  "m6", "m7", "m9", "sus2", "sus4", "dim", "aug", "7b5",
+/** A minor chord — starts with "m", but not "maj7". */
+const isMinorSuffix = (suffix: string) => suffix.startsWith("m") && !suffix.startsWith("ma");
+
+/** The quality with the minor marker peeled off: "m7" → "7", "m" → "". */
+const qualityOf = (suffix: string) => (isMinorSuffix(suffix) ? suffix.slice(1) : suffix);
+
+/** Whether a chord is major/minor is its own switch, so the type filter lists
+ *  each quality once: "7" then answers for both "7" and "m7". */
+type Minor = "major" | "minor";
+
+const QUALITY_ORDER = [
+  "", "5", "6", "7", "9", "11", "maj7", "7b5", "sus2", "sus4", "dim", "aug",
 ];
 
-const ALL_SUFFIXES = (() => {
-  const present = new Set(CHORD_SHAPES.map((entry) => suffixOf(entry.name)));
-  const known = SUFFIX_ORDER.filter((suffix) => present.has(suffix));
-  const rest = [...present].filter((suffix) => !SUFFIX_ORDER.includes(suffix)).sort();
+const qualitiesFrom = (suffixes: string[]) => {
+  const present = new Set(suffixes.map(qualityOf));
+  const known = QUALITY_ORDER.filter((q) => present.has(q));
+  const rest = [...present].filter((q) => !QUALITY_ORDER.includes(q)).sort();
   return [...known, ...rest];
-})();
+};
 
-const labelOfSuffix = (suffix: string) => (suffix === "" ? "בסיסי" : prettyChord(suffix));
+const ALL_SUFFIXES = CHORD_SHAPES.map((entry) => suffixOf(entry.name));
+const QUALITIES: Record<Minor | "all", string[]> = {
+  all: qualitiesFrom(ALL_SUFFIXES),
+  major: qualitiesFrom(ALL_SUFFIXES.filter((s) => !isMinorSuffix(s))),
+  minor: qualitiesFrom(ALL_SUFFIXES.filter((s) => isMinorSuffix(s))),
+};
+
+const labelOfQuality = (quality: string) => (quality === "" ? "בסיסי" : prettyChord(quality));
 
 /** The root is picked as a letter plus a sign, the way it is written. */
 type Sign = "" | "#" | "b";
@@ -118,7 +129,8 @@ export function ChordPreviewPage() {
   const [query, setQuery] = useState("");
   const [letterFilter, setLetterFilter] = useState<string | null>(null);
   const [signFilter, setSignFilter] = useState<Sign | null>(null);
-  const [suffixFilter, setSuffixFilter] = useState<string | null>(null);
+  const [minorFilter, setMinorFilter] = useState<Minor | null>(null);
+  const [qualityFilter, setQualityFilter] = useState<string | null>(null);
   const [orientation, setOrientation] = useState<ChordOrientation>("player-rtl");
   const [reverseStrings, setReverseStrings] = useState(false);
   const [theme, setTheme] = useState<ChordTheme>("wood");
@@ -143,8 +155,10 @@ export function ChordPreviewPage() {
 
     for (const entry of CHORD_SHAPES) {
       const root = rootOf(entry.name);
+      const suffix = suffixOf(entry.name);
       if (!rootMatches(root)) continue;
-      if (suffixFilter !== null && suffixOf(entry.name) !== suffixFilter) continue;
+      if (minorFilter !== null && (minorFilter === "minor") !== isMinorSuffix(suffix)) continue;
+      if (qualityFilter !== null && qualityOf(suffix) !== qualityFilter) continue;
       if (needle && !plain(entry.name).includes(needle)) continue;
       const bucket = byRoot.get(root);
       if (bucket) bucket.push(entry);
@@ -155,7 +169,7 @@ export function ChordPreviewPage() {
       root,
       entries: byRoot.get(root) as ChordEntry[],
     }));
-  }, [query, letterFilter, signFilter, suffixFilter]);
+  }, [query, letterFilter, signFilter, minorFilter, qualityFilter]);
 
   /** A flat filter reads the roots back as flats; otherwise leave them stored. */
   const spell = (name: string) => (signFilter === "b" ? asFlat(name) : name);
@@ -171,15 +185,27 @@ export function ChordPreviewPage() {
 
   const total = groups.reduce((sum, group) => sum + group.entries.length, 0);
   const filtered = Boolean(
-    query || letterFilter || signFilter !== null || suffixFilter !== null,
+    query || letterFilter || signFilter !== null || minorFilter !== null || qualityFilter !== null,
   );
 
   const clearFilters = () => {
     setQuery("");
     setLetterFilter(null);
     setSignFilter(null);
-    setSuffixFilter(null);
+    setMinorFilter(null);
+    setQualityFilter(null);
   };
+
+  /** Switching minor/major reshapes the type list, so drop a now-absent pick. */
+  const pickMinor = (value: Minor) => {
+    const next = minorFilter === value ? null : value;
+    setMinorFilter(next);
+    if (qualityFilter !== null && !QUALITIES[next ?? "all"].includes(qualityFilter)) {
+      setQualityFilter(null);
+    }
+  };
+
+  const qualities = QUALITIES[minorFilter ?? "all"];
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-50 px-4 py-8 text-right md:px-8">
@@ -344,9 +370,6 @@ export function ChordPreviewPage() {
 
             <div className="mb-6 space-y-2 rounded-xl bg-slate-50 p-3">
               <FilterRow label="שורש">
-                <FilterChip active={letterFilter === null} onClick={() => setLetterFilter(null)}>
-                  הכל
-                </FilterChip>
                 {ALL_LETTERS.map((letter) => (
                   <FilterChip
                     key={letter}
@@ -358,25 +381,7 @@ export function ChordPreviewPage() {
                 ))}
               </FilterRow>
 
-              <FilterRow label="סוג">
-                <FilterChip active={suffixFilter === null} onClick={() => setSuffixFilter(null)}>
-                  הכל
-                </FilterChip>
-                {ALL_SUFFIXES.map((suffix) => (
-                  <FilterChip
-                    key={suffix || "basic"}
-                    active={suffixFilter === suffix}
-                    onClick={() => setSuffixFilter(suffixFilter === suffix ? null : suffix)}
-                  >
-                    {labelOfSuffix(suffix)}
-                  </FilterChip>
-                ))}
-              </FilterRow>
-
               <FilterRow label="סימן">
-                <FilterChip active={signFilter === null} onClick={() => setSignFilter(null)}>
-                  הכל
-                </FilterChip>
                 {SIGNS.map(([key, label]) => (
                   <FilterChip
                     key={key || "natural"}
@@ -384,6 +389,27 @@ export function ChordPreviewPage() {
                     onClick={() => setSignFilter(signFilter === key ? null : key)}
                   >
                     {label}
+                  </FilterChip>
+                ))}
+              </FilterRow>
+
+              <FilterRow label="סולם">
+                <FilterChip active={minorFilter === "major"} onClick={() => pickMinor("major")}>
+                  מז'ור
+                </FilterChip>
+                <FilterChip active={minorFilter === "minor"} onClick={() => pickMinor("minor")}>
+                  מינור
+                </FilterChip>
+              </FilterRow>
+
+              <FilterRow label="סוג">
+                {qualities.map((quality) => (
+                  <FilterChip
+                    key={quality || "basic"}
+                    active={qualityFilter === quality}
+                    onClick={() => setQualityFilter(qualityFilter === quality ? null : quality)}
+                  >
+                    {labelOfQuality(quality)}
                   </FilterChip>
                 ))}
               </FilterRow>
