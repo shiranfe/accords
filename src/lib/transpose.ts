@@ -25,6 +25,12 @@ const PITCH: Record<string, number> = {
 /** Keys a chart conventionally writes with flats; the rest read better sharp. */
 const FLAT_KEYS = new Set([1, 3, 5, 8, 10]); // Db, Eb, F, Ab, Bb
 
+/** The same convention for minor keys: Gm, Cm, Fm, B♭m, E♭m, and Dm. Taken
+ *  straight rather than through the relative major, because the one key where
+ *  the two disagree - E♭m against D♯m, six flats against six sharps - is
+ *  written E♭m on every chart. */
+const FLAT_MINOR_KEYS = new Set([7, 0, 5, 10, 3, 2]);
+
 const mod12 = (n: number) => ((n % 12) + 12) % 12;
 
 export const pitchOf = (note: string): number | undefined => PITCH[note];
@@ -101,11 +107,11 @@ export function songKey(song: Song): SongKey | null {
 }
 
 /**
- * Which accidentals a key reads best in. A minor key spells itself like its
- * relative major — C minor is written with the flats of E♭, not as D♯m.
+ * Which accidentals a key reads best in — the convention a chart follows, one
+ * list for the major keys and one for the minor ones.
  */
 export const flatsForKey = (pitch: number, minor: boolean) =>
-  keyPrefersFlats(pitch + (minor ? 3 : 0));
+  minor ? FLAT_MINOR_KEYS.has(mod12(pitch)) : keyPrefersFlats(pitch);
 
 /** How a key is written: `Bb`, or `Bbm` when the song sits in minor. */
 export const keyLabel = (pitch: number, flats: boolean, minor: boolean) =>
