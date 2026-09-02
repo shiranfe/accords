@@ -1,15 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, X } from "lucide-react";
 import {
   ChordDiagram,
   type ChordOrientation,
   type ChordTheme,
 } from "../components/ChordDiagram";
-import { CHORD_SHAPES } from "../data/chordShapes";
+import { CHORD_SHAPES, isJazzShape } from "../data/chordShapes";
 import type { ChordEntry } from "../types/chord";
 import { navigate } from "../lib/navigate";
 import { prettyChord } from "../lib/chordName";
-import { allVoicings } from "../lib/voicings";
+import { ChordName } from "../components/ChordName";
+import { allVoicings, isTriadShape } from "../lib/voicings";
 
 /** Roots in playing order, sharps only — flats are folded onto their sharp. */
 const ROOT_ORDER = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
@@ -21,6 +22,19 @@ const FLAT_TO_SHARP: Record<string, string> = {
   Gb: "F#",
   Ab: "G#",
 };
+
+/** The data spells every root with a sharp; this picks its flat twin. */
+const SHARP_TO_FLAT: Record<string, string> = {
+  "A#": "Bb",
+  "C#": "Db",
+  "D#": "Eb",
+  "F#": "Gb",
+  "G#": "Ab",
+};
+
+/** Respell a stored (sharp) name with flats, so a flat filter shows E♭, not D♯. */
+const asFlat = (name: string) =>
+  name.replace(/^([A-G]#)/, (_, root) => SHARP_TO_FLAT[root] ?? root);
 
 /** Both spellings in the heading, the way the dictionary writes them. */
 const ROOT_LABEL: Record<string, string> = {
@@ -143,6 +157,18 @@ export function ChordPreviewPage() {
     }));
   }, [query, letterFilter, signFilter, suffixFilter]);
 
+  /** A flat filter reads the roots back as flats; otherwise leave them stored. */
+  const spell = (name: string) => (signFilter === "b" ? asFlat(name) : name);
+
+  /** Whatever the filters leave first is what the side panel should preview. */
+  const firstMatch = groups[0]?.entries[0]?.name;
+  useEffect(() => {
+    if (firstMatch) {
+      setSelected(firstMatch);
+      setPosition(0);
+    }
+  }, [firstMatch]);
+
   const total = groups.reduce((sum, group) => sum + group.entries.length, 0);
   const filtered = Boolean(
     query || letterFilter || signFilter !== null || suffixFilter !== null,
@@ -211,9 +237,10 @@ export function ChordPreviewPage() {
             <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-orange-600">
               {voicings.length > 1 ? `${voicings.length} דרכים לנגן` : "ניגון"}
             </div>
-            <div className="mb-3 text-4xl font-bold tracking-tight text-slate-900">
-              {prettyChord(current.name)}
-            </div>
+            <ChordName
+              name={spell(current.name)}
+              className="mb-3 block text-4xl font-bold tracking-tight text-slate-900"
+            />
             <ChordDiagram
               shape={voicings[pick]}
               orientation={orientation}
@@ -253,8 +280,17 @@ export function ChordPreviewPage() {
                         width={96}
                         className="mx-auto block"
                       />
-                      <div className="mt-0.5 text-[10px] font-semibold text-slate-500">
-                        {shape.baseFret > 1 ? `סף ${shape.baseFret}` : "פתוח"}
+                      <div className="mt-0.5 flex items-center justify-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <span>{shape.baseFret > 1 ? `סף ${shape.baseFret}` : "פתוח"}</span>
+                        {isJazzShape(shape) ? (
+                          <span className="rounded-full bg-slate-900 px-1 py-px text-[8px] font-bold leading-none text-white">
+                            ג'אז
+                          </span>
+                        ) : isTriadShape(shape) ? (
+                          <span className="rounded-full bg-indigo-500 px-1 py-px text-[8px] font-bold leading-none text-white">
+                            טריאדה
+                          </span>
+                        ) : null}
                       </div>
                     </button>
                   ))}
@@ -362,10 +398,16 @@ export function ChordPreviewPage() {
                 {groups.map((group) => (
                   <div key={group.root}>
                     <h3 className="mb-3 border-b border-slate-100 pb-1.5 text-base font-black tracking-tight text-slate-900">
-                      {ROOT_LABEL[group.root] ?? group.root}
-                      <span className="mr-2 text-xs font-semibold text-slate-400">
-                        {group.entries.length}
-                      </span>
+                      <ChordName
+                        className="inline-block"
+                        name={
+                          signFilter === "b"
+                            ? asFlat(group.root)
+                            : signFilter === "#"
+                              ? group.root
+                              : ROOT_LABEL[group.root] ?? group.root
+                        }
+                      />
                     </h3>
                     <div className="flex flex-wrap gap-5">
                       {group.entries.map((entry) => (
@@ -382,7 +424,7 @@ export function ChordPreviewPage() {
                               : "border-slate-200 hover:bg-slate-50"
                           }`}
                         >
-                          <div className="mb-1 text-center text-sm font-bold text-slate-900">{prettyChord(entry.name)}</div>
+                          <ChordName name={spell(entry.name)} className="mb-1 block text-center text-sm font-bold text-slate-900" />
                           <ChordDiagram shape={entry.shapes[0]} orientation={orientation} theme={theme} reverseStrings={reverseStrings} width={130} className="mx-auto block" />
                         </button>
                       ))}

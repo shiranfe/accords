@@ -33,7 +33,7 @@ const FULL = "מלא";
  * two rather than a jump across the neck. Labelled by which string the root
  * sits on, which is the thing worth learning.
  */
-const JAZZ = "ג'אז";
+export const JAZZ = "ג'אז";
 const E6 = `${JAZZ} · שורש במיתר 6`;
 const A5 = `${JAZZ} · שורש במיתר 5`;
 
@@ -55,6 +55,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "Csus4", shapes: [sh("x11341", "011341", 3, [1, 1, 5])] },
   { name: "Csus2", shapes: [sh("x13311", "013411", 3, [1, 1, 5])] },
   { name: "C7b5", shapes: [sh("xx1223", "001234", 4)] },
+  // Root, third and seventh with the fifth raised, root on the 5th string.
+  // The B string is muted between them; being movable, this is the shape
+  // every other root's 7#5 is derived from - see voicings.ts.
+  { name: "C7#5", shapes: [sh("x212x3", "031204", 2)] },
   { name: "Cm", shapes: [sh("x13321", "013421", 3, [1, 1, 5])] },
   { name: "Cm6", shapes: [sh("xx2212", "002314", 4)] },
   { name: "Cm7", shapes: [sh("113121", "113121", 3, [1, 0, 5])] },
@@ -167,6 +171,10 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "Fsus2", shapes: [sh("xx3011", "003011", 1, [1, 4, 5])] },
   { name: "F7b5", shapes: [sh("xx1223", "001234", 3)] },
   { name: "Fm", shapes: [sh("133111", "134111", 1, [1, 0, 5])] },
+  // A bare full barre: root, fourth, seventh, third and fifth - Fm7 with
+  // the 11th on the A string. The chart for "Take Five" prints this as an
+  // F minor with a stacked 7 over 4.
+  { name: "Fm11", shapes: [sh("111111", "111111", 1, [1, 0, 5])] },
   { name: "Fm6", shapes: [sh("xx1312", "001312", 3, [1, 2, 5])] },
   {
     name: "Fm7",
@@ -307,7 +315,7 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "B6", shapes: [sh("x21102", "031204")] },
   { name: "B7", shapes: [sh("x21202", "021304")] },
   { name: "B9", shapes: [sh("xx2122", "002134", 6)] },
-  { name: "Bmaj7", shapes: [sh("x24342", "013241", 1, [1, 1, 5])] },
+  { name: "Bmaj7", alias: "Cbmaj7", shapes: [sh("x24342", "013241", 1, [1, 1, 5])] },
   { name: "Bdim", shapes: [sh("xxx431", "000431")] },
   // The dictionary frets the A string at the first fret, sounding a Bb inside
   // a B chord. Moved to the second, the usual open shape.
@@ -343,9 +351,13 @@ export const CHORD_SHAPES: ChordEntry[] = [
   { name: "D7b9", shapes: [sh("x2121x", "021430", 4)] },
 ];
 
+/** A shell voicing — the three-note "jazz" shape, on the upper strings. */
+export const isJazzShape = (shape: ChordShape): boolean =>
+  shape.label?.startsWith(JAZZ) ?? false;
+
 /** The three-note voicing, for chords that carry one. */
 export const jazzVoicing = (entry: ChordEntry): ChordShape | undefined =>
-  entry.shapes.find((shape) => shape.label?.startsWith(JAZZ));
+  entry.shapes.find(isJazzShape);
 
 export const findChordShape = (name: string): ChordEntry | undefined =>
   CHORD_SHAPES.find((c) => c.name === name || c.alias === name);

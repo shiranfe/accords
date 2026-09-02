@@ -17,6 +17,8 @@ import { SourceEditorPanel } from "../components/SourceEditorPanel";
 import { songToNegina } from "../lib/serializeNegina";
 import { runSyncOnServer } from "../lib/syncRunner";
 import { navigate } from "../lib/navigate";
+import { KeyPicker } from "../components/viewer/KeyPicker";
+import { flatsForKey, songKey, transposeChordName, transposeSong } from "../lib/transpose";
 
 const FONT_SIZE_KEY = "accords:viewer:font-size";
 const MIN_FONT_SIZE = 12;
@@ -25,11 +27,18 @@ const DEFAULT_FONT_SIZE = 19;
 const MIN_BPM = 40;
 const MAX_BPM = 240;
 const BAR_ALIGN_KEY = "accords:viewer:bar-align";
+const TRANSPOSE_KEY = "accords:viewer:transpose";
 
 const loadFontSize = () => {
   const raw = Number(localStorage.getItem(FONT_SIZE_KEY));
   if (!Number.isFinite(raw) || raw === 0) return DEFAULT_FONT_SIZE;
   return Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, raw));
+};
+
+/** The key a song was last viewed in, as a semitone shift from what is written. */
+const loadTranspose = (songId: string) => {
+  const raw = Number(localStorage.getItem(`${TRANSPOSE_KEY}:${songId}`));
+  return Number.isFinite(raw) ? ((raw % 12) + 12) % 12 : 0;
 };
 
 export function SongPage({ songId }: { songId: string }) {
@@ -68,6 +77,16 @@ export function SongPage({ songId }: { songId: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   // One switch for the whole song: the printed shapes, or the three-note ones.
   const [jazzMode, setJazzMode] = useState(false);
+  // Display-only key change; the stored song and the sync data stay written
+  // as they are. Remembered per song, so a singer's key survives a reload.
+  const [semitones, setSemitones] = useState<number>(() => loadTranspose(songId));
+  // Which song that key belongs to — moving to another song without a remount
+  // must read its key rather than carry this one over and save it there.
+  const [keyReadFor, setKeyReadFor] = useState(songId);
+  if (keyReadFor !== songId) {
+    setKeyReadFor(songId);
+    setSemitones(loadTranspose(songId));
+  }
   const [playbackMs, setPlaybackMs] = useState(0);
   const [syncedBar, setSyncedBar] = useState<number | null>(null);
   /** Player position in seconds — drives the timeline playhead */
@@ -95,6 +114,10 @@ export function SongPage({ songId }: { songId: string }) {
   useEffect(() => {
     localStorage.setItem(BAR_ALIGN_KEY, String(barAlign));
   }, [barAlign]);
+
+  useEffect(() => {
+    localStorage.setItem(`${TRANSPOSE_KEY}:${songId}`, String(semitones));
+  }, [songId, semitones]);
 
   useEffect(() => {
     // syncTick re-fetches after a browser-triggered pipeline run completes
@@ -133,6 +156,24 @@ export function SongPage({ songId }: { songId: string }) {
   // Sheet chords in pipeline order; when align.py produced per-chord timings
   // and the counts match, karaoke maps time -> written chord directly.
   const flatChords = useMemo(() => (song ? flattenChords(song) : []), [song]);
+
+  // The written key, read off the first chord, and the accidentals the shifted
+  // key reads best in — Bb rather than A#, F# rather than Gb.
+  const writtenKey = useMemo(() => (song ? songKey(song) : null), [song]);
+  const flats = flatsForKey((writtenKey?.pitch ?? 0) + semitones, writtenKey?.minor ?? false);
+
+  /** A written chord name as the viewer should show it in the chosen key. */
+  const toKey = useCallback(
+    (name: string) => transposeChordName(name, semitones, flats),
+    [semitones, flats],
+  );
+
+  // Only the sheet is transposed; ids, anchors and timings are untouched, so
+  // everything keyed by chord id (karaoke, timeline, validation) still lines up.
+  const viewSong = useMemo(
+    () => (song ? transposeSong(song, semitones, flats) : null),
+    [song, semitones, flats],
+  );
 
   // Aligned events are valid while they still describe this sheet: every
   // event must point at an existing written chord of the same name. That also
@@ -258,7 +299,7 @@ export function SongPage({ songId }: { songId: string }) {
         return {
           chordId: flat.chordId,
           index: i,
-          name: flat.name,
+          name: toKey(flat.name),
           start: event.start,
           end: event.end,
           suspect: Boolean(suspects?.[flat.chordId]),
@@ -267,7 +308,7 @@ export function SongPage({ songId }: { songId: string }) {
       })
       .filter((c): c is NonNullable<typeof c> => c !== null);
     return items.sort((a, b) => a.start - b.start);
-  }, [effectiveFirst, flatChords, suspects, timeOverrides]);
+  }, [effectiveFirst, flatChords, suspects, timeOverrides, toKey]);
 
   /** Persist a dragged chord time (or clear it) and refresh the sheet. */
   const setChordTime = useCallback(
@@ -440,11 +481,11 @@ export function SongPage({ songId }: { songId: string }) {
     for (const { name } of flatChords) {
       if (!seen.has(name)) {
         seen.add(name);
-        out.push(name);
+        out.push(toKey(name));
       }
     }
     return out;
-  }, [flatChords]);
+  }, [flatChords, toKey]);
 
   // What is sounding now, and the next two chords that are actually a change.
   // Before playback starts the walk begins at the top, so the panel already
@@ -465,11 +506,11 @@ export function SongPage({ songId }: { songId: string }) {
     }
 
     return {
-      activeChordName: current,
-      nextChordName: upcoming[0] ?? null,
-      afterNextChordName: upcoming[1] ?? null,
+      activeChordName: current === null ? null : toKey(current),
+      nextChordName: upcoming[0] ? toKey(upcoming[0]) : null,
+      afterNextChordName: upcoming[1] ? toKey(upcoming[1]) : null,
     };
-  }, [activeEvent, flatChords]);
+  }, [activeEvent, flatChords, toKey]);
 
   const activeLineId = activeEvent?.lineId ?? null;
 
@@ -687,7 +728,10 @@ export function SongPage({ songId }: { songId: string }) {
             <button
               type="button"
               onClick={() => {
+                // Fixes are written back to the source, so editing drops back
+                // to the written key rather than saving a transposed name.
                 setEditMode((v) => !v);
+                setSemitones(0);
                 setFixTarget(null);
                 setSelectedChordId(null);
               }}
@@ -710,6 +754,15 @@ export function SongPage({ songId }: { songId: string }) {
                 </span>
               )}
             </button>
+            {writtenKey && (
+              <KeyPicker
+                originalPitch={writtenKey.pitch}
+                minor={writtenKey.minor}
+                semitones={semitones}
+                onChange={setSemitones}
+                disabled={editMode || showSource}
+              />
+            )}
             <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5">
               <button
                 type="button"
@@ -760,7 +813,7 @@ export function SongPage({ songId }: { songId: string }) {
               />
             ) : (
               <ViewerSongSheet
-                song={song}
+                song={viewSong ?? song}
                 fontSize={fontSize}
                 barAlign={barAlign}
                 activeLineId={activeLineId}
@@ -949,6 +1002,7 @@ export function SongPage({ songId }: { songId: string }) {
                   >
                     <option value={4}>4/4</option>
                     <option value={3}>3/4</option>
+                    <option value={5}>5/4</option>
                     <option value={6}>6/8</option>
                   </select>
                   {sync?.beatsPerBar != null && sync.beatsPerBar !== meter && (

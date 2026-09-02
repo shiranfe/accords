@@ -1,5 +1,5 @@
 import type { ChordEntry, ChordShape } from "../types/chord";
-import { CHORD_SHAPES } from "../data/chordShapes";
+import { CHORD_SHAPES, JAZZ, isJazzShape } from "../data/chordShapes";
 
 /** Open-string pitch classes, low E first. */
 const OPEN = [4, 9, 2, 7, 11, 4];
@@ -88,6 +88,97 @@ const TEMPLATES: Map<string, Template[]> = (() => {
 
 const STRING_LABEL = ["6", "5", "4", "3", "2", "1"];
 
+/** A template shape moved to `target`, or null when it lands off the neck. */
+const slideTo = (template: Template, target: number): ChordShape | null => {
+  let baseFret = template.shape.baseFret + ((target - template.rootPitch + 12) % 12);
+  if (baseFret > 12) baseFret -= 12;
+  const inversion = inversionOf(template.bassDegree);
+  const base = inversion
+    ? `${inversion} · ${DEGREE[template.bassDegree]} בבס`
+    : `שורש במיתר ${STRING_LABEL[template.rootString]}`;
+  const moved: ChordShape = {
+    ...template.shape,
+    baseFret,
+    // A shell voicing keeps its jazz badge as it slides — it stays the same
+    // easy upper-string shape, just higher up the neck.
+    label: isJazzShape(template.shape) ? `${JAZZ} · ${base}` : base,
+  };
+  if (baseFret < 1 || highestFret(moved) > 15) return null;
+  return moved;
+};
+
+/** A close triad on the top three strings, the easy upper-string grip. */
+export const TRIAD = "טריאדה";
+
+export const isTriadShape = (shape: ChordShape): boolean =>
+  shape.label?.startsWith(TRIAD) ?? false;
+
+/** Strings 3, 4, 5 — G3, B3, high E4 — as absolute semitones, so notes stack
+ *  in real pitch order and the grip stays close instead of springing an octave. */
+const TOP3_OPEN = [55, 59, 64];
+
+const TRIAD_TONES: Record<string, number[]> = { "": [0, 4, 7], m: [0, 3, 7] };
+
+/** The frets (within reach of the neck) where an `open` string sounds `pc`. */
+const fretsForPitch = (open: number, pc: number) => {
+  const base = ((pc - open) % 12 + 12) % 12;
+  return [base, base + 12].filter((f) => f <= 15);
+};
+
+/**
+ * The three close-voiced triads on the top three strings — one per inversion,
+ * the low strings left silent. Built for the plain major and minor chords,
+ * which carry no shell voicing: this is their "easy grip up the neck".
+ */
+function topTriads(name: string): ChordShape[] {
+  const tones = TRIAD_TONES[suffixOf(name)];
+  const root = ROOT_PITCH[rootOf(name)];
+  if (!tones || root === undefined) return [];
+  const pitches = tones.map((i) => (root + i) % 12);
+  const out: ChordShape[] = [];
+
+  for (let inv = 0; inv < 3; inv++) {
+    const order = [pitches[inv], pitches[(inv + 1) % 3], pitches[(inv + 2) % 3]];
+    // The G string carries this inversion's bass; pick the octave of each note
+    // that packs the three strings into the tightest, lowest grip.
+    let frets = [0, 0, 0];
+    let bestSpan = Infinity;
+    let bestMin = Infinity;
+    for (const g of fretsForPitch(TOP3_OPEN[0], order[0]))
+      for (const b of fretsForPitch(TOP3_OPEN[1], order[1]))
+        for (const e of fretsForPitch(TOP3_OPEN[2], order[2])) {
+          const on = [g, b, e].filter((f) => f > 0);
+          const span = on.length ? Math.max(...on) - Math.min(...on) : 0;
+          const low = on.length ? Math.min(...on) : 0;
+          if (span < bestSpan || (span === bestSpan && low < bestMin)) {
+            bestSpan = span;
+            bestMin = low;
+            frets = [g, b, e];
+          }
+        }
+
+    const fretted = frets.filter((f) => f > 0);
+    const min = fretted.length ? Math.min(...fretted) : 1;
+    const baseFret = min > 1 ? min : 1;
+    const ranked = frets
+      .map((f, i) => ({ f, i }))
+      .filter((x) => x.f > 0)
+      .sort((a, b2) => a.f - b2.f);
+    const finger: Record<number, number> = {};
+    ranked.forEach((x, k) => (finger[x.i] = Math.min(k + 1, 4)));
+
+    const bassDegree = (order[0] - root + 12) % 12;
+    const inversion = inversionOf(bassDegree);
+    out.push({
+      frets: [-1, -1, -1, ...frets.map((f) => (f === 0 ? 0 : f - baseFret + 1))],
+      fingers: [0, 0, 0, ...frets.map((f, i) => (f > 0 ? finger[i] : 0))],
+      baseFret,
+      label: `${TRIAD} · ${inversion ?? "מצב יסוד"}`,
+    });
+  }
+  return out;
+}
+
 /**
  * Every way to play a chord: the shapes written down for it, plus the same
  * type's movable shapes slid to this root. Ordered up the neck, so browsing
@@ -100,22 +191,38 @@ export function allVoicings(entry: ChordEntry): ChordShape[] {
   if (target === undefined) return out;
 
   for (const template of TEMPLATES.get(suffixOf(entry.name)) ?? []) {
-    let baseFret = template.shape.baseFret + ((target - template.rootPitch + 12) % 12);
-    if (baseFret > 12) baseFret -= 12;
-    const inversion = inversionOf(template.bassDegree);
-    const moved: ChordShape = {
-      ...template.shape,
-      baseFret,
-      label: inversion
-        ? `${inversion} · ${DEGREE[template.bassDegree]} בבס`
-        : `שורש במיתר ${STRING_LABEL[template.rootString]}`,
-    };
-    if (baseFret < 1 || highestFret(moved) > 15) continue;
+    const moved = slideTo(template, target);
+    if (!moved) continue;
     const key = keyOf(moved);
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(moved);
   }
 
+  for (const triad of topTriads(entry.name)) {
+    const key = keyOf(triad);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(triad);
+  }
+
   return out.sort((a, b) => a.baseFret - b.baseFret);
+}
+
+/**
+ * One shape for a chord the dictionary has no diagram for — the same chord
+ * type's movable shape slid to this root, root position, nearest the nut.
+ * That is what keeps a transposed sheet drawable: the dictionary happens to
+ * hold `Am7b5` and `D7b9` at one root each, and changing key moves off it.
+ */
+export function derivedShape(name: string): ChordShape | undefined {
+  const target = ROOT_PITCH[rootOf(name)];
+  if (target === undefined) return undefined;
+  let best: ChordShape | undefined;
+  for (const template of TEMPLATES.get(suffixOf(name)) ?? []) {
+    if (template.bassDegree !== 0) continue; // the panel shows root position
+    const moved = slideTo(template, target);
+    if (moved && (!best || moved.baseFret < best.baseFret)) best = moved;
+  }
+  return best;
 }

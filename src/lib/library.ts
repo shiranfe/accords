@@ -3,6 +3,7 @@ import { parseNegina } from "./neginaParser";
 import { trapetoniMeta, trapetoniSource } from "../data/hachofShelTrapetoni";
 import { samiVeSumoMeta, samiVeSumoSource } from "../data/samiVeSumo";
 import { howHighTheMoonMeta, howHighTheMoonSource } from "../data/howHighTheMoon";
+import { takeFiveMeta, takeFiveSource } from "../data/takeFive";
 
 const KEY = "accords:library:v1";
 
@@ -30,6 +31,7 @@ const SEEDS: { meta: typeof trapetoniMeta; source: string }[] = [
   { meta: trapetoniMeta, source: trapetoniSource },
   { meta: samiVeSumoMeta, source: samiVeSumoSource },
   { meta: howHighTheMoonMeta, source: howHighTheMoonSource },
+  { meta: takeFiveMeta, source: takeFiveSource },
 ];
 
 export function loadLibrary(): Song[] {

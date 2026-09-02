@@ -8,6 +8,8 @@ export type ParseMeta = {
   title: string;
   artist?: string;
   youtubeUrl?: string;
+  /** Beats per bar, when the song is not in 4/4 (5 = 5/4, 3 = 3/4, 6 = 6/8). */
+  meter?: number;
 };
 
 export type ParseResult = {
@@ -190,6 +192,7 @@ export function parseNegina(source: string, meta: ParseMeta): ParseResult {
     artist,
     sections: sections.filter((s) => s.lines.length > 0),
     youtubeUrl: meta.youtubeUrl,
+    meter: meta.meter,
     sourceText: source,
   };
 

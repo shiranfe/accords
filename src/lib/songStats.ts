@@ -19,11 +19,22 @@ export type Timeline = {
 
 export const DEFAULT_BPM = 96;
 
-const beatsFor = (kind: TickKind, beatsPerBar: number): number =>
-  kind === "bar" ? beatsPerBar : kind === "half" ? Math.max(1, Math.round(beatsPerBar / 2)) : 1;
-
 /** How much of a bar a chord takes up, counted in quarters of a bar. */
 const QUARTERS: Record<TickKind, number> = { bar: 4, half: 2, quarter: 1 };
+
+/**
+ * How many beats a chord lasts, given how far into the bar it starts.
+ *
+ * Reading the beat off both of its edges and subtracting is what keeps a bar
+ * adding up to exactly its own length when the two do not divide evenly. In
+ * 5/4 the two chords of a bar come out 3 + 2, which is the split "Take Five"
+ * is built on; in 4/4 and 6/8 nothing changes, and 3/4 stops over-running its
+ * bar by a beat.
+ */
+const beatsFor = (kind: TickKind, beatsPerBar: number, filled: number): number => {
+  const beatAt = (quarters: number) => Math.round((quarters / 4) * beatsPerBar);
+  return Math.max(1, beatAt(filled + QUARTERS[kind]) - beatAt(filled));
+};
 
 /**
  * Bar numbers, given only to the chord that starts each bar — chords sharing a
@@ -70,12 +81,14 @@ export function buildTimeline(song: Song, bpm: number): Timeline {
   const beatsPerBar = song.meter ?? 4;
   const events: PlaybackEvent[] = [];
   let elapsed = 0;
+  let filled = 0; // quarters of the current bar already used
 
   for (const section of song.sections) {
     for (const line of section.lines) {
       const ordered = [...line.chords].sort((a, b) => a.charIndex - b.charIndex);
       for (const chord of ordered) {
-        const durationMs = (beatsFor(chord.kind, beatsPerBar) * 60000) / bpm;
+        const durationMs = (beatsFor(chord.kind, beatsPerBar, filled) * 60000) / bpm;
+        filled = (filled + QUARTERS[chord.kind]) % 4;
         events.push({
           sectionId: section.id,
           lineId: line.id,
