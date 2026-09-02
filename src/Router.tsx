@@ -4,6 +4,7 @@ import { LibraryPage } from "./pages/LibraryPage.tsx";
 import { SongPage } from "./pages/SongPage.tsx";
 import { ImportPage } from "./pages/ImportPage.tsx";
 import { ChordPreviewPage } from "./pages/ChordPreviewPage.tsx";
+import { DrillPage } from "./pages/DrillPage.tsx";
 import { navigate } from "./lib/navigate";
 import { TopNav } from "./components/TopNav.tsx";
 
@@ -48,7 +49,12 @@ export function Router() {
   const songMatch = path.match(/^\/song\/(.+)$/);
 
   useEffect(() => {
-    const known = path === "/" || path === "/editor" || path === "/import" || path === "/chords";
+    const known =
+      path === "/" ||
+      path === "/editor" ||
+      path === "/import" ||
+      path === "/chords" ||
+      path === "/drill";
     if (!known && !songMatch) navigate("/", true);
   }, [path, songMatch]);
 
@@ -56,6 +62,7 @@ export function Router() {
     if (path === "/editor") return <App />;
     if (path === "/import") return <ImportPage />;
     if (path === "/chords") return <ChordPreviewPage />;
+    if (path === "/drill") return <DrillPage />;
     if (songMatch) return <SongPage songId={decodeURIComponent(songMatch[1])} />;
     return <LibraryPage />;
   })();
