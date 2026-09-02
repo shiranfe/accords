@@ -82,7 +82,10 @@ function syncPipelinePlugin(): Plugin {
       const neginaFile = path.join(workDir, `src-${songId}.txt`);
       writeFileSync(neginaFile, source, "utf-8");
 
-      const python = path.join(root, "pipeline", ".venv", "Scripts", "python.exe");
+      const python =
+        process.platform === "win32"
+          ? path.join(root, "pipeline", ".venv", "Scripts", "python.exe")
+          : path.join(root, "pipeline", ".venv", "bin", "python");
       const outFile = path.join(root, "public", "sync", `${songId}.json`);
       const args = [
         path.join(root, "pipeline", "align.py"),
@@ -143,11 +146,15 @@ function syncPipelinePlugin(): Plugin {
 }
 
 export default defineConfig({
-  // Fixed dev port: the app always answers on http://localhost:5173.
+  // Fixed dev port: the app answers on http://localhost:5173 by default.
   // strictPort makes vite fail loudly instead of silently hopping to 5174.
+  // VITE_DEV_PORT / VITE_DEV_HOST let the mini-PC deployment bind its own
+  // loopback port; allowedHosts lets it be served over the tailnet (*.ts.net).
   server: {
-    port: 5173,
+    host: process.env.VITE_DEV_HOST || "localhost",
+    port: process.env.VITE_DEV_PORT ? Number(process.env.VITE_DEV_PORT) : 5173,
     strictPort: true,
+    allowedHosts: [".ts.net"],
   },
   preview: {
     port: 5173,
