@@ -1,12 +1,13 @@
 import type { ChordEntry, ChordShape } from "../types/chord";
-import { CHORD_SHAPES, JAZZ, isJazzShape } from "../data/chordShapes";
+import { CHORD_SHAPES, JAZZ, isJazzShape, findChordShape, jazzVoicing } from "../data/chordShapes";
 
 /** Open-string pitch classes, low E first. */
 const OPEN = [4, 9, 2, 7, 11, 4];
 
 const ROOT_PITCH: Record<string, number> = {
-  C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, F: 5, "F#": 6, Gb: 6,
-  G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11,
+  C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, "E#": 5, Fb: 4, F: 5,
+  "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11,
+  "B#": 0, Cb: 11,
 };
 
 const rootOf = (name: string) => name.match(/^[A-G][#b]?/)?.[0] ?? "";
@@ -215,14 +216,43 @@ export function allVoicings(entry: ChordEntry): ChordShape[] {
  * That is what keeps a transposed sheet drawable: the dictionary happens to
  * hold `Am7b5` and `D7b9` at one root each, and changing key moves off it.
  */
-export function derivedShape(name: string): ChordShape | undefined {
+export function derivedShape(name: string, jazz = false): ChordShape | undefined {
   const target = ROOT_PITCH[rootOf(name)];
   if (target === undefined) return undefined;
+  // The panel shows root position. Jazz mode wants the shell; plain mode wants
+  // the full grip — and each must exclude the other, or a shell that slides in
+  // lower than the full grip would show in plain mode too (and toggling jazz
+  // would do nothing). Fall back to the other kind only when one is missing.
+  const rootPos = (TEMPLATES.get(suffixOf(name)) ?? []).filter((t) => t.bassDegree === 0);
+  const shells = rootPos.filter((t) => isJazzShape(t.shape));
+  const full = rootPos.filter((t) => !isJazzShape(t.shape));
+  const pool = jazz
+    ? (shells.length ? shells : full)
+    : (full.length ? full : shells);
   let best: ChordShape | undefined;
-  for (const template of TEMPLATES.get(suffixOf(name)) ?? []) {
-    if (template.bassDegree !== 0) continue; // the panel shows root position
+  for (const template of pool) {
     const moved = slideTo(template, target);
     if (moved && (!best || moved.baseFret < best.baseFret)) best = moved;
   }
   return best;
+}
+
+/**
+ * The single diagram the panels should draw for a chord name. In jazz mode this
+ * is the shell voicing — written for this exact root when the dictionary has
+ * one, otherwise the same type's movable shell slid here. Only a handful of
+ * roots carry a hand-written shell, so without the slide most chords in a flat
+ * key (Ebm7, Bbm7, Db7 …) would silently fall back to the full barre and jazz
+ * mode would look like it does nothing. Plain mode returns the dictionary's
+ * first shape, or the derived root-position grip when the chord isn't written.
+ */
+export function voicingFor(name: string, jazz: boolean): ChordShape | undefined {
+  const entry = findChordShape(name);
+  if (jazz) {
+    const own = entry && jazzVoicing(entry);
+    if (own) return own;
+    const derived = derivedShape(name, true);
+    if (derived && isJazzShape(derived)) return derived;
+  }
+  return entry ? entry.shapes[0] : derivedShape(name, false);
 }

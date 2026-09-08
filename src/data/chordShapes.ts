@@ -58,7 +58,13 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // Root, third and seventh with the fifth raised, root on the 5th string.
   // The B string is muted between them; being movable, this is the shape
   // every other root's 7#5 is derived from - see voicings.ts.
-  { name: "C7#5", shapes: [sh("x212x3", "031204", 2)] },
+  {
+    name: "C7#5",
+    shapes: [
+      labeled(FULL, sh("x212x3", "031204", 2)),
+      labeled(E6, sh("1x122x", "101230", 8, [1, 0, 2])),
+    ],
+  },
   { name: "Cm", shapes: [sh("x13321", "013421", 3, [1, 1, 5])] },
   { name: "Cm6", shapes: [sh("xx2212", "002314", 4)] },
   { name: "Cm7", shapes: [sh("113121", "113121", 3, [1, 0, 5])] },
@@ -174,8 +180,20 @@ export const CHORD_SHAPES: ChordEntry[] = [
   // A bare full barre: root, fourth, seventh, third and fifth - Fm7 with
   // the 11th on the A string. The chart for "Take Five" prints this as an
   // F minor with a stacked 7 over 4.
-  { name: "Fm11", shapes: [sh("111111", "111111", 1, [1, 0, 5])] },
-  { name: "Fm6", shapes: [sh("xx1312", "001312", 3, [1, 2, 5])] },
+  {
+    name: "Fm11",
+    shapes: [
+      labeled(FULL, sh("111111", "111111", 1, [1, 0, 5])),
+      labeled(E6, sh("1111xx", "111100", 1, [1, 0, 3])),
+    ],
+  },
+  {
+    name: "Fm6",
+    shapes: [
+      labeled(FULL, sh("xx1312", "001312", 3, [1, 2, 5])),
+      labeled(`${JAZZ} · שורש במיתר 4`, sh("xx3x34", "001023")),
+    ],
+  },
   {
     name: "Fm7",
     shapes: [

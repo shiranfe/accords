@@ -1,8 +1,8 @@
 import { ChordDiagram } from "../ChordDiagram";
-import { findChordShape, jazzVoicing } from "../../data/chordShapes";
+import { findChordShape, isJazzShape } from "../../data/chordShapes";
 import { prettyChord } from "../../lib/chordName";
 import { ChordName } from "../ChordName";
-import { derivedShape } from "../../lib/voicings";
+import { derivedShape, voicingFor } from "../../lib/voicings";
 
 type UpNextProps = {
   /** The chord to play next — the one the player needs their hand ready for. */
@@ -68,8 +68,8 @@ export function ChordPanel({ names, activeName, jazz, onJazzChange }: Props) {
       <div className="mb-3 flex items-center gap-2">
         <h2 className="text-xs font-semibold text-slate-500">אקורדי השיר ({names.length})</h2>
         {names.some((n) => {
-          const entry = findChordShape(n);
-          return entry && jazzVoicing(entry);
+          const shell = voicingFor(n, true);
+          return shell != null && isJazzShape(shell);
         }) && (
           <button
             type="button"
@@ -117,12 +117,11 @@ function Voicing({
   /** Prefer the three-note voicing when the chord has one. */
   jazz?: boolean;
 }) {
-  const entry = findChordShape(name);
-  if (!entry) {
-    // Not in the dictionary — a transposed sheet reaches chord types written
-    // down at one root only, so fall back to sliding that shape here.
-    const derived = derivedShape(name);
-    if (derived) return <ChordDiagram shape={derived} width={width} className="mx-auto block" />;
+  // One resolver for both cases: a written grip, or — for a chord type written
+  // at only one root — the same shape slid here, preferring the shell voicing
+  // in jazz mode even when this exact root has no hand-written shell.
+  const shape = voicingFor(name, jazz);
+  if (!shape) {
     return (
       <div
         className="mx-auto flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-[10px] font-medium text-slate-300"
@@ -132,6 +131,5 @@ function Voicing({
       </div>
     );
   }
-  const shape = (jazz && jazzVoicing(entry)) || entry.shapes[0];
   return <ChordDiagram shape={shape} width={width} className="mx-auto block" />;
 }
