@@ -1,4 +1,4 @@
-import { FilePlus2, Guitar, Library, Music, PencilRuler, Repeat } from "lucide-react";
+import { BookOpen, FilePlus2, Guitar, Library, Music, PencilRuler, Repeat } from "lucide-react";
 import { navigate } from "../lib/navigate";
 
 type NavLink = {
@@ -15,6 +15,7 @@ const LINKS: NavLink[] = [
   { path: "/editor", label: "העורך", icon: PencilRuler },
   { path: "/chords", label: "אקורדים", icon: Guitar },
   { path: "/drill", label: "תרגול", icon: Repeat },
+  { path: "/learn", label: "הסברים", icon: BookOpen, owns: (p) => p.startsWith("/learn") },
 ];
 
 export function TopNav({ path }: { path: string }) {

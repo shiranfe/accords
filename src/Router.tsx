@@ -5,6 +5,8 @@ import { SongPage } from "./pages/SongPage.tsx";
 import { ImportPage } from "./pages/ImportPage.tsx";
 import { ChordPreviewPage } from "./pages/ChordPreviewPage.tsx";
 import { DrillPage } from "./pages/DrillPage.tsx";
+import { LearnPage } from "./pages/LearnPage.tsx";
+import { ExplainerPage } from "./pages/ExplainerPage.tsx";
 import { navigate } from "./lib/navigate";
 import { TopNav } from "./components/TopNav.tsx";
 
@@ -47,6 +49,7 @@ export function Router() {
   }, [path]);
 
   const songMatch = path.match(/^\/song\/(.+)$/);
+  const learnMatch = path.match(/^\/learn\/(.+)$/);
 
   useEffect(() => {
     const known =
@@ -54,15 +57,18 @@ export function Router() {
       path === "/editor" ||
       path === "/import" ||
       path === "/chords" ||
-      path === "/drill";
-    if (!known && !songMatch) navigate("/", true);
-  }, [path, songMatch]);
+      path === "/drill" ||
+      path === "/learn";
+    if (!known && !songMatch && !learnMatch) navigate("/", true);
+  }, [path, songMatch, learnMatch]);
 
   const page = (() => {
     if (path === "/editor") return <App />;
     if (path === "/import") return <ImportPage />;
     if (path === "/chords") return <ChordPreviewPage />;
     if (path === "/drill") return <DrillPage />;
+    if (path === "/learn") return <LearnPage />;
+    if (learnMatch) return <ExplainerPage slug={decodeURIComponent(learnMatch[1])} />;
     if (songMatch) return <SongPage songId={decodeURIComponent(songMatch[1])} />;
     return <LibraryPage />;
   })();
